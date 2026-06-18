@@ -35,5 +35,6 @@
   "topOf": "Top {{shown}} di {{total}}",
   "units": {
     "base10": "unità base-10"
-  }
+  },
+  "docs": "Docs"
 }

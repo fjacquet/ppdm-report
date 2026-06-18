@@ -15,3 +15,14 @@ test('renders the app title', () => {
   render(<App />)
   expect(screen.getByRole('heading', { name: 'PPDM Report' })).toBeInTheDocument()
 })
+
+test('links to the documentation in a new tab', () => {
+  render(<App />)
+  const link = screen.getByRole('link', { name: 'Docs' })
+  expect(link).toHaveAttribute(
+    'href',
+    'https://github.com/fjacquet/ppdm-report/blob/main/docs/USER-GUIDE.md',
+  )
+  expect(link).toHaveAttribute('target', '_blank')
+  expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+})
