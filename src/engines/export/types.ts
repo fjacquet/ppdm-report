@@ -32,6 +32,38 @@ export interface ExportChart {
   slices: ExportChartSlice[]
 }
 
+/** One horizontal bar (shape-drawn): localized label + value, 0..1 fill ratio, tone hex. */
+export interface DeckBar {
+  label: string
+  /** 0..1 fill fraction of the track. */
+  ratio: number
+  /** Already-localized end value, e.g. "78.9 %", "11.0 TB", "9,297". */
+  value: string
+  /** sRGB hex (with '#') for the active theme. */
+  color: string
+}
+
+/** A small doughnut for a band's label zone (coverage). */
+export interface DeckDonut {
+  slices: { value: number; color: string }[]
+  /** Localized center label, e.g. "71 %". */
+  center: string
+}
+
+/** A single 100%-stacked bar (exec protection posture). */
+export interface DeckStack {
+  segments: { ratio: number; color: string; label: string; value: string }[]
+}
+
+/** PPTX-only layout for a section. The HTML export ignores this field. */
+export interface DeckSection {
+  subtitle?: string
+  kpiChips?: ExportKpi[]
+  donut?: DeckDonut
+  bars?: DeckBar[]
+  tiles?: string[]
+}
+
 export interface ExportSection {
   id: string
   title: string
@@ -40,6 +72,8 @@ export interface ExportSection {
   table?: ExportTable
   /** Caveats / subtitles (e.g. capped-window note). */
   notes?: string[]
+  /** PPTX-only band layout (additive; HTML export ignores it). */
+  deck?: DeckSection
 }
 
 export interface ExportModel {
@@ -54,6 +88,8 @@ export interface ExportModel {
   sections: ExportSection[]
   /** Footer note: base-10 units, collector build, capture date. */
   footer: string
+  /** PPTX-only exec protection-posture stacked bar. */
+  posture?: DeckStack
 }
 
 export interface ExportRequest {
