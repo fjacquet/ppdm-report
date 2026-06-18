@@ -38,5 +38,6 @@
   "units": {
     "base10": "unités base-10"
   },
-  "docs": "Docs"
+  "docs": "Docs",
+  "showDetails": "Afficher les détails"
 }
