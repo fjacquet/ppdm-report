@@ -31,7 +31,8 @@
   "capacity": {
     "title": "Kapazität",
     "utilization": "Speichernutzung",
-    "mtrees": "{{count}} Mtrees"
+    "mtrees": "{{count}} Mtrees",
+    "flagged": "{{count}} nahe der Kapazität"
   },
   "policies": {
     "title": "Richtlinien",

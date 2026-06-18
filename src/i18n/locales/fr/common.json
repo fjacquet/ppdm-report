@@ -33,6 +33,7 @@
   },
   "capped": "Basé sur les {{n}} plus récents — une fenêtre, pas l'ensemble complet",
   "topOf": "Top {{shown}} sur {{total}}",
+  "fullListInExcel": "Liste complète dans l'export Excel",
   "units": {
     "base10": "unités base-10"
   }
