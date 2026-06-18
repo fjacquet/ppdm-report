@@ -1,0 +1,93 @@
+import type { CaptureMeta } from './ppdm'
+
+/** Protection counts + both coverage figures for one scope (a type, or the whole estate). */
+export interface CoverageBand {
+  protected: number
+  unprotected: number
+  excluded: number
+  /** PROTECTED / (PROTECTED + UNPROTECTED); 0 when denominator is 0. */
+  pct: number
+  /** PROTECTED / (PROTECTED + UNPROTECTED + EXCLUDED); 0 when denominator is 0. */
+  pctInclExcluded: number
+}
+
+export interface Coverage {
+  byType: Record<string, CoverageBand>
+  overall: CoverageBand
+}
+
+/** A capped "top N of total" list. */
+export interface TopList<T> {
+  items: T[]
+  total: number
+  shown: number
+}
+
+export interface UnprotectedAsset {
+  name: string
+  type: string
+  sizeGb: number
+}
+
+export interface Gaps {
+  count: number
+  totalCapacityGb: number
+  top: TopList<UnprotectedAsset>
+}
+
+export interface Jobs {
+  counts: Record<string, number>
+  total: number
+  successPct: number
+  capped: boolean
+  windowSize: number
+}
+
+export interface Compliance {
+  appConsistentPct: number
+  immutablePct: number
+  replicatedPct: number
+  backupLevelMix: Record<string, number>
+  windowSize: number
+  capped: boolean
+}
+
+export interface StorageTarget {
+  name: string
+  type: string
+  utilizationPct: number
+  flagged: boolean
+}
+
+export interface Capacity {
+  targets: StorageTarget[]
+  flagged: StorageTarget[]
+  mtreeCount: number
+}
+
+export interface PolicyRow {
+  name: string
+  purpose: string
+  assetCount: number
+  protectionCapacityGb: number
+}
+
+export interface Policies {
+  count: number
+  byPurpose: Record<string, number>
+  perPolicy: PolicyRow[]
+}
+
+/** The single derived view of the whole report. Recomputed, never stored. */
+export interface ReportView {
+  meta: CaptureMeta
+  inUse: string[]
+  idleAgents: string[]
+  warnings: string[]
+  coverage: Coverage
+  gaps: Gaps
+  jobs: Jobs
+  compliance: Compliance
+  capacity: Capacity
+  policies: Policies
+}
