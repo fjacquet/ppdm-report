@@ -19,3 +19,7 @@ refs/
 .claude
 .vscode/
 .superpowers/
+
+# local visual-check artifacts (not committed)
+.playwright-mcp/
+/dashboard-*.png
