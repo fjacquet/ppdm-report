@@ -2,7 +2,7 @@
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["vite/client", "node", "vitest/globals"]
+    "types": ["vite/client", "vite-plugin-pwa/react", "node", "vitest/globals"]
   },
   "include": [
     "src/**/*.test.ts",

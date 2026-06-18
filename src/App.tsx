@@ -3,6 +3,7 @@ import { Dashboard } from './components/dashboard/Dashboard'
 import { ExportButtons } from './components/ExportButtons'
 import { FlavorToggle } from './components/FlavorToggle'
 import { LanguageToggle } from './components/LanguageToggle'
+import { PwaUpdater } from './components/PwaUpdater'
 import { ThemeToggle } from './components/ThemeToggle'
 import { UploadZone } from './components/UploadZone'
 import { useReportView } from './hooks/useReportView'
@@ -37,6 +38,7 @@ export default function App() {
         <UploadZone />
         {view && <Dashboard view={view} />}
       </main>
+      <PwaUpdater />
     </div>
   )
 }
