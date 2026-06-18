@@ -33,7 +33,7 @@ export function Dashboard({ view }: DashboardProps) {
       case 'idle':
         return <IdleAgentsSection key={id} view={view} />
       case 'jobs':
-        return <JobsComplianceSection key={id} view={view} />
+        return <JobsComplianceSection key={id} view={view} dark={dark} />
       case 'compliance':
         return null
       case 'capacity':

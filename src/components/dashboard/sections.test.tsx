@@ -248,34 +248,28 @@ describe('JobsComplianceSection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
+  afterEach(() => cleanup())
 
-  afterEach(() => {
-    cleanup()
-  })
-
-  it('renders job success percent "93%"', () => {
-    render(<JobsComplianceSection view={jobsComplianceFixture} />)
+  it('renders the job success KPI "93%"', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
     expect(screen.getByText('93%')).toBeInTheDocument()
   })
 
-  it('renders the jobs capped caveat containing the window size', () => {
-    render(<JobsComplianceSection view={jobsComplianceFixture} />)
-    // common:capped with n=10000 → "Based on most recent 10,000 — a window, not the full set"
-    const cappedEls = screen.getAllByText(/10[,.]?000/)
-    expect(cappedEls.length).toBeGreaterThan(0)
+  it('renders the jobs result-mix and compliance bar charts', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
+    expect(screen.getByTestId('jobs-bars')).toBeInTheDocument()
+    expect(screen.getByTestId('compliance-bars')).toBeInTheDocument()
   })
 
-  it('renders immutable "0%" with a bad/red tone class', () => {
-    render(<JobsComplianceSection view={jobsComplianceFixture} />)
-    expect(screen.getByText('0%')).toBeInTheDocument()
-    const redBorder = document.querySelector('.border-red-500, .border-red-400')
-    expect(redBorder).not.toBeNull()
+  it('keeps the status counts behind Show details', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
+    expect(screen.getByText('Show details')).toBeInTheDocument()
+    expect(screen.getAllByText('SUCCESS').length).toBeGreaterThan(0)
   })
 
-  it('renders compliance capped caveat', () => {
-    render(<JobsComplianceSection view={jobsComplianceFixture} />)
-    const cappedEls = screen.getAllByText(/window, not the full set/i)
-    expect(cappedEls.length).toBeGreaterThan(0)
+  it('renders both capped caveats', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
+    expect(screen.getAllByText(/window, not the full set/i).length).toBeGreaterThanOrEqual(2)
   })
 })
 
