@@ -90,7 +90,7 @@ describe('Dashboard', () => {
     expect(screen.getByText('Asset Coverage')).toBeInTheDocument() // CoverageSection
     expect(screen.getAllByText('263.0 TB').length).toBeGreaterThan(0) // GapsSection (also a KPI)
     expect(screen.getByText('Oracle Databases')).toBeInTheDocument() // IdleAgentsSection
-    expect(screen.getByText('dd1')).toBeInTheDocument() // CapacitySection
+    expect(screen.getAllByText('dd1').length).toBeGreaterThan(0) // CapacitySection (chart axis + table)
     expect(screen.getByText('SQL - Prod')).toBeInTheDocument() // PoliciesSection
     expect(screen.getAllByText('93%').length).toBeGreaterThan(0) // Jobs/Compliance (also a KPI)
   })
@@ -102,7 +102,7 @@ describe('Dashboard', () => {
     expect(screen.getByText('Coverage')).toBeInTheDocument()
     expect(screen.getByText('Asset Coverage')).toBeInTheDocument()
     expect(screen.getByText('Oracle Databases')).toBeInTheDocument()
-    expect(screen.getByText('dd1')).toBeInTheDocument()
+    expect(screen.getAllByText('dd1').length).toBeGreaterThan(0)
     expect(screen.getByText('SQL - Prod')).toBeInTheDocument()
   })
 })
