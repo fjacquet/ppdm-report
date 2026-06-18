@@ -37,10 +37,12 @@ export function useExport(view: ReportView | null) {
   const { resolved } = useTheme()
   const { i18n } = useTranslation()
   const [busy, setBusy] = useState<ExportKind | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   async function run(kind: ExportKind): Promise<void> {
     if (!view) return
     setBusy(kind)
+    setError(null)
     try {
       const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, o) as string
       const model = buildExportModel(view, flavor, resolved, t, i18n.language)
@@ -53,10 +55,15 @@ export function useExport(view: ReportView | null) {
       } else {
         download(assembleHtml(model, resolved), `${base}.html`, 'text/html;charset=utf-8')
       }
+    } catch (err) {
+      // Surface failures (e.g. a stale dynamically-imported chunk 404 after a
+      // redeploy) instead of failing silently — the button must never look dead.
+      console.error('PPDM export failed:', err)
+      setError(i18n.t('common:export.error') as string)
     } finally {
       setBusy(null)
     }
   }
 
-  return { run, busy }
+  return { run, busy, error }
 }
