@@ -23,4 +23,16 @@ describe('reportStore', () => {
     useReportStore.getState().clear()
     expect(useReportStore.getState().workbook).toBeNull()
   })
+
+  it('starts with assessment flavor', () => {
+    const { flavor } = useReportStore.getState()
+    expect(flavor).toBe('assessment')
+  })
+
+  it('setFlavor updates flavor', () => {
+    useReportStore.getState().setFlavor('ops')
+    expect(useReportStore.getState().flavor).toBe('ops')
+    // reset
+    useReportStore.getState().setFlavor('assessment')
+  })
 })

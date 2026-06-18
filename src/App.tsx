@@ -1,12 +1,32 @@
-import { DebugInventory } from './components/DebugInventory'
+import { useTranslation } from 'react-i18next'
+import { Dashboard } from './components/dashboard/Dashboard'
+import { FlavorToggle } from './components/FlavorToggle'
+import { LanguageToggle } from './components/LanguageToggle'
+import { ThemeToggle } from './components/ThemeToggle'
 import { UploadZone } from './components/UploadZone'
+import { useReportView } from './hooks/useReportView'
 
 export default function App() {
+  const { t } = useTranslation('common')
+  const view = useReportView()
+
   return (
-    <main style={{ padding: 24, fontFamily: 'Arial, Helvetica, sans-serif' }}>
-      <h1>PPDM Report</h1>
-      <UploadZone />
-      <DebugInventory />
-    </main>
+    <div
+      className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+      style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
+    >
+      <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-6 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <h1 className="text-xl font-bold">{t('appTitle')}</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <FlavorToggle />
+          <LanguageToggle />
+          <ThemeToggle />
+        </div>
+      </header>
+      <main className="space-y-6 p-6">
+        <UploadZone />
+        {view && <Dashboard view={view} />}
+      </main>
+    </div>
   )
 }

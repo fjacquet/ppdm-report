@@ -23,12 +23,15 @@
 - **ECharts bundle discipline** — import only the chart types/components used (BarChart, PieChart + Grid/Tooltip/Legend/Dataset) and the SVGRenderer; never the full `echarts` bundle.
 
 ## Visual language (locked from approved mockups)
+
 Use these via Tailwind utilities (light / `dark:`) for components, and the explicit hex in `palette.ts` for ECharts/PPTX:
+
 - Light: bg `white`, surface `slate-50`, ink `slate-900`, muted `slate-500`, line `slate-200`, accent `blue-600`, ok `green-600`, warn `amber-600`, bad `red-600`, excluded `slate-300`.
 - Dark: bg `slate-950`(#0b1220-ish), surface `slate-900`, ink `slate-100`, muted `slate-400`, line `slate-800`, accent `blue-400`, ok `green-400`, warn `amber-400`, bad `red-400`, excluded `slate-700`.
 - KPI cards: left accent border, big value, uppercase micro-label. Severity by metric (immutable 0% → bad/red). 16:9 slide grammar for PPTX.
 
 ## File Structure
+
 ```
 src/index.css                                  # + @variant dark + Arial base
 src/theme/palette.ts                           # shared light/dark hex tokens (ECharts + PPTX)
@@ -68,12 +71,14 @@ src/hooks/useExport.ts
 
 - [ ] **Step 1:** Copy `/Users/fjacquet/Projects/vatlas/src/hooks/useTheme.ts` and its `.test.ts` → `src/hooks/`. Adapt: localStorage key → `ppdm-report-theme`; ensure it exports `theme` (the 3-state preference), `resolved` (`'light'|'dark'` after auto resolution), and `setTheme`. If the vatlas version differs in shape, adjust the test to match the adapted exports (keep real assertions: stores pref, toggles `.dark`, follows system on auto).
 - [ ] **Step 2:** In `src/index.css`, after `@import 'tailwindcss';`, add class-based dark mode and keep Arial:
+
 ```css
 @import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
 :root { font-family: Arial, Helvetica, sans-serif; }
 body { margin: 0; }
 ```
+
 - [ ] **Step 3:** Create `src/components/ThemeToggle.tsx` — a button cycling auto→light→dark using `useTheme`, labelled via i18n later (for now plain text "Theme: {theme}"). Arial inherited.
 - [ ] **Step 4:** Run `npx vitest run src/hooks/useTheme.test.ts` (PASS), `npm run test:run`, `npm run typecheck`, `rtk proxy node_modules/.bin/biome check .` (0/0).
 - [ ] **Step 5:** `git add src/hooks/useTheme.ts src/hooks/useTheme.test.ts src/index.css src/components/ThemeToggle.tsx && git commit -m "feat: add auto dark-mode theme hook and toggle"`
@@ -87,6 +92,7 @@ body { margin: 0; }
 **Interfaces:** Produces `PALETTE` (light/dark hex sets), `MIDNIGHT_EXECUTIVE_LIGHT`/`_DARK` ECharts themes, and `<Chart option={...} dark={boolean} />`. Chart is the ONLY ECharts import site.
 
 - [ ] **Step 1: Write** `src/theme/palette.ts` (sRGB hex — zrender/pptx cannot parse oklch):
+
 ```ts
 export interface Palette {
   bg: string; surface: string; ink: string; muted: string; line: string
@@ -104,7 +110,9 @@ export const DARK: Palette = {
   series: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#a78bfa', '#22d3ee'],
 }
 ```
+
 - [ ] **Step 2: Write the failing test** `src/theme/echartsTheme.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest'
 import { MIDNIGHT_EXECUTIVE_DARK, MIDNIGHT_EXECUTIVE_LIGHT } from './echartsTheme'
@@ -121,15 +129,19 @@ describe('echarts themes', () => {
   })
 })
 ```
+
 - [ ] **Step 3:** Run → FAIL. Then write `src/theme/echartsTheme.ts` building two theme objects from `LIGHT`/`DARK` (`backgroundColor`, `textStyle.fontFamily: 'Arial, Helvetica, sans-serif'`, `color: series`, axis/legend/tooltip colors from palette). Run → PASS.
 - [ ] **Step 4:** Create `src/components/Chart.tsx` — copy the pattern from `/Users/fjacquet/Projects/vatlas/src/components/Chart.tsx`, but register only what we use:
+
 ```ts
 import { BarChart, PieChart } from 'echarts/charts'
 import { DatasetComponent, GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
 ```
+
 `echarts.use([...])`, `registerTheme('midnight-light', MIDNIGHT_EXECUTIVE_LIGHT)` and `'midnight-dark'`. Component props `{ option: EChartsOption; dark: boolean; style?; ariaLabel? }`; init/update an instance, pick theme by `dark`, dispose on unmount, `memo`.
+
 - [ ] **Step 5:** `npm run test:run`, `npm run typecheck`, biome 0/0 (`rtk proxy`), `npm run build` (confirm ECharts is tree-shaken into its own chunk). Commit: `git add src/theme src/components/Chart.tsx && git commit -m "feat: add ECharts midnight theme (light/dark) and Chart wrapper"`
 
 ---
@@ -293,13 +305,16 @@ import { SVGRenderer } from 'echarts/renderers'
 ---
 
 ## Self-Review (completed by author)
+
 - **Spec coverage:** auto dark mode ✓ T1/T2; i18n fr/de/it/en + parity ✓ T3; styled dashboard sections (all metrics, skip-idle, top-25, capped caveats) ✓ T4–T8; drag-drop ✓ T9; dual-theme PPTX following web theme ✓ T10/T11/T13; HTML ✓ T12; flavor ordering ✓ T8/T11; Arial ✓ throughout; privacy keys ✓ T1/T3.
 - **No metric logic in UI/exports:** every section/slide reads `ReportView`; `buildExportModel` only orders/selects. DRY holds.
 - **Placeholder scan:** infra tasks are "copy from vatlas + adapt" with exact paths; PPDM-specific UI/model/HTML have full code or precise component specs + real tests. No "TBD".
 - **Type consistency:** `ReportView` (Plan 2) consumed read-only; `ExportRequest/Response` and `ExportModel` defined in types and used by worker/hook/builder/html consistently.
 
 ## Process notes
+
 - Run biome via `rtk proxy node_modules/.bin/biome check .`; tests use `?.` not `!`.
 - The controller performs the two manual browser checks (Task 8, Task 13).
 - Recommended (from P2 review): add a real-file integration test asserting spec numbers — fold into Task 8 or a follow-up if cheap.
+
 ```
