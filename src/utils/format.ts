@@ -23,44 +23,6 @@ export const fmtInt = (n: number, locale = 'fr-FR'): string =>
 export const formatNumber = fmtInt
 
 /**
- * Renders a unit-bearing GHz value from MHz (one decimal of precision).
- */
-export const fmtGhz = (mhz: number, locale = 'fr-FR'): string => {
-  if (!Number.isFinite(mhz)) return '—'
-  const ghz = mhz / 1000
-  return `${ghz.toLocaleString(locale, { minimumFractionDigits: 0, maximumFractionDigits: 1 })} GHz`
-}
-
-/**
- * Locale-aware unitless GHz formatter with adaptive precision: one
- * decimal for sub-10 values, integer otherwise. Returns em-dash for
- * non-finite inputs.
- */
-export const fmtGhzNumber = (ghz: number, locale = 'fr-FR'): string => {
-  if (!Number.isFinite(ghz)) return '—'
-  const opts =
-    Math.abs(ghz) < 10
-      ? { minimumFractionDigits: 1, maximumFractionDigits: 1 }
-      : { maximumFractionDigits: 0 }
-  return ghz.toLocaleString(locale, opts)
-}
-
-/**
- * Renders an already-GHz value as a unit-bearing string. Adaptive precision.
- */
-export const fmtGhzValue = (ghz: number, locale = 'fr-FR'): string =>
-  Number.isFinite(ghz) ? `${fmtGhzNumber(ghz, locale)} GHz` : '—'
-
-/**
- * Renders an already-MHz value as a unit-bearing string (`"385 MHz"`).
- * `0` is a sentinel ("no powered-on vCPUs to divide by") → em-dash.
- */
-export const fmtMhzValue = (mhz: number, locale = 'fr-FR'): string => {
-  if (!Number.isFinite(mhz) || mhz === 0) return '—'
-  return `${Math.round(mhz).toLocaleString(locale, { maximumFractionDigits: 0 })} MHz`
-}
-
-/**
  * Renders a 0..1 ratio as a localized percent (one decimal). Inputs
  * outside [0, 1] pass through unmodified — clamp upstream if needed.
  */

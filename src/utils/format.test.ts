@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
   fmtDate,
-  fmtGhzValue,
   fmtInt,
+  fmtPercent,
   fmtPercentValue,
+  fmtPercentWhole,
   fmtRatio,
   formatBytes,
   formatDate,
@@ -24,13 +25,23 @@ describe('fmtInt / formatNumber', () => {
   })
 })
 
-describe('fmtGhzValue', () => {
-  it('adaptive precision + GHz suffix', () => {
-    expect(fmtGhzValue(230, 'en-US')).toBe('230 GHz')
-    expect(fmtGhzValue(0.24, 'en-US')).toBe('0.2 GHz')
+describe('fmtPercent', () => {
+  it('formats a 0..1 ratio as a localized percent with one decimal', () => {
+    expect(fmtPercent(0.234, 'en-US')).toBe('23.4%')
   })
-  it('em-dash for non-finite', () => {
-    expect(fmtGhzValue(Number.NaN)).toBe('—')
+  it('em-dash for non-finite input', () => {
+    expect(fmtPercent(Number.NaN)).toBe('—')
+    expect(fmtPercent(Number.POSITIVE_INFINITY)).toBe('—')
+  })
+})
+
+describe('fmtPercentWhole', () => {
+  it('formats a 0..1 ratio as a localized percent with no decimals', () => {
+    expect(fmtPercentWhole(0.234, 'en-US')).toBe('23%')
+  })
+  it('em-dash for non-finite input', () => {
+    expect(fmtPercentWhole(Number.NaN)).toBe('—')
+    expect(fmtPercentWhole(Number.POSITIVE_INFINITY)).toBe('—')
   })
 })
 
