@@ -205,8 +205,8 @@ function drawSection(slide: Slide, sec: ExportSection, top: number, p: Palette) 
   if (d?.bars?.length) {
     drawBars(slide, CHART_X, top + 0.7, CHART_W, BAND_H - 1.0, d.bars, p)
   }
-  if (sec.notes?.length) {
-    slide.addText(sec.notes.join('   ·   '), {
+  if (d?.caveat) {
+    slide.addText(d.caveat, {
       x: CHART_X,
       y: top + BAND_H - 0.3,
       w: CHART_W,

@@ -62,6 +62,8 @@ export interface DeckSection {
   donut?: DeckDonut
   bars?: DeckBar[]
   tiles?: string[]
+  /** PPTX-only band-bottom caveat (window cap, incl-excluded, Excel fallback). Replaces rendering the shared `notes` in the deck. */
+  caveat?: string
 }
 
 export interface ExportSection {

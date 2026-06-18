@@ -132,6 +132,7 @@ export function buildExportModel(
     ],
     deck: {
       subtitle: t('dashboard:coverage.headline', { pct: fmtPercent(coverage.overall.pct, locale) }),
+      caveat: `${t('dashboard:coverage.inclExcluded')}: ${fmtPercent(coverage.overall.pctInclExcluded, locale)}`,
       donut: {
         center: fmtPercentWhole(coverage.overall.pct, locale),
         slices: [
@@ -174,6 +175,7 @@ export function buildExportModel(
     },
     deck: {
       kpiChips: gapsKpis,
+      caveat: `${t('common:topOf', { shown: Math.min(10, gaps.top.items.length), total: gaps.top.total })} · ${t('common:fullListInExcel')}`,
       bars: toBars(
         gaps.top.items.slice(0, 10).map((a) => ({
           label: a.name,
@@ -221,6 +223,7 @@ export function buildExportModel(
     ],
     deck: {
       kpiChips: jobsKpis,
+      caveat: jobs.capped ? t('common:capped', { n: fmtInt(jobs.windowSize, locale) }) : undefined,
       bars: toBars(
         Object.entries(jobs.counts).map(([status, n]) => ({
           label: status,
@@ -257,6 +260,9 @@ export function buildExportModel(
       ? [t('common:capped', { n: fmtInt(compliance.windowSize, locale) })]
       : [],
     deck: {
+      caveat: compliance.capped
+        ? t('common:capped', { n: fmtInt(compliance.windowSize, locale) })
+        : undefined,
       bars: toBars(
         [
           {

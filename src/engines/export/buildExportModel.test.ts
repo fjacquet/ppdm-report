@@ -184,6 +184,12 @@ describe('buildExportModel', () => {
 
     // exec posture: protected / unprotected / excluded segments
     expect(model.posture?.segments.map((s) => s.color)).toEqual(['#16a34a', '#dc2626', '#cbd5e1'])
+
+    // deck caveats: jobs shows window cap only (not raw counts), coverage shows incl-excluded pct, capacity has none
+    expect(byId.jobs?.deck?.caveat).toMatch(/10,000/)
+    expect(byId.jobs?.deck?.caveat).not.toMatch(/SUCCESS/)
+    expect(byId.coverage?.deck?.caveat).toContain('51.7%')
+    expect(byId.capacity?.deck?.caveat).toBeUndefined()
   })
 
   it('caps deck gap bars at 10 and notes the Excel fallback', () => {
