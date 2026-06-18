@@ -5,7 +5,7 @@ import { AGENT_SHEETS } from '../../types/ppdm'
 function isPlaceholder(value: Cell): boolean {
   if (value === null || value === undefined) return true
   const s = String(value).trim()
-  return s === '' || s === 'N/A'
+  return s === '' || s.toUpperCase() === 'N/A'
 }
 
 /** A sheet is "in use" when at least one data row holds a real (non-placeholder) value. */

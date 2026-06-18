@@ -20,7 +20,14 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['src/engines/**', 'src/utils/**', 'src/privacy/**'],
-      exclude: ['**/*.d.ts', '**/*.test.ts', '**/*.spec.ts'],
+      exclude: [
+        '**/*.d.ts',
+        '**/*.test.ts',
+        '**/*.spec.ts',
+        // browser/worker glue — verified end-to-end, not unit-tested
+        'src/engines/parser/parser.worker.ts',
+        'src/engines/parser/parseInWorker.ts',
+      ],
       thresholds: {
         lines: 75,
         functions: 75,

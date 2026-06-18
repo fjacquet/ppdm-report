@@ -24,6 +24,12 @@ describe('sheetIsInUse', () => {
   it('treats empty strings and nulls as placeholders', () => {
     expect(sheetIsInUse(sheet('NAS', [{ a: '', b: null }]))).toBe(false)
   })
+
+  it('treats lowercase n/a as a placeholder (case-insensitive)', () => {
+    expect(sheetIsInUse(sheet('SQL Databases', [{ 'Asset Name': 'n/a', Status: 'n/a' }]))).toBe(
+      false,
+    )
+  })
 })
 
 describe('classifyAgents', () => {

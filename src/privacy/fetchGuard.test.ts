@@ -127,6 +127,7 @@ describe('fetchGuard', () => {
     // Sanity: the guard's error is a small, intentional Error subclass.
     // It must not embed any structured cause-like payload that a future
     // FallbackError could reflect to the UI.
+    expect.assertions(3)
     await import('./fetchGuard')
     try {
       fetch('https://evil.example.com/')
