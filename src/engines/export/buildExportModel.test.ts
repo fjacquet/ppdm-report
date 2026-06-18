@@ -212,7 +212,7 @@ describe('buildExportModel', () => {
       (s) => s.id === 'gaps',
     )
     expect(gaps?.deck?.bars).toHaveLength(10)
-    expect(gaps?.notes?.some((n) => /Excel/.test(n))).toBe(true)
+    expect(gaps?.deck?.caveat).toMatch(/Excel/)
   })
 
   it('coverage deck bars are capped at 6 and sorted descending by pct', () => {

@@ -46,7 +46,7 @@ export interface DeckBar {
 /** A small doughnut for a band's label zone (coverage). */
 export interface DeckDonut {
   slices: { value: number; color: string }[]
-  /** Localized center label, e.g. "71 %". */
+  /** Localized center label, e.g. "71%" (en) / "71 %" (fr). */
   center: string
 }
 

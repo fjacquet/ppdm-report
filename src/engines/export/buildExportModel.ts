@@ -186,10 +186,6 @@ export function buildExportModel(
         pal,
       ),
     },
-    notes: [
-      t('common:topOf', { shown: Math.min(10, gaps.top.items.length), total: gaps.top.total }),
-      t('common:fullListInExcel'),
-    ],
   }
 
   const idleSection: ExportSection | null =

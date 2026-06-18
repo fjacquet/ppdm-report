@@ -70,7 +70,7 @@ describe('buildPptx (deck)', () => {
       for (const theme of ['light', 'dark'] as const) {
         const model = buildExportModel(view, flavor, theme, t, 'en')
         const buf = await buildPptx(model, theme)
-        expect(buf.byteLength).toBeGreaterThan(1000)
+        expect(buf.byteLength).toBeGreaterThan(20000)
         const head = new Uint8Array(buf.slice(0, 2))
         expect(head[0]).toBe(0x50) // 'P'
         expect(head[1]).toBe(0x4b) // 'K'
