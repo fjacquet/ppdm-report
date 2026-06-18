@@ -4,6 +4,8 @@ import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { CoverageSection } from './CoverageSection'
 import { ExecutiveKpis } from './ExecutiveKpis'
+import { GapsSection } from './GapsSection'
+import { IdleAgentsSection } from './IdleAgentsSection'
 
 const fixture: ReportView = {
   meta: {
@@ -154,5 +156,73 @@ describe('CoverageSection', () => {
   it('renders aria-label on the donut chart', () => {
     render(<CoverageSection view={fixture} dark={false} />)
     expect(screen.getByRole('img', { name: /coverage donut/i })).toBeInTheDocument()
+  })
+})
+
+const gapsFixture: ReportView = {
+  ...fixture,
+  gaps: {
+    count: 281,
+    totalCapacityGb: 263000,
+    top: {
+      items: [{ name: 'HR_PAYROLL_PROD', type: 'MSSQL', sizeGb: 842.6 }],
+      total: 281,
+      shown: 1,
+    },
+  },
+}
+
+describe('GapsSection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it('renders total unprotected capacity as "263.0 TB"', () => {
+    render(<GapsSection view={gapsFixture} />)
+    expect(screen.getByText('263.0 TB')).toBeInTheDocument()
+  })
+
+  it('renders unprotected asset count "281"', () => {
+    render(<GapsSection view={gapsFixture} />)
+    expect(screen.getAllByText('281').length).toBeGreaterThan(0)
+  })
+
+  it('renders top-of caption via common:topOf', () => {
+    render(<GapsSection view={gapsFixture} />)
+    expect(screen.getByText('Top 1 of 281')).toBeInTheDocument()
+  })
+
+  it('renders asset name "HR_PAYROLL_PROD" in the table', () => {
+    render(<GapsSection view={gapsFixture} />)
+    expect(screen.getByText('HR_PAYROLL_PROD')).toBeInTheDocument()
+  })
+})
+
+describe('IdleAgentsSection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it('renders "Oracle Databases" when idleAgents is non-empty', () => {
+    const view: ReportView = {
+      ...fixture,
+      idleAgents: ['Oracle Databases', 'SAP HANA Databases'],
+    }
+    render(<IdleAgentsSection view={view} />)
+    expect(screen.getByText('Oracle Databases')).toBeInTheDocument()
+  })
+
+  it('renders nothing when idleAgents is empty', () => {
+    const view: ReportView = { ...fixture, idleAgents: [] }
+    const { container } = render(<IdleAgentsSection view={view} />)
+    expect(container).toBeEmptyDOMElement()
   })
 })
