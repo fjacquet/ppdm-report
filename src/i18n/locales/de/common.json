@@ -33,6 +33,7 @@
   },
   "capped": "Basierend auf den neuesten {{n}} — ein Zeitfenster, nicht die gesamte Menge",
   "topOf": "Top {{shown}} von {{total}}",
+  "fullListInExcel": "Vollständige Liste im Excel-Export",
   "units": {
     "base10": "Base-10-Einheiten"
   }
