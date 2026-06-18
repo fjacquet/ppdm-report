@@ -7,6 +7,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    // jsdom withholds `localStorage` from opaque origins (e.g. `about:blank`);
+    // setting an explicit URL gives the test environment a same-origin
+    // window so `window.localStorage` and other origin-bound APIs work.
     environmentOptions: {
       jsdom: {
         url: 'http://localhost/',
@@ -29,6 +32,7 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.test.ts',
         '**/*.spec.ts',
+        // browser/worker glue — verified end-to-end, not unit-tested
         'src/engines/parser/parser.worker.ts',
         'src/engines/parser/parseInWorker.ts',
       ],
