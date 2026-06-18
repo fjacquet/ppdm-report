@@ -1,17 +1,41 @@
+import type { EChartsOption } from 'echarts/types/dist/shared'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { DARK, LIGHT } from '../../theme/palette'
 import type { ReportView } from '../../types/reportView'
 import { fmtInt, formatBytes, gbToBytes } from '../../utils/format'
+import { Chart } from '../Chart'
+import { Details } from '../Details'
+import { type BarDatum, horizontalBarOption } from './barOption'
 
 interface GapsSectionProps {
   view: ReportView
+  dark: boolean
 }
 
-export function GapsSection({ view }: GapsSectionProps) {
+export function GapsSection({ view, dark }: GapsSectionProps) {
   const { t, i18n } = useTranslation(['dashboard', 'common'])
   const locale = i18n.language
+  const palette = dark ? DARK : LIGHT
 
   const totalBytes = gbToBytes(view.gaps.totalCapacityGb)
   const { top, count } = view.gaps
+
+  const barData: BarDatum[] = useMemo(
+    () =>
+      top.items.slice(0, 10).map((a) => ({
+        label: a.name,
+        value: a.sizeGb,
+        valueText: formatBytes(gbToBytes(a.sizeGb), locale),
+        color: palette.bad,
+      })),
+    [top.items, locale, palette],
+  )
+  const barOption: EChartsOption = useMemo(
+    () => horizontalBarOption(barData, palette),
+    [barData, palette],
+  )
+  const barHeight = Math.max(120, barData.length * 34)
 
   return (
     <section aria-label={t('dashboard:gaps.title')}>
@@ -33,41 +57,45 @@ export function GapsSection({ view }: GapsSectionProps) {
         </div>
       </div>
 
-      {/* Top-N table */}
-      {top.items.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
-                <th className="pb-2 pr-4 font-medium">{t('common:col.name')}</th>
-                <th className="pb-2 pr-4 font-medium">{t('common:col.type')}</th>
-                <th className="pb-2 font-medium text-right">{t('common:col.size')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {top.items.map((item, index) => {
-                // Unprotected assets can share a name (e.g. "X:\\") with no stable id, so the
-                // index keeps React keys unique; the top-N list is static per render (remounts on upload).
-                const rowKey = `${item?.name}-${index}`
-                return (
-                  <tr
-                    key={rowKey}
-                    className="border-b border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200"
-                  >
-                    <td className="py-1.5 pr-4">{item?.name}</td>
-                    <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{item?.type}</td>
-                    <td className="py-1.5 text-right">
-                      {formatBytes(gbToBytes(item?.sizeGb ?? 0), locale)}
-                    </td>
+      {barData.length > 0 && (
+        <>
+          <Chart
+            option={barOption}
+            dark={dark}
+            testId="gaps-bars"
+            style={{ minHeight: barHeight, width: '100%' }}
+          />
+          <Details summary={t('common:showDetails')}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
+                    <th className="pb-2 pr-4 font-medium">{t('common:col.name')}</th>
+                    <th className="pb-2 pr-4 font-medium">{t('common:col.type')}</th>
+                    <th className="pb-2 font-medium text-right">{t('common:col.size')}</th>
                   </tr>
-                )
-              })}
-            </tbody>
-          </table>
-          <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-            {t('common:topOf', { shown: top.shown, total: top.total })}
-          </p>
-        </div>
+                </thead>
+                <tbody>
+                  {top.items.map((item) => (
+                    <tr
+                      key={`${item?.name ?? ''}-${item?.type ?? ''}-${item?.sizeGb ?? 0}`}
+                      className="border-b border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200"
+                    >
+                      <td className="py-1.5 pr-4">{item?.name}</td>
+                      <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{item?.type}</td>
+                      <td className="py-1.5 text-right">
+                        {formatBytes(gbToBytes(item?.sizeGb ?? 0), locale)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+                {t('common:topOf', { shown: top.shown, total: top.total })}
+              </p>
+            </div>
+          </Details>
+        </>
       )}
     </section>
   )

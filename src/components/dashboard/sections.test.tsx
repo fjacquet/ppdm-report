@@ -179,29 +179,24 @@ describe('GapsSection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
+  afterEach(() => cleanup())
 
-  afterEach(() => {
-    cleanup()
-  })
-
-  it('renders total unprotected capacity as "263.0 TB"', () => {
-    render(<GapsSection view={gapsFixture} />)
+  it('renders the two KPIs', () => {
+    render(<GapsSection view={gapsFixture} dark={false} />)
     expect(screen.getByText('263.0 TB')).toBeInTheDocument()
-  })
-
-  it('renders unprotected asset count "281"', () => {
-    render(<GapsSection view={gapsFixture} />)
     expect(screen.getAllByText('281').length).toBeGreaterThan(0)
   })
 
-  it('renders top-of caption via common:topOf', () => {
-    render(<GapsSection view={gapsFixture} />)
-    expect(screen.getByText('Top 1 of 281')).toBeInTheDocument()
+  it('renders the unprotected-by-size bar chart', () => {
+    render(<GapsSection view={gapsFixture} dark={false} />)
+    expect(screen.getByTestId('gaps-bars')).toBeInTheDocument()
   })
 
-  it('renders asset name "HR_PAYROLL_PROD" in the table', () => {
-    render(<GapsSection view={gapsFixture} />)
-    expect(screen.getByText('HR_PAYROLL_PROD')).toBeInTheDocument()
+  it('keeps the full list behind a Show details disclosure (asset name + caption present)', () => {
+    render(<GapsSection view={gapsFixture} dark={false} />)
+    expect(screen.getByText('Show details')).toBeInTheDocument()
+    expect(screen.getAllByText('HR_PAYROLL_PROD').length).toBeGreaterThan(0)
+    expect(screen.getByText('Top 1 of 281')).toBeInTheDocument()
   })
 })
 
