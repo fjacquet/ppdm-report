@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest'
 import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
 import { computeCoverage } from './coverage'
 
-function wb(sheets: Record<string, Array<Record<string, string>>>, inUse: string[]): ParsedWorkbook {
+function wb(
+  sheets: Record<string, Array<Record<string, string>>>,
+  inUse: string[],
+): ParsedWorkbook {
   const sheetData: Record<string, SheetData> = {}
   for (const [name, rows] of Object.entries(sheets)) {
     sheetData[name] = { name, headers: Object.keys(rows[0] ?? {}), rows, capped: false }
@@ -30,19 +33,21 @@ describe('computeCoverage', () => {
         ['SQL Databases'],
       ),
     )
-    const sql = cov.byType['SQL Databases']!
-    expect(sql.protected).toBe(380)
-    expect(sql.unprotected).toBe(150)
-    expect(sql.excluded).toBe(224)
-    expect(sql.pct).toBeCloseTo(380 / 530, 4)
-    expect(sql.pctInclExcluded).toBeCloseTo(380 / 754, 4)
+    const sql = cov.byType['SQL Databases']
+    expect(sql?.protected).toBe(380)
+    expect(sql?.unprotected).toBe(150)
+    expect(sql?.excluded).toBe(224)
+    expect(sql?.pct).toBeCloseTo(380 / 530, 4)
+    expect(sql?.pctInclExcluded).toBeCloseTo(380 / 754, 4)
     expect(cov.overall.protected).toBe(380)
   })
 
   it('returns 0 pct for an empty denominator, never NaN', () => {
-    const cov = computeCoverage(wb({ 'File Systems': [{ 'Protection Status': 'EXCLUDED' }] }, ['File Systems']))
-    expect(cov.byType['File Systems']!.pct).toBe(0)
-    expect(cov.byType['File Systems']!.pctInclExcluded).toBe(0)
+    const cov = computeCoverage(
+      wb({ 'File Systems': [{ 'Protection Status': 'EXCLUDED' }] }, ['File Systems']),
+    )
+    expect(cov.byType['File Systems']?.pct).toBe(0)
+    expect(cov.byType['File Systems']?.pctInclExcluded).toBe(0)
   })
 
   it('ignores sheets not in inUse', () => {
