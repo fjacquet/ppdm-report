@@ -70,7 +70,7 @@ src/hooks/useExport.ts
 - [ ] **Step 2:** In `src/index.css`, after `@import 'tailwindcss';`, add class-based dark mode and keep Arial:
 ```css
 @import 'tailwindcss';
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 :root { font-family: Arial, Helvetica, sans-serif; }
 body { margin: 0; }
 ```
