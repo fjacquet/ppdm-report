@@ -1,0 +1,42 @@
+{
+  "coverage": {
+    "title": "Asset Coverage",
+    "protected": "Protected",
+    "unprotected": "Unprotected",
+    "excluded": "Excluded",
+    "headline": "{{pct}}% of assets protected",
+    "inclExcluded": "Including excluded assets"
+  },
+  "gaps": {
+    "title": "Protection Gaps",
+    "unprotectedTb": "Unprotected data (TB)",
+    "assets": "Unprotected assets"
+  },
+  "idle": {
+    "title": "Idle Jobs",
+    "subtitle": "Jobs that have not run recently"
+  },
+  "jobs": {
+    "title": "Job Activity",
+    "success": "Successful jobs"
+  },
+  "compliance": {
+    "title": "Compliance",
+    "appConsistent": "App-consistent backups",
+    "immutable": "Immutable copies",
+    "replicated": "Replicated copies"
+  },
+  "capacity": {
+    "title": "Capacity",
+    "utilization": "Storage utilization"
+  },
+  "policies": {
+    "title": "Policies"
+  },
+  "kpi": {
+    "coverage": "Coverage",
+    "unprotected": "Unprotected",
+    "jobSuccess": "Job success rate",
+    "immutable": "Immutable"
+  }
+}

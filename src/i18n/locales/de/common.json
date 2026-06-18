@@ -1,0 +1,26 @@
+{
+  "appTitle": "PPDM-Bericht",
+  "upload": {
+    "drop": "PPDM-Exportdatei hier ablegen",
+    "choose": "Datei auswählen"
+  },
+  "lang": {
+    "label": "Sprache",
+    "en": "English",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano"
+  },
+  "theme": {
+    "label": "Design",
+    "auto": "Auto",
+    "light": "Hell",
+    "dark": "Dunkel"
+  },
+  "flavor": {
+    "assessment": "Bewertung",
+    "ops": "Betrieb"
+  },
+  "capped": "Basierend auf den neuesten {{n}} — ein Zeitfenster, nicht die gesamte Menge",
+  "topOf": "Top {{shown}} von {{total}}"
+}

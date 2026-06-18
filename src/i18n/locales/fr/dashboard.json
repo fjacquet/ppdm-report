@@ -1,0 +1,42 @@
+{
+  "coverage": {
+    "title": "Couverture des ressources",
+    "protected": "Protégé",
+    "unprotected": "Non protégé",
+    "excluded": "Exclu",
+    "headline": "{{pct}}% des ressources protégées",
+    "inclExcluded": "Y compris les ressources exclues"
+  },
+  "gaps": {
+    "title": "Lacunes de protection",
+    "unprotectedTb": "Données non protégées (To)",
+    "assets": "Ressources non protégées"
+  },
+  "idle": {
+    "title": "Jobs inactifs",
+    "subtitle": "Jobs n'ayant pas été exécutés récemment"
+  },
+  "jobs": {
+    "title": "Activité des jobs",
+    "success": "Jobs réussis"
+  },
+  "compliance": {
+    "title": "Conformité",
+    "appConsistent": "Sauvegardes cohérentes applicativement",
+    "immutable": "Copies immuables",
+    "replicated": "Copies répliquées"
+  },
+  "capacity": {
+    "title": "Capacité",
+    "utilization": "Utilisation du stockage"
+  },
+  "policies": {
+    "title": "Politiques"
+  },
+  "kpi": {
+    "coverage": "Couverture",
+    "unprotected": "Non protégé",
+    "jobSuccess": "Taux de réussite des jobs",
+    "immutable": "Immuable"
+  }
+}

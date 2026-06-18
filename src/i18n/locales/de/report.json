@@ -1,0 +1,13 @@
+{
+  "title": "PPDM-Schutzbericht",
+  "sections": {
+    "executiveSummary": "Zusammenfassung",
+    "assetCoverage": "Asset-Abdeckung",
+    "protectionGaps": "Schutzlücken",
+    "jobActivity": "Job-Aktivität",
+    "compliance": "Compliance",
+    "capacity": "Kapazität",
+    "policies": "Richtlinienübersicht",
+    "recommendations": "Empfehlungen"
+  }
+}

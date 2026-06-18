@@ -1,0 +1,13 @@
+{
+  "slides": {
+    "cover": "Rapporto di protezione PPDM",
+    "executiveSummary": "Riepilogo esecutivo",
+    "assetCoverage": "Copertura degli asset",
+    "protectionGaps": "Lacune di protezione",
+    "jobActivity": "Attività dei job",
+    "compliance": "Panoramica della conformità",
+    "capacity": "Capacità e utilizzo",
+    "policies": "Panoramica dei criteri",
+    "recommendations": "Raccomandazioni"
+  }
+}

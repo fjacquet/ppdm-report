@@ -1,0 +1,13 @@
+{
+  "title": "Rapporto di protezione PPDM",
+  "sections": {
+    "executiveSummary": "Riepilogo esecutivo",
+    "assetCoverage": "Copertura degli asset",
+    "protectionGaps": "Lacune di protezione",
+    "jobActivity": "Attività dei job",
+    "compliance": "Conformità",
+    "capacity": "Capacità",
+    "policies": "Panoramica dei criteri",
+    "recommendations": "Raccomandazioni"
+  }
+}

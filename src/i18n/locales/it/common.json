@@ -1,0 +1,26 @@
+{
+  "appTitle": "Rapporto PPDM",
+  "upload": {
+    "drop": "Trascina qui il file di esportazione PPDM",
+    "choose": "Scegli file"
+  },
+  "lang": {
+    "label": "Lingua",
+    "en": "English",
+    "fr": "Français",
+    "de": "Deutsch",
+    "it": "Italiano"
+  },
+  "theme": {
+    "label": "Tema",
+    "auto": "Auto",
+    "light": "Chiaro",
+    "dark": "Scuro"
+  },
+  "flavor": {
+    "assessment": "Valutazione",
+    "ops": "Operazioni"
+  },
+  "capped": "Basato sugli ultimi {{n}} — una finestra temporale, non l'insieme completo",
+  "topOf": "Top {{shown}} di {{total}}"
+}
