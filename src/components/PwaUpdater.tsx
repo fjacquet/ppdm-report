@@ -14,6 +14,7 @@ export function PwaUpdater() {
   return (
     <div
       role="alert"
+      aria-atomic="true"
       className="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm shadow-lg dark:border-slate-700 dark:bg-slate-900"
       style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
     >
