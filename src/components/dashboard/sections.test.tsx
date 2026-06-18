@@ -2,6 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
+import { CoverageSection } from './CoverageSection'
 import { ExecutiveKpis } from './ExecutiveKpis'
 
 const fixture: ReportView = {
@@ -16,7 +17,15 @@ const fixture: ReportView = {
   idleAgents: [],
   warnings: [],
   coverage: {
-    byType: {},
+    byType: {
+      'SQL Databases': {
+        protected: 380,
+        unprotected: 150,
+        excluded: 224,
+        pct: 0.717,
+        pctInclExcluded: 0.501,
+      },
+    },
     overall: {
       protected: 703,
       unprotected: 281,
@@ -101,5 +110,49 @@ describe('ExecutiveKpis', () => {
     expect(screen.getByText('Unprotected')).toBeInTheDocument()
     expect(screen.getByText('Job success rate')).toBeInTheDocument()
     expect(screen.getByText('Immutable')).toBeInTheDocument()
+  })
+})
+
+describe('CoverageSection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it('renders section title', () => {
+    render(<CoverageSection view={fixture} dark={false} />)
+    expect(screen.getByText('Asset Coverage')).toBeInTheDocument()
+  })
+
+  it('renders per-type label "SQL Databases"', () => {
+    render(<CoverageSection view={fixture} dark={false} />)
+    expect(screen.getByText('SQL Databases')).toBeInTheDocument()
+  })
+
+  it('renders legend counts for protected / unprotected / excluded', () => {
+    render(<CoverageSection view={fixture} dark={false} />)
+    expect(screen.getByText('703')).toBeInTheDocument()
+    expect(screen.getByText('281')).toBeInTheDocument()
+    expect(screen.getByText('377')).toBeInTheDocument()
+  })
+
+  it('renders headline pct "71.4%"', () => {
+    render(<CoverageSection view={fixture} dark={false} />)
+    // fmtPercent(0.714, 'en') → "71.4%"
+    expect(screen.getByText('71.4%')).toBeInTheDocument()
+  })
+
+  it('renders incl-excluded secondary pct "51.7%"', () => {
+    render(<CoverageSection view={fixture} dark={false} />)
+    // fmtPercent(0.517, 'en') → "51.7%"
+    expect(screen.getByText('51.7%')).toBeInTheDocument()
+  })
+
+  it('renders aria-label on the donut chart', () => {
+    render(<CoverageSection view={fixture} dark={false} />)
+    expect(screen.getByRole('img', { name: /coverage donut/i })).toBeInTheDocument()
   })
 })
