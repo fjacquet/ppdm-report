@@ -317,7 +317,9 @@ export function buildExportModel(
           .slice(0, 6)
           .map((tg) => ({
             label: tg.name,
-            magnitude: tg.utilizationPct,
+            // utilization is 0..100; divide by 100 so the bar fills absolutely
+            // (89.6% → 89.6% of the track), not relative to the busiest target.
+            magnitude: tg.utilizationPct / 100,
             value: fmtPercentValue(tg.utilizationPct, locale),
             tone: tg.flagged ? ('warn' as const) : ('accent' as const),
           })),

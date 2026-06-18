@@ -224,7 +224,10 @@ function drawTiles(slide: Slide, x: number, y: number, w: number, items: string[
   const rows = Math.ceil(items.length / cols)
   const gap = 0.18
   const tw = (w - gap * (cols - 1)) / cols
-  const th = Math.min(0.7, (5.0 - gap * (rows - 1)) / Math.max(rows, 1))
+  // idleAgents is a bounded catalog of PPDM agent types (~13-20), so a single
+  // slide always suffices; the floor keeps tile geometry valid (never ≤ 0) even
+  // for unexpectedly large lists.
+  const th = Math.max(0.32, Math.min(0.7, (5.0 - gap * (rows - 1)) / Math.max(rows, 1)))
   items.forEach((name, i) => {
     const c = i % cols
     const r = Math.floor(i / cols)

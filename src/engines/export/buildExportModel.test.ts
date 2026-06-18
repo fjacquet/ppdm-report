@@ -174,6 +174,8 @@ describe('buildExportModel', () => {
 
     // capacity: flagged target colored warn + a flagged KPI chip
     expect(byId.capacity?.deck?.bars?.[0]).toMatchObject({ label: 'dd1', color: '#d97706' })
+    // utilization bars scale absolutely (87.6% → 0.876 of the track), not to the local max
+    expect(byId.capacity?.deck?.bars?.[0]?.ratio).toBeCloseTo(0.876, 3)
     expect(byId.capacity?.deck?.kpiChips?.some((k) => /near capacity/.test(k.label))).toBe(true)
 
     // policies: by-purpose bars

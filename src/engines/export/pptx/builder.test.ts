@@ -65,16 +65,21 @@ const view: ReportView = {
 
 describe('buildPptx (deck)', () => {
   it('produces a valid .pptx for both themes and both flavors', async () => {
+    const prevLanguage = i18n.language
     await i18n.changeLanguage('en')
-    for (const flavor of ['assessment', 'ops'] as const) {
-      for (const theme of ['light', 'dark'] as const) {
-        const model = buildExportModel(view, flavor, theme, t, 'en')
-        const buf = await buildPptx(model, theme)
-        expect(buf.byteLength).toBeGreaterThan(20000)
-        const head = new Uint8Array(buf.slice(0, 2))
-        expect(head[0]).toBe(0x50) // 'P'
-        expect(head[1]).toBe(0x4b) // 'K'
+    try {
+      for (const flavor of ['assessment', 'ops'] as const) {
+        for (const theme of ['light', 'dark'] as const) {
+          const model = buildExportModel(view, flavor, theme, t, 'en')
+          const buf = await buildPptx(model, theme)
+          expect(buf.byteLength).toBeGreaterThan(20000)
+          const head = new Uint8Array(buf.slice(0, 2))
+          expect(head[0]).toBe(0x50) // 'P'
+          expect(head[1]).toBe(0x4b) // 'K'
+        }
       }
+    } finally {
+      await i18n.changeLanguage(prevLanguage)
     }
   })
 })

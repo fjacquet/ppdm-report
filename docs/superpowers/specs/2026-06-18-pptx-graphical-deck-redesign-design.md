@@ -120,7 +120,7 @@ Notes:
 ### Theming
 
 - Drive all fills/ink/lines/tones from `LIGHT` / `DARK` palettes (`src/theme/palette.ts`).
-- KPI cards/tiles need a **surface** color distinct from the slide background (esp. in dark theme, where cards must be lighter than `bg`). **Add a `surface` token to `Palette`** for both themes (small, additive change).
+- KPI cards/tiles need a **surface** color distinct from the slide background (esp. in dark theme, where cards must be lighter than `bg`). The `Palette` already provides a `surface` token (`#f8fafc` light / `#111a2c` dark) — reuse it; no palette change needed.
 
 ### Edge cases
 
