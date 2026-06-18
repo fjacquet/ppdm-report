@@ -300,6 +300,8 @@ describe('CapacitySection', () => {
     expect(screen.getAllByText('87.6 %').length).toBeGreaterThan(0)
     const flaggedRow = document.querySelector('[data-flagged="true"]')
     expect(flaggedRow).not.toBeNull()
+    // the flagged row must keep its amber warning tone (visual signal)
+    expect(flaggedRow?.className).toMatch(/amber/)
   })
 })
 

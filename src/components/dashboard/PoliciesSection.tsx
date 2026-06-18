@@ -14,7 +14,7 @@ interface PoliciesSectionProps {
 }
 
 export function PoliciesSection({ view, dark }: PoliciesSectionProps) {
-  const { t, i18n } = useTranslation('dashboard')
+  const { t, i18n } = useTranslation(['dashboard', 'common'])
   const locale = i18n.language
   const palette = dark ? DARK : LIGHT
   const { policies } = view
@@ -53,7 +53,7 @@ export function PoliciesSection({ view, dark }: PoliciesSectionProps) {
             testId="policies-bars"
             style={{ minHeight: barHeight, width: '100%' }}
           />
-          <Details summary={t('common:showDetails', { ns: 'common' })}>
+          <Details summary={t('common:showDetails')}>
             <div className="mb-4 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>

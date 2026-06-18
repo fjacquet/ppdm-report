@@ -15,7 +15,9 @@ export interface BarDatum {
 
 /**
  * Horizontal bar chart mirroring the deck: category labels, hidden value axis,
- * per-bar colours, localized value labels at the bar end, largest first.
+ * per-bar colours, localized value labels at the bar end. Bars render in the
+ * order given (top to bottom) — the caller must pre-sort descending for a
+ * largest-first display.
  * `max` defaults to 'dataMax' (bars relative to the largest); pass a number for
  * absolute scaling (1 for 0..1 ratios, 100 for 0..100 percentages).
  */
