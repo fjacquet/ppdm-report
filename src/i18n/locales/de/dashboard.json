@@ -13,8 +13,8 @@
     "assets": "Ungeschützte Assets"
   },
   "idle": {
-    "title": "Inaktive Jobs",
-    "subtitle": "Jobs, die kürzlich nicht ausgeführt wurden"
+    "title": "Inaktive Agenten",
+    "subtitle": "Im System vorhanden, schützen aber keine Assets"
   },
   "jobs": {
     "title": "Job-Aktivität",
@@ -31,7 +31,15 @@
     "utilization": "Speichernutzung"
   },
   "policies": {
-    "title": "Richtlinien"
+    "title": "Richtlinien",
+    "countLabel": "{{count}} Richtlinien",
+    "col": {
+      "policy": "Richtlinie",
+      "purpose": "Zweck",
+      "assets": "Assets",
+      "capacity": "Kapazität",
+      "count": "Anzahl"
+    }
   },
   "kpi": {
     "coverage": "Abdeckung",

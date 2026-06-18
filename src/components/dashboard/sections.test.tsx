@@ -350,9 +350,9 @@ describe('PoliciesSection', () => {
     cleanup()
   })
 
-  it('renders total policy count "32"', () => {
+  it('renders total policy count "32 policies"', () => {
     render(<PoliciesSection view={policiesFixture} />)
-    expect(screen.getByText('32')).toBeInTheDocument()
+    expect(screen.getByText('32 policies')).toBeInTheDocument()
   })
 
   it('renders purpose tally "CENTRALIZED"', () => {

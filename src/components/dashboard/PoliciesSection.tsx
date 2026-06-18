@@ -20,10 +20,7 @@ export function PoliciesSection({ view }: PoliciesSectionProps) {
 
       {/* Total policy count */}
       <p className="mb-4 text-3xl font-bold text-gray-900 dark:text-gray-100">
-        {fmtInt(policies.count, locale)}
-        <span className="ml-2 text-base font-normal text-gray-500 dark:text-gray-400">
-          policies
-        </span>
+        {t('policies.countLabel', { count: fmtInt(policies.count, locale) })}
       </p>
 
       {/* By purpose tally */}
@@ -32,8 +29,8 @@ export function PoliciesSection({ view }: PoliciesSectionProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
-                <th className="pb-2 pr-4 font-medium">Purpose</th>
-                <th className="pb-2 font-medium text-right">Count</th>
+                <th className="pb-2 pr-4 font-medium">{t('policies.col.purpose')}</th>
+                <th className="pb-2 font-medium text-right">{t('policies.col.count')}</th>
               </tr>
             </thead>
             <tbody>
@@ -57,10 +54,10 @@ export function PoliciesSection({ view }: PoliciesSectionProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
-                <th className="pb-2 pr-4 font-medium">Policy</th>
-                <th className="pb-2 pr-4 font-medium">Purpose</th>
-                <th className="pb-2 pr-4 font-medium text-right">Assets</th>
-                <th className="pb-2 font-medium text-right">Capacity</th>
+                <th className="pb-2 pr-4 font-medium">{t('policies.col.policy')}</th>
+                <th className="pb-2 pr-4 font-medium">{t('policies.col.purpose')}</th>
+                <th className="pb-2 pr-4 font-medium text-right">{t('policies.col.assets')}</th>
+                <th className="pb-2 font-medium text-right">{t('policies.col.capacity')}</th>
               </tr>
             </thead>
             <tbody>

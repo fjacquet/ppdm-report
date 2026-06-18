@@ -13,8 +13,8 @@
     "assets": "Unprotected assets"
   },
   "idle": {
-    "title": "Idle Jobs",
-    "subtitle": "Jobs that have not run recently"
+    "title": "Idle agents",
+    "subtitle": "Present in the environment but not protecting any assets"
   },
   "jobs": {
     "title": "Job Activity",
@@ -31,7 +31,15 @@
     "utilization": "Storage utilization"
   },
   "policies": {
-    "title": "Policies"
+    "title": "Policies",
+    "countLabel": "{{count}} policies",
+    "col": {
+      "policy": "Policy",
+      "purpose": "Purpose",
+      "assets": "Assets",
+      "capacity": "Capacity",
+      "count": "Count"
+    }
   },
   "kpi": {
     "coverage": "Coverage",

@@ -13,8 +13,8 @@
     "assets": "Asset non protetti"
   },
   "idle": {
-    "title": "Job inattivi",
-    "subtitle": "Job non eseguiti di recente"
+    "title": "Agenti inattivi",
+    "subtitle": "Presenti nell'ambiente ma non proteggono alcun asset"
   },
   "jobs": {
     "title": "Attività dei job",
@@ -31,7 +31,15 @@
     "utilization": "Utilizzo dello storage"
   },
   "policies": {
-    "title": "Criteri"
+    "title": "Criteri",
+    "countLabel": "{{count}} criteri",
+    "col": {
+      "policy": "Criterio",
+      "purpose": "Scopo",
+      "assets": "Asset",
+      "capacity": "Capacità",
+      "count": "Numero"
+    }
   },
   "kpi": {
     "coverage": "Copertura",

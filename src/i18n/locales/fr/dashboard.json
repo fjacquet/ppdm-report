@@ -13,8 +13,8 @@
     "assets": "Ressources non protégées"
   },
   "idle": {
-    "title": "Jobs inactifs",
-    "subtitle": "Jobs n'ayant pas été exécutés récemment"
+    "title": "Agents inactifs",
+    "subtitle": "Présents dans l'environnement mais ne protégeant aucune ressource"
   },
   "jobs": {
     "title": "Activité des jobs",
@@ -31,7 +31,15 @@
     "utilization": "Utilisation du stockage"
   },
   "policies": {
-    "title": "Politiques"
+    "title": "Politiques",
+    "countLabel": "{{count}} politiques",
+    "col": {
+      "policy": "Politique",
+      "purpose": "Objectif",
+      "assets": "Ressources",
+      "capacity": "Capacité",
+      "count": "Nombre"
+    }
   },
   "kpi": {
     "coverage": "Couverture",

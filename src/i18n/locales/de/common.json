@@ -21,6 +21,11 @@
     "assessment": "Bewertung",
     "ops": "Betrieb"
   },
+  "col": {
+    "name": "Name",
+    "type": "Typ",
+    "size": "Größe"
+  },
   "capped": "Basierend auf den neuesten {{n}} — ein Zeitfenster, nicht die gesamte Menge",
   "topOf": "Top {{shown}} von {{total}}"
 }

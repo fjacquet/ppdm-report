@@ -7,7 +7,7 @@ interface CapacitySectionProps {
 }
 
 export function CapacitySection({ view }: CapacitySectionProps) {
-  const { t, i18n } = useTranslation('dashboard')
+  const { t, i18n } = useTranslation(['dashboard', 'common'])
   const locale = i18n.language
 
   const { capacity } = view
@@ -29,8 +29,8 @@ export function CapacitySection({ view }: CapacitySectionProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
-                <th className="pb-2 pr-4 font-medium">Name</th>
-                <th className="pb-2 pr-4 font-medium">Type</th>
+                <th className="pb-2 pr-4 font-medium">{t('common:col.name')}</th>
+                <th className="pb-2 pr-4 font-medium">{t('common:col.type')}</th>
                 <th className="pb-2 font-medium text-right">{t('capacity.utilization')}</th>
               </tr>
             </thead>

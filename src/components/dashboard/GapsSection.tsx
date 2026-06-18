@@ -39,24 +39,29 @@ export function GapsSection({ view }: GapsSectionProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
-                <th className="pb-2 pr-4 font-medium">Name</th>
-                <th className="pb-2 pr-4 font-medium">Type</th>
-                <th className="pb-2 font-medium text-right">Size</th>
+                <th className="pb-2 pr-4 font-medium">{t('common:col.name')}</th>
+                <th className="pb-2 pr-4 font-medium">{t('common:col.type')}</th>
+                <th className="pb-2 font-medium text-right">{t('common:col.size')}</th>
               </tr>
             </thead>
             <tbody>
-              {top.items.map((item) => (
-                <tr
-                  key={item?.name}
-                  className="border-b border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200"
-                >
-                  <td className="py-1.5 pr-4">{item?.name}</td>
-                  <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{item?.type}</td>
-                  <td className="py-1.5 text-right">
-                    {formatBytes((item?.sizeGb ?? 0) * 1e9, locale)}
-                  </td>
-                </tr>
-              ))}
+              {top.items.map((item, index) => {
+                // Unprotected assets can share a name (e.g. "X:\\") with no stable id, so the
+                // index keeps React keys unique; the top-N list is static per render (remounts on upload).
+                const rowKey = `${item?.name}-${index}`
+                return (
+                  <tr
+                    key={rowKey}
+                    className="border-b border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200"
+                  >
+                    <td className="py-1.5 pr-4">{item?.name}</td>
+                    <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{item?.type}</td>
+                    <td className="py-1.5 text-right">
+                      {formatBytes((item?.sizeGb ?? 0) * 1e9, locale)}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
           <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">

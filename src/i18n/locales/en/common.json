@@ -21,6 +21,11 @@
     "assessment": "Assessment",
     "ops": "Operations"
   },
+  "col": {
+    "name": "Name",
+    "type": "Type",
+    "size": "Size"
+  },
   "capped": "Based on most recent {{n}} — a window, not the full set",
   "topOf": "Top {{shown}} of {{total}}"
 }

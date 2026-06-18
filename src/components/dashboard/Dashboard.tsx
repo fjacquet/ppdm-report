@@ -47,7 +47,7 @@ export function Dashboard({ view }: DashboardProps) {
 
   return (
     <div
-      className="min-h-screen space-y-8 overflow-y-auto bg-white p-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+      className="w-full space-y-8 bg-white p-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
       style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
     >
       <ExecutiveKpis view={view} />

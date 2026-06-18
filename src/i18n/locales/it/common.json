@@ -21,6 +21,11 @@
     "assessment": "Valutazione",
     "ops": "Operazioni"
   },
+  "col": {
+    "name": "Nome",
+    "type": "Tipo",
+    "size": "Dimensione"
+  },
   "capped": "Basato sugli ultimi {{n}} — una finestra temporale, non l'insieme completo",
   "topOf": "Top {{shown}} di {{total}}"
 }

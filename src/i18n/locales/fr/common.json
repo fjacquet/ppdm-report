@@ -21,6 +21,11 @@
     "assessment": "Évaluation",
     "ops": "Opérations"
   },
+  "col": {
+    "name": "Nom",
+    "type": "Type",
+    "size": "Taille"
+  },
   "capped": "Basé sur les {{n}} plus récents — une fenêtre, pas l'ensemble complet",
   "topOf": "Top {{shown}} sur {{total}}"
 }
