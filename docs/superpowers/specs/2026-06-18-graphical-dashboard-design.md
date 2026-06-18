@@ -21,14 +21,16 @@ What a user demos on screen no longer matches what they hand over as a deck.
 
 - Lazy-loading ECharts (the 501 KB chunk) — that's the separate **B1** item.
 - Any change to the export engines (`buildExportModel`, `pptx/builder`, `assembleHtml`) — unchanged.
-- `CoverageSection` (already graphical) and `ExecutiveKpis` (already cards) — untouched.
+- `ExecutiveKpis` (already cards) — untouched. `CoverageSection` is already graphical; it receives only the small chart-accessibility harmonization described below (decorative chart + `testId`).
 - No new `ReportView` metrics — read existing fields only.
 
 ## Design
 
 ### Pattern
 
-Each converted section renders: heading → KPI(s) *(kept)* → an **ECharts bar chart** via `<Chart option={…} dark={dark} ariaLabel="…" />` → for sections with row detail, a **`<Details>`** disclosure wrapping the *existing* table.
+Each converted section renders: heading → KPI(s) *(kept)* → an **ECharts bar chart** via `<Chart option={…} dark={dark} testId="…" />` → for sections with row detail, a **`<Details>`** disclosure wrapping the *existing* table.
+
+**Accessibility:** dashboard charts are **decorative** (`aria-hidden`, no `aria-label`). The data is conveyed as text by the KPIs and the accessible `<details>` tables (`<th>/<td>` semantics) — stronger and fully-localized for screen readers, versus a terse English chart label. The shared `<Chart>` component renders `aria-hidden` when given no `ariaLabel`, and accepts a `testId` used for test targeting. `CoverageSection` is harmonized to this same pattern.
 
 - **`<Details>`** is a small shared component over the native, accessible `<details><summary>` element — **no JS state, no new lib**. Summary text = `t('common:showDetails')`. Collapsed by default.
 - Bars follow `CoverageSection`'s pattern: a `useMemo`'d `EChartsOption` with a `category` y-axis (labels), a hidden `value` x-axis, and a `bar` series whose per-item `itemStyle.color` comes from the active palette tones. Bar-area height scales with row count (as Coverage does: `Math.max(min, n * rowPx)`).
@@ -72,7 +74,7 @@ All colours from `DARK`/`LIGHT`. Bar `itemStyle.color` = palette tone. Idle chip
 
 ### Testing
 
-- `src/components/dashboard/sections.test.tsx` + `Dashboard.test.tsx`: for each converted section assert (a) a chart renders (`getByRole('img')` / its `aria-label`), (b) a "Show details" disclosure exists where applicable, and (c) the existing table content now lives **inside** the details element. Move current table-content assertions into the details. Add a `Details.test.tsx` for the disclosure (collapsed by default, summary label, expands).
+- `src/components/dashboard/sections.test.tsx` + `Dashboard.test.tsx`: for each converted section assert (a) a chart renders (via `getByTestId` — charts are decorative, not role/label), (b) a "Show details" disclosure exists where applicable, and (c) the existing table content now lives **inside** the details element. Where a label appears on both the chart axis and the table, use `getAllByText` (length ≥ 1). Add a `Details.test.tsx` for the disclosure (collapsed by default, summary label, children present).
 - Keep the suite green; both themes exercised where the existing tests already do.
 
 ## Rollout
