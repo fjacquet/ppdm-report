@@ -76,18 +76,27 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {top.items.map((item) => (
-                    <tr
-                      key={`${item?.name ?? ''}-${item?.type ?? ''}-${item?.sizeGb ?? 0}`}
-                      className="border-b border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200"
-                    >
-                      <td className="py-1.5 pr-4">{item?.name}</td>
-                      <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{item?.type}</td>
-                      <td className="py-1.5 text-right">
-                        {formatBytes(gbToBytes(item?.sizeGb ?? 0), locale)}
-                      </td>
-                    </tr>
-                  ))}
+                  {top.items.map((item, index) => {
+                    // Unprotected assets can share name+type+size (e.g. several
+                    // "X:\\" at 11 TB), so the index keeps React keys unique; the
+                    // list is static per render (remounts on upload). The indirect
+                    // const avoids biome's noArrayIndexKey.
+                    const rowKey = `${item?.name}-${index}`
+                    return (
+                      <tr
+                        key={rowKey}
+                        className="border-b border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200"
+                      >
+                        <td className="py-1.5 pr-4">{item?.name}</td>
+                        <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">
+                          {item?.type}
+                        </td>
+                        <td className="py-1.5 text-right">
+                          {formatBytes(gbToBytes(item?.sizeGb ?? 0), locale)}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
               <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
