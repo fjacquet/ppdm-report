@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
-import '../../i18n'
+import { cleanup, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { ExecutiveKpis } from './ExecutiveKpis'
 
@@ -58,30 +58,38 @@ const fixture: ReportView = {
 }
 
 describe('ExecutiveKpis', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
   it('renders coverage percent', () => {
     render(<ExecutiveKpis view={fixture} />)
-    // fmtPercent(0.714, 'fr-FR') → "71,4 %" — use a partial text match
-    expect(screen.getByText(/71/)).toBeInTheDocument()
+    // fmtPercent(0.714, 'en') → "71.4%"
+    expect(screen.getByText('71.4%')).toBeInTheDocument()
   })
 
   it('renders unprotected capacity in TB', () => {
     render(<ExecutiveKpis view={fixture} />)
-    // formatBytes(263000 * 1e9, 'fr-FR') → "263,0 TB"
-    expect(screen.getByText(/263/)).toBeInTheDocument()
-    expect(screen.getAllByText(/TB/).length).toBeGreaterThan(0)
+    // formatBytes(263000 * 1e9, 'en') → "263.0 TB"
+    expect(screen.getByText('263.0 TB')).toBeInTheDocument()
   })
 
   it('renders job success percent', () => {
     render(<ExecutiveKpis view={fixture} />)
-    // fmtPercent(0.93) → "93 %" in fr-FR
-    expect(screen.getByText(/93/)).toBeInTheDocument()
+    // fmtPercent(0.93, 'en') → "93%"
+    expect(screen.getByText('93%')).toBeInTheDocument()
   })
 
   it('renders immutable 0% with bad/red tone class', () => {
     render(<ExecutiveKpis view={fixture} />)
-    // The immutable value should be 0%
-    const immutableValues = screen.getAllByText(/0/)
-    expect(immutableValues.length).toBeGreaterThan(0)
+    // fmtPercent(0, 'en') → "0%" — target specifically by label then assert sibling value
+    const immutableLabel = screen.getByText('Immutable')
+    const valueEl = immutableLabel.previousElementSibling
+    expect(valueEl?.textContent).toBe('0%')
     // The immutable card should have a red border class (bad tone)
     const redBorder = document.querySelector('.border-red-500')
     expect(redBorder).not.toBeNull()

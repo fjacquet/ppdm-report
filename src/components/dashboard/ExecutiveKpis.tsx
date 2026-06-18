@@ -8,12 +8,13 @@ interface ExecutiveKpisProps {
 }
 
 export function ExecutiveKpis({ view }: ExecutiveKpisProps) {
-  const { t } = useTranslation('dashboard')
+  const { t, i18n } = useTranslation('dashboard')
+  const locale = i18n.language
 
-  const coverageValue = fmtPercent(view.coverage.overall.pct)
-  const unprotectedValue = formatBytes(view.gaps.totalCapacityGb * 1e9)
-  const jobSuccessValue = fmtPercent(view.jobs.successPct)
-  const immutableValue = fmtPercent(view.compliance.immutablePct)
+  const coverageValue = fmtPercent(view.coverage.overall.pct, locale)
+  const unprotectedValue = formatBytes(view.gaps.totalCapacityGb * 1e9, locale)
+  const jobSuccessValue = fmtPercent(view.jobs.successPct, locale)
+  const immutableValue = fmtPercent(view.compliance.immutablePct, locale)
 
   const immutableTone = view.compliance.immutablePct === 0 ? 'bad' : 'ok'
 
