@@ -29,9 +29,10 @@ export interface ChartProps {
   dark: boolean
   style?: CSSProperties
   ariaLabel?: string
+  testId?: string
 }
 
-function ChartImpl({ option, dark, style, ariaLabel }: ChartProps) {
+function ChartImpl({ option, dark, style, ariaLabel, testId }: ChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<echarts.ECharts | null>(null)
   const optionRef = useRef(option)
@@ -64,11 +65,15 @@ function ChartImpl({ option, dark, style, ariaLabel }: ChartProps) {
     instanceRef.current?.setOption(option)
   }, [option])
 
+  const ariaProps = ariaLabel
+    ? ({ role: 'img', 'aria-label': ariaLabel } as const)
+    : ({ 'aria-hidden': true } as const)
+
   return (
     <div
       ref={containerRef}
-      role="img"
-      aria-label={ariaLabel}
+      {...ariaProps}
+      data-testid={testId}
       style={style ?? { minHeight: 320, width: '100%' }}
     />
   )

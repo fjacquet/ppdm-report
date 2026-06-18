@@ -156,9 +156,9 @@ describe('CoverageSection', () => {
     expect(screen.getByText('51.7%')).toBeInTheDocument()
   })
 
-  it('renders aria-label on the donut chart', () => {
+  it('renders the donut chart (decorative, found by testid)', () => {
     render(<CoverageSection view={fixture} dark={false} />)
-    expect(screen.getByRole('img', { name: /coverage donut/i })).toBeInTheDocument()
+    expect(screen.getByTestId('coverage-donut')).toBeInTheDocument()
   })
 })
 

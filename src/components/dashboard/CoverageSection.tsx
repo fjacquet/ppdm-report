@@ -133,14 +133,14 @@ export function CoverageSection({ view, dark }: CoverageSectionProps) {
         <Chart
           option={donutOption}
           dark={dark}
-          ariaLabel="coverage donut"
+          testId="coverage-donut"
           style={{ minHeight: 240, width: '100%', flex: '0 0 240px' }}
         />
         {typeNames.length > 0 && (
           <Chart
             option={barOption}
             dark={dark}
-            ariaLabel="coverage per type bars"
+            testId="coverage-bars"
             style={{ minHeight: barHeight, width: '100%' }}
           />
         )}
