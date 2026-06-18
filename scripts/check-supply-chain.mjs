@@ -16,7 +16,7 @@
 // `check:supply-chain` + `prebuild` npm scripts.
 //
 // Exit 0 = clean. Exit 1 = violation (with a clear message).
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 
 export const REQUIRED_XLSX_PIN = 'https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz'
 

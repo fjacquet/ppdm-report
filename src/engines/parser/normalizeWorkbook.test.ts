@@ -1,5 +1,5 @@
-import * as XLSX from 'xlsx'
 import { describe, expect, it } from 'vitest'
+import * as XLSX from 'xlsx'
 import type { Cell } from '../../types/ppdm'
 import { normalizeWorkbook } from './normalizeWorkbook'
 
@@ -22,8 +22,14 @@ describe('normalizeWorkbook', () => {
           ['Project Name', 'WHO'],
           ['Collector Build Version', '27.2.5.278'],
         ],
-        'SQL Databases': [['Asset Name', 'Protection Status'], ['db1', 'PROTECTED']],
-        'Oracle Databases': [['Asset Name', 'Protection Status'], ['N/A', 'N/A']],
+        'SQL Databases': [
+          ['Asset Name', 'Protection Status'],
+          ['db1', 'PROTECTED'],
+        ],
+        'Oracle Databases': [
+          ['Asset Name', 'Protection Status'],
+          ['N/A', 'N/A'],
+        ],
         Copies: cappedRows,
       }),
     )
@@ -31,7 +37,7 @@ describe('normalizeWorkbook', () => {
     expect(result.meta.customer).toBe('WHO')
     expect(result.inUse).toContain('SQL Databases')
     expect(result.idleAgents).toContain('Oracle Databases')
-    expect(result.sheets['SQL Databases']!.rows).toHaveLength(1)
+    expect(result.sheets['SQL Databases']?.rows).toHaveLength(1)
     expect(result.warnings.some((w) => w.includes('Copies'))).toBe(true)
   })
 })

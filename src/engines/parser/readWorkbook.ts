@@ -10,7 +10,7 @@ export function readWorkbook(buf: ArrayBuffer): XLSX.WorkBook {
 /** Convert every worksheet into a SheetData (header row + keyed data rows). */
 export function toSheetData(wb: XLSX.WorkBook): SheetData[] {
   return wb.SheetNames.map((name) => {
-    const ws = wb.Sheets[name]!
+    const ws = wb.Sheets[name] ?? ({} as XLSX.WorkSheet)
     const aoa = XLSX.utils.sheet_to_json<Cell[]>(ws, {
       header: 1,
       blankrows: false,

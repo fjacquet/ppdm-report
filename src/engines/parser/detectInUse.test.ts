@@ -8,7 +8,9 @@ function sheet(name: string, rows: SheetData['rows']): SheetData {
 
 describe('sheetIsInUse', () => {
   it('is false when every row is an N/A placeholder', () => {
-    expect(sheetIsInUse(sheet('Oracle Databases', [{ 'Asset Name': 'N/A', Status: 'N/A' }]))).toBe(false)
+    expect(sheetIsInUse(sheet('Oracle Databases', [{ 'Asset Name': 'N/A', Status: 'N/A' }]))).toBe(
+      false,
+    )
   })
 
   it('is false when there are no data rows', () => {

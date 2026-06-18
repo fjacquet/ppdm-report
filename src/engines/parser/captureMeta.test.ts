@@ -1,5 +1,5 @@
-import * as XLSX from 'xlsx'
 import { describe, expect, it } from 'vitest'
+import * as XLSX from 'xlsx'
 import type { Cell } from '../../types/ppdm'
 import { captureMeta } from './captureMeta'
 
@@ -29,6 +29,12 @@ describe('captureMeta', () => {
 
   it('returns safe defaults when Details is missing', () => {
     const meta = captureMeta(XLSX.utils.book_new())
-    expect(meta).toEqual({ projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: false })
+    expect(meta).toEqual({
+      projectId: '',
+      customer: '',
+      collectorBuild: '',
+      capturedAt: '',
+      baseTen: false,
+    })
   })
 })

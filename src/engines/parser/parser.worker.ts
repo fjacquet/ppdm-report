@@ -14,7 +14,11 @@ self.onmessage = (e: MessageEvent<ParseRequest>) => {
     const res: ParseResponse = { id, ok: true, result }
     ;(self as unknown as Worker).postMessage(res)
   } catch (err) {
-    const res: ParseResponse = { id, ok: false, error: err instanceof Error ? err.message : String(err) }
+    const res: ParseResponse = {
+      id,
+      ok: false,
+      error: err instanceof Error ? err.message : String(err),
+    }
     ;(self as unknown as Worker).postMessage(res)
   }
 }
