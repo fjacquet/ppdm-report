@@ -1,5 +1,7 @@
 # ppdm-report
 
+[![CI](https://github.com/fjacquet/ppdm-report/actions/workflows/ci.yml/badge.svg)](https://github.com/fjacquet/ppdm-report/actions/workflows/ci.yml)
+
 Drop a Dell Live Optics PPDM `.xlsx` extract and get a professional, multilingual dashboard with one-click PPTX and HTML export — 100% client-side. Your workbook never leaves the browser.
 
 ---
