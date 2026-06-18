@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Dashboard } from './components/dashboard/Dashboard'
+import { ExportButtons } from './components/ExportButtons'
 import { FlavorToggle } from './components/FlavorToggle'
 import { LanguageToggle } from './components/LanguageToggle'
 import { ThemeToggle } from './components/ThemeToggle'
@@ -21,6 +22,7 @@ export default function App() {
           <FlavorToggle />
           <LanguageToggle />
           <ThemeToggle />
+          <ExportButtons />
         </div>
       </header>
       <main className="space-y-6 p-6">

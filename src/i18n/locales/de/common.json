@@ -22,6 +22,10 @@
     "assessment": "Bewertung",
     "ops": "Betrieb"
   },
+  "export": {
+    "pptx": "PPTX exportieren",
+    "html": "HTML exportieren"
+  },
   "col": {
     "name": "Name",
     "type": "Typ",

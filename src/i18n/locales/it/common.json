@@ -22,6 +22,10 @@
     "assessment": "Valutazione",
     "ops": "Operazioni"
   },
+  "export": {
+    "pptx": "Esporta PPTX",
+    "html": "Esporta HTML"
+  },
   "col": {
     "name": "Nome",
     "type": "Tipo",
