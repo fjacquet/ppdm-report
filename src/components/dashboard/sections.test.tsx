@@ -2,10 +2,13 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
+import { CapacitySection } from './CapacitySection'
 import { CoverageSection } from './CoverageSection'
 import { ExecutiveKpis } from './ExecutiveKpis'
 import { GapsSection } from './GapsSection'
 import { IdleAgentsSection } from './IdleAgentsSection'
+import { JobsComplianceSection } from './JobsComplianceSection'
+import { PoliciesSection } from './PoliciesSection'
 
 const fixture: ReportView = {
   meta: {
@@ -224,5 +227,147 @@ describe('IdleAgentsSection', () => {
     const view: ReportView = { ...fixture, idleAgents: [] }
     const { container } = render(<IdleAgentsSection view={view} />)
     expect(container).toBeEmptyDOMElement()
+  })
+})
+
+const jobsComplianceFixture: ReportView = {
+  ...fixture,
+  jobs: {
+    counts: { SUCCESS: 9297, RETRIED: 635 },
+    total: 10000,
+    successPct: 0.93,
+    capped: true,
+    windowSize: 10000,
+  },
+  compliance: {
+    appConsistentPct: 0.77,
+    immutablePct: 0,
+    replicatedPct: 0.32,
+    capped: true,
+    windowSize: 10000,
+    backupLevelMix: {},
+  },
+}
+
+describe('JobsComplianceSection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it('renders job success percent "93%"', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} />)
+    expect(screen.getByText('93%')).toBeInTheDocument()
+  })
+
+  it('renders the jobs capped caveat containing the window size', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} />)
+    // common:capped with n=10000 → "Based on most recent 10,000 — a window, not the full set"
+    const cappedEls = screen.getAllByText(/10[,.]?000/)
+    expect(cappedEls.length).toBeGreaterThan(0)
+  })
+
+  it('renders immutable "0%" with a bad/red tone class', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} />)
+    expect(screen.getByText('0%')).toBeInTheDocument()
+    const redBorder = document.querySelector('.border-red-500, .border-red-400')
+    expect(redBorder).not.toBeNull()
+  })
+
+  it('renders compliance capped caveat', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} />)
+    const cappedEls = screen.getAllByText(/window, not the full set/i)
+    expect(cappedEls.length).toBeGreaterThan(0)
+  })
+})
+
+const capacityFixture: ReportView = {
+  ...fixture,
+  capacity: {
+    targets: [{ name: 'dd1', type: 'DATA_DOMAIN_SYSTEM', utilizationPct: 87.6, flagged: true }],
+    flagged: [{ name: 'dd1', type: 'DATA_DOMAIN_SYSTEM', utilizationPct: 87.6, flagged: true }],
+    mtreeCount: 17,
+  },
+}
+
+describe('CapacitySection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it('renders target name "dd1"', () => {
+    render(<CapacitySection view={capacityFixture} />)
+    expect(screen.getByText('dd1')).toBeInTheDocument()
+  })
+
+  it('renders utilization "87.6 %"', () => {
+    render(<CapacitySection view={capacityFixture} />)
+    expect(screen.getByText('87.6 %')).toBeInTheDocument()
+  })
+
+  it('renders flagged row with a warn/bad tone class', () => {
+    render(<CapacitySection view={capacityFixture} />)
+    const flaggedRow = document.querySelector('[data-flagged="true"]')
+    expect(flaggedRow).not.toBeNull()
+    expect(flaggedRow?.className).toMatch(/amber|red|warn/)
+  })
+
+  it('renders mtree count "17"', () => {
+    render(<CapacitySection view={capacityFixture} />)
+    expect(screen.getByText(/17/)).toBeInTheDocument()
+  })
+})
+
+const policiesFixture: ReportView = {
+  ...fixture,
+  policies: {
+    count: 32,
+    byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 },
+    perPolicy: [
+      {
+        name: 'SQL - Prod',
+        purpose: 'CENTRALIZED',
+        assetCount: 380,
+        protectionCapacityGb: 1234.5,
+      },
+    ],
+  },
+}
+
+describe('PoliciesSection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it('renders total policy count "32"', () => {
+    render(<PoliciesSection view={policiesFixture} />)
+    expect(screen.getByText('32')).toBeInTheDocument()
+  })
+
+  it('renders purpose tally "CENTRALIZED"', () => {
+    render(<PoliciesSection view={policiesFixture} />)
+    const els = screen.getAllByText('CENTRALIZED')
+    expect(els.length).toBeGreaterThan(0)
+  })
+
+  it('renders purpose tally count "29"', () => {
+    render(<PoliciesSection view={policiesFixture} />)
+    expect(screen.getByText('29')).toBeInTheDocument()
+  })
+
+  it('renders policy name "SQL - Prod"', () => {
+    render(<PoliciesSection view={policiesFixture} />)
+    expect(screen.getByText('SQL - Prod')).toBeInTheDocument()
   })
 })
