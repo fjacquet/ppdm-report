@@ -1,73 +1,105 @@
 import { describe, expect, it } from 'vitest'
-import type { ExportModel } from '../types'
+import i18n from '../../../i18n'
+import type { ReportView } from '../../../types/reportView'
+import { buildExportModel } from '../buildExportModel'
 import { assembleHtml } from './assembleHtml'
 
-const model: ExportModel = {
-  title: 'PPDM Report',
-  customer: 'WHO',
-  subtitle: 'Assessment · 2026-06-15',
-  execTitle: 'Executive summary',
-  locale: 'en',
-  kpis: [
-    { label: 'Coverage', value: '71.4%', tone: 'ok' },
-    { label: 'Immutable', value: '0%', tone: 'bad' },
-  ],
-  sections: [
-    {
-      id: 'coverage',
-      title: 'Asset Coverage',
-      chart: {
-        kind: 'pie',
-        slices: [
-          { name: 'Protected', value: 703, color: '#16a34a' },
-          { name: 'Unprotected', value: 281, color: '#dc2626' },
-        ],
-      },
-      notes: ['71.4% of assets protected'],
-    },
-    {
-      id: 'gaps',
-      title: 'Protection Gaps',
-      table: {
-        columns: ['Name', 'Type', 'Size'],
-        rows: [['HR_PAYROLL', 'MSSQL', '842.6 GB']],
-        caption: 'Top 1 of 281',
+const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, o) as string
+
+const view: ReportView = {
+  meta: {
+    projectId: '1',
+    customer: 'WHO',
+    collectorBuild: '27.2.5.278',
+    capturedAt: '2026-06-15T00:00:00.000Z',
+    baseTen: true,
+  },
+  inUse: ['SQL Databases'],
+  idleAgents: ['Oracle Databases', 'NAS'],
+  warnings: [],
+  coverage: {
+    byType: {
+      'SQL Databases': {
+        protected: 380,
+        unprotected: 150,
+        excluded: 224,
+        pct: 0.717,
+        pctInclExcluded: 0.504,
       },
     },
-    {
-      id: 'jobs',
-      title: 'Job Activity',
-      notes: ['Based on most recent 10,000 — a window, not the full set'],
+    overall: {
+      protected: 703,
+      unprotected: 281,
+      excluded: 377,
+      pct: 0.714,
+      pctInclExcluded: 0.517,
     },
-  ],
-  footer: 'WHO · 27.2.5.278 · 2026-06-15 · base-10 units',
+  },
+  gaps: {
+    count: 281,
+    totalCapacityGb: 263000,
+    top: { items: [{ name: 'HR_PAYROLL', type: 'MSSQL', sizeGb: 842.6 }], total: 281, shown: 1 },
+  },
+  jobs: {
+    counts: { SUCCESS: 9297, RETRIED: 635 },
+    total: 10000,
+    successPct: 0.93,
+    capped: true,
+    windowSize: 10000,
+  },
+  compliance: {
+    appConsistentPct: 0.77,
+    immutablePct: 0,
+    replicatedPct: 0.32,
+    backupLevelMix: {},
+    windowSize: 10000,
+    capped: true,
+  },
+  capacity: {
+    targets: [{ name: 'dd1', type: 'DATA_DOMAIN_SYSTEM', utilizationPct: 87.6, flagged: true }],
+    flagged: [{ name: 'dd1', type: 'DATA_DOMAIN_SYSTEM', utilizationPct: 87.6, flagged: true }],
+    mtreeCount: 17,
+  },
+  policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
 }
 
-describe('assembleHtml', () => {
-  it('produces a self-contained HTML document with a CSP meta and no scripts', () => {
-    const html = assembleHtml(model, 'light')
+const model = (locale = 'en') => buildExportModel(view, 'assessment', 'light', t, locale)
+
+describe('assembleHtml (deck)', () => {
+  it('produces a self-contained HTML document with a CSP meta and no scripts', async () => {
+    await i18n.changeLanguage('en')
+    const html = assembleHtml(model(), 'light')
     expect(html.startsWith('<!doctype html>')).toBe(true)
     expect(html).toContain('Content-Security-Policy')
     expect(html).not.toContain('<script')
   })
 
-  it('renders customer, KPIs, the coverage note, the gaps caption and the capped caveat', () => {
-    const html = assembleHtml(model, 'light')
+  it('renders deck visuals (bars, donut, posture, tiles) and drops data tables', async () => {
+    await i18n.changeLanguage('en')
+    const html = assembleHtml(model(), 'light')
     expect(html).toContain('WHO')
-    expect(html).toContain('71.4%')
-    expect(html).toContain('Top 1 of 281')
-    expect(html).toContain('a window, not the full set')
-    expect(html).toContain('HR_PAYROLL')
+    expect(html).toContain('class="bars"')
+    expect(html).toContain('class="donut"')
+    expect(html).toContain('class="posture"')
+    expect(html).toContain('class="tiles"')
+    expect(html).toContain('Oracle Databases') // complete idle tile list
+    expect(html).not.toContain('<table') // tables are gone
   })
 
-  it('theme-matches the background (light vs dark differ)', () => {
-    expect(assembleHtml(model, 'light')).toContain('#ffffff')
-    expect(assembleHtml(model, 'dark')).toContain('#0b1220')
+  it('theme-matches the background (light vs dark differ)', async () => {
+    await i18n.changeLanguage('en')
+    const m = model()
+    expect(assembleHtml(m, 'light')).toContain('#ffffff')
+    expect(assembleHtml(m, 'dark')).toContain('#0b1220')
   })
 
-  it('escapes user-supplied text', () => {
-    const evil: ExportModel = { ...model, customer: '<img src=x onerror=alert(1)>' }
-    const html = assembleHtml(evil, 'light')
+  it('escapes user-supplied text', async () => {
+    await i18n.changeLanguage('en')
+    const evil: ReportView = {
+      ...view,
+      meta: { ...view.meta, customer: '<img src=x onerror=alert(1)>' },
+    }
+    const html = assembleHtml(buildExportModel(evil, 'assessment', 'light', t, 'en'), 'light')
     expect(html).not.toContain('<img src=x')
     expect(html).toContain('&lt;img src=x')
   })
