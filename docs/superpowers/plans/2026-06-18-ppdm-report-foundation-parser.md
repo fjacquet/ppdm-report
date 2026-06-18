@@ -59,10 +59,12 @@ src/test/setup.ts                              # COPIED from vatlas (jest-dom)
 ### Task 1: Initialize the project
 
 **Files:**
+
 - Create: `package.json`, `vite.config.ts`, `vitest.config.ts`, `biome.json`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `tsconfig.test.json`, `index.html`, `src/main.tsx`, `src/App.tsx`, `src/index.css`, `src/test/setup.ts`, `src/vite-env.d.ts`
 - Copy from vatlas: `scripts/check-supply-chain.mjs`
 
 **Interfaces:**
+
 - Produces: a runnable Vite app and a green `npm run test:run`.
 
 - [ ] **Step 1: Create `package.json`**
@@ -113,6 +115,7 @@ src/test/setup.ts                              # COPIED from vatlas (jest-dom)
 - [ ] **Step 2: Copy the reusable config files from vatlas, adapting names**
 
 Copy each file from `/Users/fjacquet/Projects/vatlas/` to the same relative path here, then adapt:
+
 - `biome.json` — copy verbatim.
 - `vitest.config.ts` — copy; keep `environment: 'jsdom'`, `setupFiles: ['./src/test/setup.ts']`, `globals: true`; in `coverage.include` set `['src/engines/**', 'src/utils/**', 'src/privacy/**']` and thresholds `{ lines: 75, functions: 75, branches: 75, statements: 75 }`.
 - `vite.config.ts` — copy, but **remove** any PWA / EOS / bundle-size plugins and the `base` path; keep the React + Tailwind plugins. Minimal target:
@@ -135,6 +138,7 @@ export default defineConfig({
 - [ ] **Step 3: Create `index.html`, `src/index.css`, `src/vite-env.d.ts`**
 
 `index.html`:
+
 ```html
 <!doctype html>
 <html lang="en">
@@ -151,6 +155,7 @@ export default defineConfig({
 ```
 
 `src/index.css`:
+
 ```css
 @import 'tailwindcss';
 
@@ -159,6 +164,7 @@ body { margin: 0; }
 ```
 
 `src/vite-env.d.ts`:
+
 ```ts
 /// <reference types="vite/client" />
 ```
@@ -166,6 +172,7 @@ body { margin: 0; }
 - [ ] **Step 4: Create `src/main.tsx` and `src/App.tsx`**
 
 `src/main.tsx` (fetchGuard added in Task 2; for now just render):
+
 ```tsx
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -180,6 +187,7 @@ createRoot(document.getElementById('root') as HTMLElement).render(
 ```
 
 `src/App.tsx`:
+
 ```tsx
 export default function App() {
   return <main style={{ padding: 24 }}><h1>PPDM Report</h1></main>
@@ -189,6 +197,7 @@ export default function App() {
 - [ ] **Step 5: Create a smoke test so `test:run` is green**
 
 `src/App.test.tsx`:
+
 ```tsx
 import { render, screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
@@ -224,10 +233,12 @@ git commit -m "chore: scaffold ppdm-report (vatlas stack) with CI supply-chain g
 ### Task 2: Privacy fetch guard
 
 **Files:**
+
 - Create: `src/privacy/fetchGuard.ts`, `src/privacy/fetchGuard.test.ts`
 - Modify: `src/main.tsx`
 
 **Interfaces:**
+
 - Produces: side-effect module installing a synchronous-throwing guard on non-same-origin `fetch`/`XHR`/`WebSocket`/`sendBeacon`. No exports needed by callers.
 
 - [ ] **Step 1: Copy the guard and its test from vatlas**
@@ -242,6 +253,7 @@ Expected: PASS (all guard tests).
 - [ ] **Step 3: Import the guard FIRST in `src/main.tsx`**
 
 Add as the very first import (before React), so it installs before any code can make a request:
+
 ```tsx
 import './privacy/fetchGuard'
 import { StrictMode } from 'react'
@@ -263,9 +275,11 @@ git commit -m "feat: add same-origin privacy fetch guard (reused from vatlas)"
 ### Task 3: Locale-aware formatting helpers
 
 **Files:**
+
 - Create: `src/utils/format.ts`, `src/utils/format.test.ts`
 
 **Interfaces:**
+
 - Produces: `formatNumber(n: number, locale: string): string`, `formatBytes`/`formatDate` as present in the vatlas source. Used later by `captureMeta` display and engines.
 
 - [ ] **Step 1: Copy `format.ts` and its test from vatlas**
@@ -291,9 +305,11 @@ git commit -m "feat: add locale-aware base-10 format helpers (reused from vatlas
 ### Task 4: Domain types and constants
 
 **Files:**
+
 - Create: `src/types/ppdm.ts`
 
 **Interfaces:**
+
 - Produces: `Cell`, `ProtectionStatus`, `SheetData`, `CaptureMeta`, `ParsedWorkbook`, `AGENT_SHEETS`, `LIVE_OPTICS_ROW_CAP`. Consumed by every parser file and the store.
 
 - [ ] **Step 1: Write `src/types/ppdm.ts`**
@@ -376,14 +392,17 @@ git commit -m "feat: add PPDM domain types and agent-sheet constants"
 ### Task 5: Excel serial date → ISO
 
 **Files:**
+
 - Create: `src/engines/parser/serialToIso.ts`, `src/engines/parser/serialToIso.test.ts`
 
 **Interfaces:**
+
 - Produces: `serialToIso(serial: number): string` (ISO-8601 UTC). Consumed by `captureMeta`.
 
 - [ ] **Step 1: Write the failing test**
 
 `src/engines/parser/serialToIso.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest'
 import { serialToIso } from './serialToIso'
@@ -412,6 +431,7 @@ Expected: FAIL ("serialToIso is not a function" / module not found).
 - [ ] **Step 3: Write the implementation**
 
 `src/engines/parser/serialToIso.ts`:
+
 ```ts
 /** Days between the Excel epoch (1899-12-30) and the Unix epoch (1970-01-01). */
 const EXCEL_UNIX_OFFSET_DAYS = 25569
@@ -439,15 +459,18 @@ git commit -m "feat: add Excel serial date to ISO converter"
 ### Task 6: Read workbook → SheetData
 
 **Files:**
+
 - Create: `src/engines/parser/readWorkbook.ts`, `src/engines/parser/readWorkbook.test.ts`
 
 **Interfaces:**
+
 - Consumes: `SheetData`, `LIVE_OPTICS_ROW_CAP`, `Cell` from `types/ppdm`.
 - Produces: `readWorkbook(buf: ArrayBuffer): XLSX.WorkBook`, `toSheetData(wb: XLSX.WorkBook): SheetData[]`, `parseXlsx(buf: ArrayBuffer): SheetData[]`. Consumed by `captureMeta` and `normalizeWorkbook`. **This is an xlsx import site.**
 
 - [ ] **Step 1: Write the failing test**
 
 `src/engines/parser/readWorkbook.test.ts`:
+
 ```ts
 import * as XLSX from 'xlsx'
 import { describe, expect, it } from 'vitest'
@@ -499,6 +522,7 @@ Expected: FAIL (module not found).
 - [ ] **Step 3: Write the implementation**
 
 `src/engines/parser/readWorkbook.ts`:
+
 ```ts
 import * as XLSX from 'xlsx'
 import type { Cell, SheetData } from '../../types/ppdm'
@@ -552,15 +576,18 @@ git commit -m "feat: parse xlsx workbook into typed sheet data with cap flag"
 ### Task 7: In-use detection (N/A-placeholder rule)
 
 **Files:**
+
 - Create: `src/engines/parser/detectInUse.ts`, `src/engines/parser/detectInUse.test.ts`
 
 **Interfaces:**
+
 - Consumes: `SheetData`, `AGENT_SHEETS` from `types/ppdm`.
 - Produces: `sheetIsInUse(sheet: SheetData): boolean`, `classifyAgents(sheets: SheetData[]): { inUse: string[]; idleAgents: string[] }`. Consumed by `normalizeWorkbook`. **Pure — no xlsx import.**
 
 - [ ] **Step 1: Write the failing test**
 
 `src/engines/parser/detectInUse.test.ts`:
+
 ```ts
 import { describe, expect, it } from 'vitest'
 import type { SheetData } from '../../types/ppdm'
@@ -611,6 +638,7 @@ Expected: FAIL (module not found).
 - [ ] **Step 3: Write the implementation**
 
 `src/engines/parser/detectInUse.ts`:
+
 ```ts
 import type { Cell, SheetData } from '../../types/ppdm'
 import { AGENT_SHEETS } from '../../types/ppdm'
@@ -657,15 +685,18 @@ git commit -m "feat: detect in-use vs idle agent sheets via N/A-placeholder rule
 ### Task 8: Capture metadata from the Details sheet
 
 **Files:**
+
 - Create: `src/engines/parser/captureMeta.ts`, `src/engines/parser/captureMeta.test.ts`
 
 **Interfaces:**
+
 - Consumes: `CaptureMeta` from `types/ppdm`, `readWorkbook` from `./readWorkbook`, `serialToIso` from `./serialToIso`, `zod`.
 - Produces: `captureMeta(wb: XLSX.WorkBook): CaptureMeta`. Consumed by `normalizeWorkbook`. **xlsx import site.**
 
 - [ ] **Step 1: Write the failing test**
 
 `src/engines/parser/captureMeta.test.ts`:
+
 ```ts
 import * as XLSX from 'xlsx'
 import { describe, expect, it } from 'vitest'
@@ -711,6 +742,7 @@ Expected: FAIL (module not found).
 - [ ] **Step 3: Write the implementation**
 
 `src/engines/parser/captureMeta.ts`:
+
 ```ts
 import * as XLSX from 'xlsx'
 import { z } from 'zod'
@@ -767,15 +799,18 @@ git commit -m "feat: extract capture metadata from the Details sheet (Zod-valida
 ### Task 9: Compose the normalized workbook
 
 **Files:**
+
 - Create: `src/engines/parser/normalizeWorkbook.ts`, `src/engines/parser/normalizeWorkbook.test.ts`
 
 **Interfaces:**
+
 - Consumes: `readWorkbook`/`toSheetData`, `classifyAgents`, `captureMeta`, types + `LIVE_OPTICS_ROW_CAP`.
 - Produces: `normalizeWorkbook(buf: ArrayBuffer): ParsedWorkbook`. Consumed by the worker and store. **xlsx import site (via readWorkbook).**
 
 - [ ] **Step 1: Write the failing test**
 
 `src/engines/parser/normalizeWorkbook.test.ts`:
+
 ```ts
 import * as XLSX from 'xlsx'
 import { describe, expect, it } from 'vitest'
@@ -824,6 +859,7 @@ Expected: FAIL (module not found).
 - [ ] **Step 3: Write the implementation**
 
 `src/engines/parser/normalizeWorkbook.ts`:
+
 ```ts
 import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
 import { LIVE_OPTICS_ROW_CAP } from '../../types/ppdm'
@@ -868,15 +904,18 @@ git commit -m "feat: compose normalized PPDM workbook with classification and ca
 ### Task 10: Worker and main-thread surface
 
 **Files:**
+
 - Create: `src/engines/parser/parser.worker.ts`, `src/engines/parser/parseInWorker.ts`
 
 **Interfaces:**
+
 - Consumes: `normalizeWorkbook`, `ParsedWorkbook`.
 - Produces: `parseInWorker(file: File): Promise<ParsedWorkbook>`. Consumed by `useReportUpload`. The worker is the only place besides parser modules where xlsx executes; it posts the plain `ParsedWorkbook` back and never the raw workbook.
 
 - [ ] **Step 1: Write the worker**
 
 `src/engines/parser/parser.worker.ts`:
+
 ```ts
 import '../../privacy/fetchGuard'
 import type { ParsedWorkbook } from '../../types/ppdm'
@@ -903,6 +942,7 @@ self.onmessage = (e: MessageEvent<ParseRequest>) => {
 - [ ] **Step 2: Write the main-thread surface**
 
 `src/engines/parser/parseInWorker.ts` (no xlsx import here — keeps the main bundle clean):
+
 ```ts
 import type { ParsedWorkbook } from '../../types/ppdm'
 import type { ParseRequest, ParseResponse } from './parser.worker'
@@ -956,15 +996,18 @@ git commit -m "feat: run PPDM parsing in a web worker with a promise surface"
 ### Task 11: Inputs-only report store
 
 **Files:**
+
 - Create: `src/store/reportStore.ts`, `src/store/reportStore.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ParsedWorkbook`, `zustand`.
 - Produces: `useReportStore` with state `{ workbook: ParsedWorkbook | null; setWorkbook(wb): void; clear(): void }`. Consumed by `useReportUpload` and the UI. **Inputs only — no derived metrics.**
 
 - [ ] **Step 1: Write the failing test**
 
 `src/store/reportStore.test.ts`:
+
 ```ts
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { ParsedWorkbook } from '../types/ppdm'
@@ -1002,6 +1045,7 @@ Expected: FAIL (module not found).
 - [ ] **Step 3: Write the implementation**
 
 `src/store/reportStore.ts`:
+
 ```ts
 import { create } from 'zustand'
 import type { ParsedWorkbook } from '../types/ppdm'
@@ -1034,15 +1078,18 @@ git commit -m "feat: add inputs-only report store"
 ### Task 12: Upload hook
 
 **Files:**
+
 - Create: `src/hooks/useReportUpload.ts`
 
 **Interfaces:**
+
 - Consumes: `parseInWorker`, `useReportStore`.
 - Produces: `useReportUpload(): { upload(file: File): Promise<void>; busy: boolean; error: string | null }`. Consumed by `UploadZone`.
 
 - [ ] **Step 1: Write the hook**
 
 `src/hooks/useReportUpload.ts`:
+
 ```ts
 import { useState } from 'react'
 import { parseInWorker } from '../engines/parser/parseInWorker'
@@ -1085,16 +1132,19 @@ git commit -m "feat: add report upload hook (file -> worker -> store)"
 ### Task 13: Upload zone, debug inventory, and wiring
 
 **Files:**
+
 - Create: `src/components/UploadZone.tsx`, `src/components/DebugInventory.tsx`
 - Modify: `src/App.tsx`
 
 **Interfaces:**
+
 - Consumes: `useReportUpload`, `useReportStore`, `AGENT_SHEETS`.
 - Produces: a working UI. End-to-end manual verification target.
 
 - [ ] **Step 1: Write `UploadZone`**
 
 `src/components/UploadZone.tsx`:
+
 ```tsx
 import type { ChangeEvent } from 'react'
 import { useReportUpload } from '../hooks/useReportUpload'
@@ -1124,6 +1174,7 @@ export function UploadZone() {
 - [ ] **Step 2: Write `DebugInventory`**
 
 `src/components/DebugInventory.tsx`:
+
 ```tsx
 import { useReportStore } from '../store/reportStore'
 
@@ -1175,6 +1226,7 @@ export function DebugInventory() {
 - [ ] **Step 3: Wire into `App.tsx`**
 
 `src/App.tsx`:
+
 ```tsx
 import { DebugInventory } from './components/DebugInventory'
 import { UploadZone } from './components/UploadZone'
@@ -1200,6 +1252,7 @@ Expected: PASS.
 
 Run: `npm run dev`
 Open the served URL, choose `ref/PPDM.xlsx`, and confirm:
+
 - Header shows `WHO — collector 27.2.5.278`, captured `2026-06-15`.
 - "Agents in use: **5** · idle: **13**".
 - The `Copies` and `Protection Job Activities` rows show **⚠️ yes** under Capped, and two cap warnings appear.
@@ -1226,6 +1279,8 @@ git commit -m "feat: add upload zone and debug inventory; wire end-to-end parsin
 - **Type consistency:** `ParsedWorkbook`/`SheetData`/`CaptureMeta` defined in T4 and used identically in T6–T13; `parseInWorker(file): Promise<ParsedWorkbook>`, `classifyAgents → { inUse, idleAgents }`, store `{ workbook, setWorkbook, clear }` consistent across consumers.
 
 ## Next plans
+
 - **Plan 2 — Metric engines:** `topN` helper, `coverage`, `gaps`, `jobs`, `compliance`, `capacity`, `policies`, `agents`, `reportView` composition root, `useReportView` bridge hook, branded `units`. (Reads the `ParsedWorkbook` from this plan.)
 - **Plan 3 — Dashboard + exports + i18n:** lean scrollable dashboard, flavor/theme/language toggles, dual-theme PPTX (pptxgenjs) following the live web theme, HTML export, and fr/de/it/en locale files with a key-parity test.
+
 ```

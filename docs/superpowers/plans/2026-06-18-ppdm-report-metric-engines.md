@@ -44,6 +44,7 @@ src/hooks/useReportView.ts (+ .test.ts)          # the single useMemo: store →
 **Files:** Create `src/types/reportView.ts`
 
 **Interfaces:**
+
 - Consumes: `ProtectionStatus`, `CaptureMeta` from `./ppdm`.
 - Produces: all result types below. Consumed by every engine + the hook.
 
@@ -155,6 +156,7 @@ export interface ReportView {
 **Files:** Create `src/engines/aggregation/rows.ts`, `src/engines/aggregation/rows.test.ts`
 
 **Interfaces:**
+
 - Produces: `cellStr(row, key): string`, `cellNum(row, key): number`, `countBy(rows, key): Record<string, number>`. Consumed by all engines.
 
 - [ ] **Step 1: Write the failing test** `src/engines/aggregation/rows.test.ts`
@@ -231,6 +233,7 @@ export function countBy(rows: Row[], key: string): Record<string, number> {
 **Files:** Create `src/engines/aggregation/topN.ts`, `src/engines/aggregation/topN.test.ts`
 
 **Interfaces:**
+
 - Produces: `topN<T>(items: T[], n: number, score: (t: T) => number): TopList<T>` (descending by score). Consumed by `gaps` and later slides.
 
 - [ ] **Step 1: Write the failing test** `src/engines/aggregation/topN.test.ts`
@@ -287,6 +290,7 @@ export function topN<T>(items: T[], n: number, score: (t: T) => number): TopList
 **Files:** Create `src/engines/aggregation/coverage.ts`, `src/engines/aggregation/coverage.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ParsedWorkbook`, `AGENT_SHEETS` from `../../types/ppdm`; `cellStr` from `./rows`; `Coverage`/`CoverageBand` from `../../types/reportView`.
 - Produces: `computeCoverage(wb: ParsedWorkbook): Coverage`. Counts only `wb.inUse` sheets; reads each row's `Protection Status` ∈ {PROTECTED, UNPROTECTED, EXCLUDED}.
 
@@ -407,6 +411,7 @@ export function computeCoverage(wb: ParsedWorkbook): Coverage {
 **Files:** Create `src/engines/aggregation/gaps.ts`, `src/engines/aggregation/gaps.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ParsedWorkbook`; `cellStr`/`cellNum` from `./rows`; `topN` from `./topN`; `Gaps`/`UnprotectedAsset` from `../../types/reportView`.
 - Produces: `findGaps(wb: ParsedWorkbook, n = 25): Gaps`. Reads the `Unprotected Assets` sheet (`Name`, `Type`, `Size (GB)`).
 
@@ -492,6 +497,7 @@ export function findGaps(wb: ParsedWorkbook, n = 25): Gaps {
 **Files:** Create `src/engines/aggregation/jobs.ts`, `src/engines/aggregation/jobs.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ParsedWorkbook`; `countBy` from `./rows`; `Jobs` from `../../types/reportView`.
 - Produces: `computeJobs(wb): Jobs`. Reads `Protection Job Activities` (`Result` column). `successPct = SUCCESS / total`. `capped`/`windowSize` from the sheet.
 
@@ -583,6 +589,7 @@ export function computeJobs(wb: ParsedWorkbook): Jobs {
 **Files:** Create `src/engines/aggregation/compliance.ts`, `src/engines/aggregation/compliance.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ParsedWorkbook`; `cellStr`/`countBy` from `./rows`; `Compliance` from `../../types/reportView`.
 - Produces: `computeCompliance(wb): Compliance`. Reads `Copies`: `Data Consistency` (APPLICATION_CONSISTENT), `Lock Status` (immutable = anything other than `ALL_COPIES_UNLOCKED`), `Replica` (`True`), `Backup Level` mix. Percentages over the window; `capped`/`windowSize` from the sheet.
 
@@ -695,6 +702,7 @@ export function computeCompliance(wb: ParsedWorkbook): Compliance {
 **Files:** Create `src/engines/aggregation/capacity.ts`, `src/engines/aggregation/capacity.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ParsedWorkbook`; `cellStr`/`cellNum` from `./rows`; `Capacity`/`StorageTarget` from `../../types/reportView`.
 - Produces: `computeCapacity(wb, flagThresholdPct = 80): Capacity`. Reads `Storage Targets` (`Name`, `Type`, `Utilization (%)`) → flag when utilization ≥ threshold and the value is present. `mtreeCount` = data-row count of `Data Domain Mtrees`.
 
@@ -787,6 +795,7 @@ export function computeCapacity(wb: ParsedWorkbook, flagThresholdPct = 80): Capa
 **Files:** Create `src/engines/aggregation/policies.ts`, `src/engines/aggregation/policies.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ParsedWorkbook`; `cellStr`/`cellNum`/`countBy` from `./rows`; `Policies`/`PolicyRow` from `../../types/reportView`.
 - Produces: `summarizePolicies(wb): Policies`. Reads `Policies` (`Name`, `Purpose`, `Number of Assets`, `Total Asset Protection Capacity (GB)`).
 
@@ -859,6 +868,7 @@ export function summarizePolicies(wb: ParsedWorkbook): Policies {
 **Files:** Create `src/engines/aggregation/reportView.ts`, `src/engines/aggregation/reportView.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ParsedWorkbook`; every engine above; `ReportView` from `../../types/reportView`.
 - Produces: `buildReportView(wb: ParsedWorkbook): ReportView`. Pure composition — calls each engine once, passes through `meta`/`inUse`/`idleAgents`/`warnings`.
 
@@ -944,6 +954,7 @@ export function buildReportView(wb: ParsedWorkbook): ReportView {
 **Files:** Create `src/hooks/useReportView.ts`, `src/hooks/useReportView.test.ts`
 
 **Interfaces:**
+
 - Consumes: `useReportStore` (Plan 1), `buildReportView`, `ReportView`.
 - Produces: `useReportView(): ReportView | null`. The ONLY `useMemo` deriving the view from the stored workbook; returns `null` when no workbook is loaded.
 
@@ -1014,8 +1025,10 @@ export function useReportView(): ReportView | null {
 - **Type consistency:** all engines import result types from `src/types/reportView.ts`; `buildReportView` returns `ReportView`; `useReportView` returns `ReportView | null`. `cellStr`/`cellNum`/`countBy` signatures stable across all consumers.
 
 ## Process notes (carried from Plan 1 review)
+
 - Every implementer brief here already lists `lint` + `build` + `coverage` in the gate (Plan 1's lint gap won't recur).
 - Run biome via `rtk proxy node_modules/.bin/biome check .` — the proxy mangles raw `npm run lint` output.
 
-## Next: Plan 3 — Dashboard, dual-theme PPTX/HTML export, i18n (the visible product).
+## Next: Plan 3 — Dashboard, dual-theme PPTX/HTML export, i18n (the visible product)
+
 ```
