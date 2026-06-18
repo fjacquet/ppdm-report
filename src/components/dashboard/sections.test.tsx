@@ -204,18 +204,13 @@ describe('IdleAgentsSection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
+  afterEach(() => cleanup())
 
-  afterEach(() => {
-    cleanup()
-  })
-
-  it('renders "Oracle Databases" when idleAgents is non-empty', () => {
-    const view: ReportView = {
-      ...fixture,
-      idleAgents: ['Oracle Databases', 'SAP HANA Databases'],
-    }
+  it('renders all idle agents as tiles', () => {
+    const view: ReportView = { ...fixture, idleAgents: ['Oracle Databases', 'SAP HANA Databases'] }
     render(<IdleAgentsSection view={view} />)
     expect(screen.getByText('Oracle Databases')).toBeInTheDocument()
+    expect(screen.getByText('SAP HANA Databases')).toBeInTheDocument()
   })
 
   it('renders nothing when idleAgents is empty', () => {
