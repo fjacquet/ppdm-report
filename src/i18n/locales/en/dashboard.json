@@ -1,10 +1,11 @@
 {
+  "execSummary": "Executive summary",
   "coverage": {
     "title": "Asset Coverage",
     "protected": "Protected",
     "unprotected": "Unprotected",
     "excluded": "Excluded",
-    "headline": "{{pct}}% of assets protected",
+    "headline": "{{pct}} of assets protected",
     "inclExcluded": "Including excluded assets"
   },
   "gaps": {
@@ -18,7 +19,8 @@
   },
   "jobs": {
     "title": "Job Activity",
-    "success": "Successful jobs"
+    "success": "Successful jobs",
+    "total": "Total jobs"
   },
   "compliance": {
     "title": "Compliance",
@@ -28,7 +30,8 @@
   },
   "capacity": {
     "title": "Capacity",
-    "utilization": "Storage utilization"
+    "utilization": "Storage utilization",
+    "mtrees": "{{count}} mtrees"
   },
   "policies": {
     "title": "Policies",

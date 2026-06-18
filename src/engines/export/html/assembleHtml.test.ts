@@ -6,6 +6,8 @@ const model: ExportModel = {
   title: 'PPDM Report',
   customer: 'WHO',
   subtitle: 'Assessment · 2026-06-15',
+  execTitle: 'Executive summary',
+  locale: 'en',
   kpis: [
     { label: 'Coverage', value: '71.4%', tone: 'ok' },
     { label: 'Immutable', value: '0%', tone: 'bad' },

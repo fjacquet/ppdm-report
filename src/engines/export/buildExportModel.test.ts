@@ -133,6 +133,15 @@ describe('buildExportModel', () => {
     expect(dark?.chart?.slices[0]?.color).toBe('#22c55e')
   })
 
+  it('renders the coverage headline with a single percent sign (no double %)', () => {
+    const cov = buildExportModel(view, 'assessment', 'light', t, 'en').sections.find(
+      (s) => s.id === 'coverage',
+    )
+    const headline = cov?.notes?.[0] ?? ''
+    expect(headline).toContain('71.4%')
+    expect((headline.match(/%/g) ?? []).length).toBe(1)
+  })
+
   it('includes customer and base-10 note in the footer', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en')
     expect(model.footer).toContain('WHO')

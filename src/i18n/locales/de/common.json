@@ -32,5 +32,8 @@
     "size": "Größe"
   },
   "capped": "Basierend auf den neuesten {{n}} — ein Zeitfenster, nicht die gesamte Menge",
-  "topOf": "Top {{shown}} von {{total}}"
+  "topOf": "Top {{shown}} von {{total}}",
+  "units": {
+    "base10": "Base-10-Einheiten"
+  }
 }

@@ -153,7 +153,7 @@ export async function buildPptx(model: ExportModel, theme: ExportTheme): Promise
   // Executive summary slide
   const exec = pptx.addSlide()
   exec.background = { color: bg }
-  exec.addText('Executive summary', {
+  exec.addText(model.execTitle, {
     x: 0.5,
     y: 0.3,
     w: 12.3,

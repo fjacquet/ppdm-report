@@ -91,7 +91,7 @@ export function assembleHtml(model: ExportModel, theme: ExportTheme): string {
   const kpis = model.kpis.map((k) => kpiCardHtml(k, p)).join('')
   const sections = model.sections.map((s) => sectionHtml(s, p)).join('')
   return `<!doctype html>
-<html lang="en">
+<html lang="${esc(model.locale)}">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">

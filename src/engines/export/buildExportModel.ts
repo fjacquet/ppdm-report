@@ -174,7 +174,7 @@ export function buildExportModel(
         fmtPercentValue(tg.utilizationPct, locale),
       ]),
     },
-    notes: [`${fmtInt(capacity.mtreeCount, locale)} mtrees`],
+    notes: [t('dashboard:capacity.mtrees', { count: fmtInt(capacity.mtreeCount, locale) })],
   }
 
   const policiesSection: ExportSection = {
@@ -217,14 +217,19 @@ export function buildExportModel(
   const sections = inOrder.filter((s): s is ExportSection => s !== null)
 
   const captured = meta.capturedAt ? meta.capturedAt.slice(0, 10) : ''
-  const footerParts = [meta.customer, meta.collectorBuild, captured, 'base-10 units'].filter(
-    Boolean,
-  )
+  const footerParts = [
+    meta.customer,
+    meta.collectorBuild,
+    captured,
+    t('common:units.base10'),
+  ].filter(Boolean)
 
   return {
     title: t('common:appTitle'),
     customer: meta.customer,
     subtitle: [t(`common:flavor.${flavor}`), captured].filter(Boolean).join(' · '),
+    execTitle: t('dashboard:execSummary'),
+    locale,
     kpis: execKpis,
     sections,
     footer: footerParts.join(' · '),

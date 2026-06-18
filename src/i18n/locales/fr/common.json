@@ -32,5 +32,8 @@
     "size": "Taille"
   },
   "capped": "Basé sur les {{n}} plus récents — une fenêtre, pas l'ensemble complet",
-  "topOf": "Top {{shown}} sur {{total}}"
+  "topOf": "Top {{shown}} sur {{total}}",
+  "units": {
+    "base10": "unités base-10"
+  }
 }

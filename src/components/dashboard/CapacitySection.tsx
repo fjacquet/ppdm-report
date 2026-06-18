@@ -20,7 +20,7 @@ export function CapacitySection({ view }: CapacitySectionProps) {
 
       {/* mtreeCount summary */}
       <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        {fmtInt(capacity.mtreeCount, locale)} mtrees
+        {t('capacity.mtrees', { count: fmtInt(capacity.mtreeCount, locale) })}
       </p>
 
       {/* Storage targets table */}

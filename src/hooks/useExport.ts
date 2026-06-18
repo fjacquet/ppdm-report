@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { buildExportModel } from '../engines/export/buildExportModel'
 import { assembleHtml } from '../engines/export/html/assembleHtml'
-import { buildPptx } from '../engines/export/pptx/builder'
 import type { ExportKind } from '../engines/export/types'
 import { useReportStore } from '../store/reportStore'
 import { useReportView } from './useReportView'
@@ -46,6 +45,8 @@ export function useExport() {
       const stamp = new Date().toISOString().slice(0, 10)
       const base = `ppdm-report_${sanitize(view.meta.customer)}_${stamp}`
       if (kind === 'pptx') {
+        // Dynamically imported so pptxgenjs + jszip stay out of the main bundle.
+        const { buildPptx } = await import('../engines/export/pptx/builder')
         download(await buildPptx(model, resolved), `${base}.pptx`, PPTX_MIME)
       } else {
         download(assembleHtml(model, resolved), `${base}.html`, 'text/html;charset=utf-8')

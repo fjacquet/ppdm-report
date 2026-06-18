@@ -28,7 +28,11 @@ export function JobsComplianceSection({ view }: JobsComplianceSectionProps) {
           label={t('dashboard:jobs.success')}
           tone="ok"
         />
-        <KpiCard value={fmtInt(jobs.total, locale)} label="Total jobs" tone="muted" />
+        <KpiCard
+          value={fmtInt(jobs.total, locale)}
+          label={t('dashboard:jobs.total')}
+          tone="muted"
+        />
       </div>
 
       {/* Jobs result mix */}

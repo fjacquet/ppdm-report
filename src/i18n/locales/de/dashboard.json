@@ -1,10 +1,11 @@
 {
+  "execSummary": "Zusammenfassung",
   "coverage": {
     "title": "Asset-Abdeckung",
     "protected": "Geschützt",
     "unprotected": "Ungeschützt",
     "excluded": "Ausgeschlossen",
-    "headline": "{{pct}}% der Assets geschützt",
+    "headline": "{{pct}} der Assets geschützt",
     "inclExcluded": "Einschließlich ausgeschlossener Assets"
   },
   "gaps": {
@@ -18,7 +19,8 @@
   },
   "jobs": {
     "title": "Job-Aktivität",
-    "success": "Erfolgreiche Jobs"
+    "success": "Erfolgreiche Jobs",
+    "total": "Jobs gesamt"
   },
   "compliance": {
     "title": "Compliance",
@@ -28,7 +30,8 @@
   },
   "capacity": {
     "title": "Kapazität",
-    "utilization": "Speichernutzung"
+    "utilization": "Speichernutzung",
+    "mtrees": "{{count}} Mtrees"
   },
   "policies": {
     "title": "Richtlinien",

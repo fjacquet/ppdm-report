@@ -1,10 +1,11 @@
 {
+  "execSummary": "Sintesi",
   "coverage": {
     "title": "Copertura degli asset",
     "protected": "Protetto",
     "unprotected": "Non protetto",
     "excluded": "Escluso",
-    "headline": "{{pct}}% degli asset protetti",
+    "headline": "{{pct}} degli asset protetti",
     "inclExcluded": "Inclusi gli asset esclusi"
   },
   "gaps": {
@@ -18,7 +19,8 @@
   },
   "jobs": {
     "title": "Attività dei job",
-    "success": "Job riusciti"
+    "success": "Job riusciti",
+    "total": "Job totali"
   },
   "compliance": {
     "title": "Conformità",
@@ -28,7 +30,8 @@
   },
   "capacity": {
     "title": "Capacità",
-    "utilization": "Utilizzo dello storage"
+    "utilization": "Utilizzo dello storage",
+    "mtrees": "{{count}} mtrees"
   },
   "policies": {
     "title": "Criteri",

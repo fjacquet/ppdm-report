@@ -46,6 +46,10 @@ export interface ExportModel {
   title: string
   customer: string
   subtitle: string
+  /** Localized "Executive summary" heading. */
+  execTitle: string
+  /** Active UI language (BCP-47), used e.g. for the HTML `lang` attribute. */
+  locale: string
   kpis: ExportKpi[]
   sections: ExportSection[]
   /** Footer note: base-10 units, collector build, capture date. */
