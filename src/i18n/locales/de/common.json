@@ -2,7 +2,8 @@
   "appTitle": "PPDM-Bericht",
   "upload": {
     "drop": "PPDM-Exportdatei hier ablegen",
-    "choose": "Datei auswählen"
+    "choose": "Datei auswählen",
+    "parsing": "Wird verarbeitet…"
   },
   "lang": {
     "label": "Sprache",

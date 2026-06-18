@@ -2,7 +2,8 @@
   "appTitle": "Rapporto PPDM",
   "upload": {
     "drop": "Trascina qui il file di esportazione PPDM",
-    "choose": "Scegli file"
+    "choose": "Scegli file",
+    "parsing": "Analisi…"
   },
   "lang": {
     "label": "Lingua",

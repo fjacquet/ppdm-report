@@ -2,7 +2,8 @@
   "appTitle": "PPDM Report",
   "upload": {
     "drop": "Drop your PPDM export file here",
-    "choose": "Choose file"
+    "choose": "Choose file",
+    "parsing": "Parsing…"
   },
   "lang": {
     "label": "Language",
