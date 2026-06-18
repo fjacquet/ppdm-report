@@ -34,15 +34,20 @@ export interface ChartProps {
 function ChartImpl({ option, dark, style, ariaLabel }: ChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<echarts.ECharts | null>(null)
+  const optionRef = useRef(option)
+  optionRef.current = option
 
+  // init / theme switch only — option is applied via optionRef to avoid reinit on every render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
 
-    const theme = dark ? 'midnight-dark' : 'midnight-light'
-    const instance = echarts.init(container, theme, { renderer: 'svg' })
+    const instance = echarts.init(container, dark ? 'midnight-dark' : 'midnight-light', {
+      renderer: 'svg',
+    })
     instanceRef.current = instance
-    instance.setOption(option)
+    instance.setOption(optionRef.current)
 
     const handleResize = () => instance.resize()
     window.addEventListener('resize', handleResize)
@@ -52,8 +57,9 @@ function ChartImpl({ option, dark, style, ariaLabel }: ChartProps) {
       instance.dispose()
       instanceRef.current = null
     }
-  }, [dark, option])
+  }, [dark])
 
+  // lightweight option updates — no reinit
   useEffect(() => {
     instanceRef.current?.setOption(option)
   }, [option])
