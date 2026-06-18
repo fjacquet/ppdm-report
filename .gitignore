@@ -9,17 +9,22 @@ coverage/
 .DS_Store
 *.log
 npm-debug.log*
+.idea/
+.vscode/
+
+# env / local overrides
+.env
+.env.*
+*.local
 
 # local-only inputs (customer data + scratch — never commit)
 /ref/
 /data/
 
-# existing project ignores
-refs/
-.claude
-.vscode/
-.superpowers/
+# Claude Code local config
+.claude/
 
-# local visual-check artifacts (not committed)
+# brainstorming + visual-check artifacts (never committed)
+.superpowers/
 .playwright-mcp/
-/dashboard-*.png
+/*.png
