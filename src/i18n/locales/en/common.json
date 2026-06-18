@@ -36,5 +36,6 @@
   "fullListInExcel": "Full list in the Excel export",
   "units": {
     "base10": "base-10 units"
-  }
+  },
+  "docs": "Docs"
 }

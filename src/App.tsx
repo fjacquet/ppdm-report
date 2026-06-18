@@ -19,6 +19,14 @@ export default function App() {
       <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-6 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <h1 className="text-xl font-bold">{t('appTitle')}</h1>
         <div className="flex flex-wrap items-center gap-3">
+          <a
+            href="https://github.com/fjacquet/ppdm-report/blob/main/docs/USER-GUIDE.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
+          >
+            {t('docs')}
+          </a>
           <FlavorToggle />
           <LanguageToggle />
           <ThemeToggle />
