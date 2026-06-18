@@ -147,4 +147,65 @@ describe('buildExportModel', () => {
     expect(model.footer).toContain('WHO')
     expect(model.footer).toContain('base-10')
   })
+
+  it('builds a deck for every section + a posture stack', () => {
+    const model = buildExportModel(view, 'assessment', 'light', t, 'en')
+    const byId = Object.fromEntries(model.sections.map((s) => [s.id, s]))
+
+    // coverage: mini-donut (overall) + per-type bars
+    expect(byId.coverage?.deck?.donut?.center).toBe('71%')
+    expect(byId.coverage?.deck?.donut?.slices.map((s) => s.color)).toEqual([
+      '#16a34a',
+      '#dc2626',
+      '#cbd5e1',
+    ])
+    expect(byId.coverage?.deck?.bars?.[0]).toMatchObject({
+      label: 'SQL Databases',
+      value: '71.7%',
+    })
+
+    // jobs: status bars derived from counts, success colored ok
+    const success = byId.jobs?.deck?.bars?.find((b) => b.label === 'SUCCESS')
+    expect(success).toMatchObject({ value: '9,297', color: '#16a34a' })
+
+    // compliance: three percent bars; immutable (0%) colored bad
+    const immut = byId.compliance?.deck?.bars?.find((b) => b.value === '0%')
+    expect(immut?.color).toBe('#dc2626')
+
+    // capacity: flagged target colored warn + a flagged KPI chip
+    expect(byId.capacity?.deck?.bars?.[0]).toMatchObject({ label: 'dd1', color: '#d97706' })
+    expect(byId.capacity?.deck?.kpiChips?.some((k) => /near capacity/.test(k.label))).toBe(true)
+
+    // policies: by-purpose bars
+    expect(byId.policies?.deck?.bars?.map((b) => b.label)).toEqual(['CENTRALIZED', 'EXCLUSION'])
+
+    // idle: complete tile list (never truncated)
+    expect(byId.idle?.deck?.tiles).toEqual(['Oracle Databases', 'NAS'])
+
+    // exec posture: protected / unprotected / excluded segments
+    expect(model.posture?.segments.map((s) => s.color)).toEqual(['#16a34a', '#dc2626', '#cbd5e1'])
+  })
+
+  it('caps deck gap bars at 10 and notes the Excel fallback', () => {
+    const many = {
+      ...view,
+      gaps: {
+        ...view.gaps,
+        top: {
+          total: 281,
+          shown: 12,
+          items: Array.from({ length: 12 }, (_, i) => ({
+            name: `A${i}`,
+            type: 'FILE_SYSTEM',
+            sizeGb: 100 - i,
+          })),
+        },
+      },
+    }
+    const gaps = buildExportModel(many, 'assessment', 'light', t, 'en').sections.find(
+      (s) => s.id === 'gaps',
+    )
+    expect(gaps?.deck?.bars).toHaveLength(10)
+    expect(gaps?.notes?.some((n) => /Excel/.test(n))).toBe(true)
+  })
 })
