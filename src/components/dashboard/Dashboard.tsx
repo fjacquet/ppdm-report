@@ -39,7 +39,7 @@ export function Dashboard({ view }: DashboardProps) {
       case 'capacity':
         return <CapacitySection key={id} view={view} dark={dark} />
       case 'policies':
-        return <PoliciesSection key={id} view={view} />
+        return <PoliciesSection key={id} view={view} dark={dark} />
     }
   }
 

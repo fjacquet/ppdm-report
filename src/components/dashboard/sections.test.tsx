@@ -328,29 +328,22 @@ describe('PoliciesSection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
-
-  afterEach(() => {
-    cleanup()
-  })
+  afterEach(() => cleanup())
 
   it('renders total policy count "32 policies"', () => {
-    render(<PoliciesSection view={policiesFixture} />)
+    render(<PoliciesSection view={policiesFixture} dark={false} />)
     expect(screen.getByText('32 policies')).toBeInTheDocument()
   })
 
-  it('renders purpose tally "CENTRALIZED"', () => {
-    render(<PoliciesSection view={policiesFixture} />)
-    const els = screen.getAllByText('CENTRALIZED')
-    expect(els.length).toBeGreaterThan(0)
+  it('renders the by-purpose bar chart', () => {
+    render(<PoliciesSection view={policiesFixture} dark={false} />)
+    expect(screen.getByTestId('policies-bars')).toBeInTheDocument()
   })
 
-  it('renders purpose tally count "29"', () => {
-    render(<PoliciesSection view={policiesFixture} />)
-    expect(screen.getByText('29')).toBeInTheDocument()
-  })
-
-  it('renders policy name "SQL - Prod"', () => {
-    render(<PoliciesSection view={policiesFixture} />)
+  it('keeps the by-purpose and per-policy tables behind Show details', () => {
+    render(<PoliciesSection view={policiesFixture} dark={false} />)
+    expect(screen.getByText('Show details')).toBeInTheDocument()
+    expect(screen.getAllByText('CENTRALIZED').length).toBeGreaterThan(0)
     expect(screen.getByText('SQL - Prod')).toBeInTheDocument()
   })
 })
