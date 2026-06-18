@@ -3,10 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../i18n'
 import type { ReportView } from '../types/reportView'
 
-const { runMock } = vi.hoisted(() => ({
+const { runMock, exportState } = vi.hoisted(() => ({
   runMock: vi.fn(),
+  exportState: { error: null as string | null },
 }))
-vi.mock('../hooks/useExport', () => ({ useExport: () => ({ run: runMock, busy: null }) }))
+vi.mock('../hooks/useExport', () => ({
+  useExport: () => ({ run: runMock, busy: null, error: exportState.error }),
+}))
 
 import { ExportButtons } from './ExportButtons'
 
@@ -16,6 +19,7 @@ describe('ExportButtons', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
     runMock.mockClear()
+    exportState.error = null
   })
   afterEach(() => cleanup())
 
@@ -36,5 +40,11 @@ describe('ExportButtons', () => {
   it('renders nothing when no report is loaded', () => {
     const { container } = render(<ExportButtons view={null} />)
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it('surfaces an export error to the user instead of failing silently', () => {
+    exportState.error = 'Export failed — reload the page and try again.'
+    render(<ExportButtons view={view} />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Export failed')
   })
 })

@@ -24,7 +24,8 @@
   },
   "export": {
     "pptx": "Esporta PPTX",
-    "html": "Esporta HTML"
+    "html": "Esporta HTML",
+    "error": "Esportazione non riuscita — ricarica la pagina e riprova."
   },
   "col": {
     "name": "Nome",

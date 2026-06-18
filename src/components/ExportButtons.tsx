@@ -8,27 +8,37 @@ const BTN =
 /** PPTX + HTML export buttons. Renders only when a report is loaded. */
 export function ExportButtons({ view }: { view: ReportView | null }) {
   const { t } = useTranslation('common')
-  const { run, busy } = useExport(view)
+  const { run, busy, error } = useExport(view)
   if (!view) return null
 
   return (
-    <div className="flex gap-2" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
-      <button
-        type="button"
-        className={BTN}
-        disabled={busy !== null}
-        onClick={() => void run('pptx')}
-      >
-        {busy === 'pptx' ? '…' : t('export.pptx')}
-      </button>
-      <button
-        type="button"
-        className={BTN}
-        disabled={busy !== null}
-        onClick={() => void run('html')}
-      >
-        {busy === 'html' ? '…' : t('export.html')}
-      </button>
+    <div
+      className="flex flex-col items-end gap-1"
+      style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
+    >
+      <div className="flex gap-2">
+        <button
+          type="button"
+          className={BTN}
+          disabled={busy !== null}
+          onClick={() => void run('pptx')}
+        >
+          {busy === 'pptx' ? '…' : t('export.pptx')}
+        </button>
+        <button
+          type="button"
+          className={BTN}
+          disabled={busy !== null}
+          onClick={() => void run('html')}
+        >
+          {busy === 'html' ? '…' : t('export.html')}
+        </button>
+      </div>
+      {error ? (
+        <p role="alert" className="max-w-xs text-right text-xs text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      ) : null}
     </div>
   )
 }
