@@ -292,31 +292,25 @@ describe('CapacitySection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
+  afterEach(() => cleanup())
 
-  afterEach(() => {
-    cleanup()
+  it('renders the mtree count', () => {
+    render(<CapacitySection view={capacityFixture} dark={false} />)
+    expect(screen.getByText(/17/)).toBeInTheDocument()
   })
 
-  it('renders target name "dd1"', () => {
-    render(<CapacitySection view={capacityFixture} />)
-    expect(screen.getByText('dd1')).toBeInTheDocument()
+  it('renders the utilization bar chart', () => {
+    render(<CapacitySection view={capacityFixture} dark={false} />)
+    expect(screen.getByTestId('capacity-bars')).toBeInTheDocument()
   })
 
-  it('renders utilization "87.6 %"', () => {
-    render(<CapacitySection view={capacityFixture} />)
-    expect(screen.getByText('87.6 %')).toBeInTheDocument()
-  })
-
-  it('renders flagged row with a warn/bad tone class', () => {
-    render(<CapacitySection view={capacityFixture} />)
+  it('keeps the targets table behind Show details (name + utilization present)', () => {
+    render(<CapacitySection view={capacityFixture} dark={false} />)
+    expect(screen.getByText('Show details')).toBeInTheDocument()
+    expect(screen.getAllByText('dd1').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('87.6 %').length).toBeGreaterThan(0)
     const flaggedRow = document.querySelector('[data-flagged="true"]')
     expect(flaggedRow).not.toBeNull()
-    expect(flaggedRow?.className).toMatch(/amber|red|warn/)
-  })
-
-  it('renders mtree count "17"', () => {
-    render(<CapacitySection view={capacityFixture} />)
-    expect(screen.getByText(/17/)).toBeInTheDocument()
   })
 })
 

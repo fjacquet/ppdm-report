@@ -37,7 +37,7 @@ export function Dashboard({ view }: DashboardProps) {
       case 'compliance':
         return null
       case 'capacity':
-        return <CapacitySection key={id} view={view} />
+        return <CapacitySection key={id} view={view} dark={dark} />
       case 'policies':
         return <PoliciesSection key={id} view={view} />
     }
