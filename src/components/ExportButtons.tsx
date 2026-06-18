@@ -1,15 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { useExport } from '../hooks/useExport'
-import { useReportView } from '../hooks/useReportView'
+import type { ReportView } from '../types/reportView'
 
 const BTN =
   'rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-400'
 
 /** PPTX + HTML export buttons. Renders only when a report is loaded. */
-export function ExportButtons() {
+export function ExportButtons({ view }: { view: ReportView | null }) {
   const { t } = useTranslation('common')
-  const { run, busy } = useExport()
-  const view = useReportView()
+  const { run, busy } = useExport(view)
   if (!view) return null
 
   return (

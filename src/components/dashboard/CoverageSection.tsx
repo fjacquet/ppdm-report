@@ -1,4 +1,5 @@
 import type { EChartsOption } from 'echarts/types/dist/shared'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DARK, LIGHT } from '../../theme/palette'
 import type { ReportView } from '../../types/reportView'
@@ -17,69 +18,75 @@ export function CoverageSection({ view, dark }: CoverageSectionProps) {
   const { overall, byType } = view.coverage
 
   // Overall donut (pie) option
-  const donutOption: EChartsOption = {
-    series: [
-      {
-        type: 'pie',
-        radius: ['40%', '70%'],
-        data: [
-          {
-            value: overall.protected,
-            name: t('coverage.protected'),
-            itemStyle: { color: palette.ok },
-          },
-          {
-            value: overall.unprotected,
-            name: t('coverage.unprotected'),
-            itemStyle: { color: palette.bad },
-          },
-          {
-            value: overall.excluded,
-            name: t('coverage.excluded'),
-            itemStyle: { color: palette.excluded },
-          },
-        ],
-        label: { show: false },
-      },
-    ],
-  }
+  const donutOption: EChartsOption = useMemo(
+    () => ({
+      series: [
+        {
+          type: 'pie',
+          radius: ['40%', '70%'],
+          data: [
+            {
+              value: overall.protected,
+              name: t('coverage.protected'),
+              itemStyle: { color: palette.ok },
+            },
+            {
+              value: overall.unprotected,
+              name: t('coverage.unprotected'),
+              itemStyle: { color: palette.bad },
+            },
+            {
+              value: overall.excluded,
+              name: t('coverage.excluded'),
+              itemStyle: { color: palette.excluded },
+            },
+          ],
+          label: { show: false },
+        },
+      ],
+    }),
+    [overall.protected, overall.unprotected, overall.excluded, palette, t],
+  )
 
   // Per-type horizontal bar option
-  const typeNames = Object.keys(byType)
-  const barOption: EChartsOption = {
-    grid: { containLabel: true, left: 8, right: 16, top: 8, bottom: 8 },
-    xAxis: { type: 'value', show: false },
-    yAxis: {
-      type: 'category',
-      data: typeNames,
-      axisLabel: { color: palette.ink },
-      axisLine: { show: false },
-      axisTick: { show: false },
-    },
-    series: [
-      {
-        type: 'bar',
-        name: t('coverage.protected'),
-        stack: 'total',
-        data: typeNames.map((k) => byType[k]?.protected ?? 0),
-        itemStyle: { color: palette.ok },
+  const typeNames = useMemo(() => Object.keys(byType), [byType])
+  const barOption: EChartsOption = useMemo(
+    () => ({
+      grid: { containLabel: true, left: 8, right: 16, top: 8, bottom: 8 },
+      xAxis: { type: 'value', show: false },
+      yAxis: {
+        type: 'category',
+        data: typeNames,
+        axisLabel: { color: palette.ink },
+        axisLine: { show: false },
+        axisTick: { show: false },
       },
-      {
-        type: 'bar',
-        name: t('coverage.unprotected'),
-        stack: 'total',
-        data: typeNames.map((k) => byType[k]?.unprotected ?? 0),
-        itemStyle: { color: palette.bad },
-      },
-      {
-        type: 'bar',
-        name: t('coverage.excluded'),
-        stack: 'total',
-        data: typeNames.map((k) => byType[k]?.excluded ?? 0),
-        itemStyle: { color: palette.excluded },
-      },
-    ],
-  }
+      series: [
+        {
+          type: 'bar',
+          name: t('coverage.protected'),
+          stack: 'total',
+          data: typeNames.map((k) => byType[k]?.protected ?? 0),
+          itemStyle: { color: palette.ok },
+        },
+        {
+          type: 'bar',
+          name: t('coverage.unprotected'),
+          stack: 'total',
+          data: typeNames.map((k) => byType[k]?.unprotected ?? 0),
+          itemStyle: { color: palette.bad },
+        },
+        {
+          type: 'bar',
+          name: t('coverage.excluded'),
+          stack: 'total',
+          data: typeNames.map((k) => byType[k]?.excluded ?? 0),
+          itemStyle: { color: palette.excluded },
+        },
+      ],
+    }),
+    [byType, typeNames, palette, t],
+  )
 
   const barHeight = Math.max(120, typeNames.length * 36)
 

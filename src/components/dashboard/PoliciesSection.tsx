@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { ReportView } from '../../types/reportView'
-import { fmtInt, formatBytes } from '../../utils/format'
+import { fmtInt, formatBytes, gbToBytes } from '../../utils/format'
 
 interface PoliciesSectionProps {
   view: ReportView
@@ -70,7 +70,7 @@ export function PoliciesSection({ view }: PoliciesSectionProps) {
                   <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{row.purpose}</td>
                   <td className="py-1.5 pr-4 text-right">{fmtInt(row.assetCount, locale)}</td>
                   <td className="py-1.5 text-right">
-                    {formatBytes(row.protectionCapacityGb * 1e9, locale)}
+                    {formatBytes(gbToBytes(row.protectionCapacityGb), locale)}
                   </td>
                 </tr>
               ))}

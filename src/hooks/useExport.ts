@@ -4,7 +4,7 @@ import { buildExportModel } from '../engines/export/buildExportModel'
 import { assembleHtml } from '../engines/export/html/assembleHtml'
 import type { ExportKind } from '../engines/export/types'
 import { useReportStore } from '../store/reportStore'
-import { useReportView } from './useReportView'
+import type { ReportView } from '../types/reportView'
 import { useTheme } from './useTheme'
 
 const PPTX_MIME = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
@@ -28,9 +28,11 @@ function download(data: ArrayBuffer | string, filename: string, mime: string): v
  * resolved theme and active locale into a render-ready model, generates the PPTX or
  * HTML, and triggers a download. (pptxgenjs is not Web-Worker-safe, and a ~10-slide
  * deck generates in well under a second, so a worker would add risk for no benefit.)
+ *
+ * Takes the already-derived ReportView as an argument so it is computed once at the
+ * app root (App's memo) rather than re-derived per consumer.
  */
-export function useExport() {
-  const view = useReportView()
+export function useExport(view: ReportView | null) {
   const flavor = useReportStore((s) => s.flavor)
   const { resolved } = useTheme()
   const { i18n } = useTranslation()

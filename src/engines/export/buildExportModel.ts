@@ -1,13 +1,12 @@
 import { DARK, LIGHT } from '../../theme/palette'
 import type { ReportView } from '../../types/reportView'
-import { fmtInt, fmtPercent, fmtPercentValue, formatBytes } from '../../utils/format'
+import { fmtInt, fmtPercent, fmtPercentValue, formatBytes, gbToBytes } from '../../utils/format'
+import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
+import { immutableTone } from './tone'
 import type { ExportModel, ExportSection, ExportTheme } from './types'
 
 /** Minimal translator surface (i18next TFunction, resolving `ns:key`). */
 type TFn = (key: string, opts?: Record<string, unknown>) => string
-export type ExportFlavor = 'assessment' | 'ops'
-
-const gb = (n: number) => n * 1e9
 
 /**
  * Pure: turn a ReportView into a render-ready, localized, flavor-ordered ExportModel.
@@ -34,7 +33,7 @@ export function buildExportModel(
     },
     {
       label: t('dashboard:kpi.unprotected'),
-      value: formatBytes(gb(gaps.totalCapacityGb), locale),
+      value: formatBytes(gbToBytes(gaps.totalCapacityGb), locale),
       tone: 'warn' as const,
     },
     {
@@ -45,7 +44,7 @@ export function buildExportModel(
     {
       label: t('dashboard:kpi.immutable'),
       value: fmtPercent(compliance.immutablePct, locale),
-      tone: (compliance.immutablePct === 0 ? 'bad' : 'ok') as 'bad' | 'ok',
+      tone: immutableTone(compliance.immutablePct),
     },
   ]
 
@@ -100,14 +99,14 @@ export function buildExportModel(
     kpis: [
       {
         label: t('dashboard:gaps.unprotectedTb'),
-        value: formatBytes(gb(gaps.totalCapacityGb), locale),
+        value: formatBytes(gbToBytes(gaps.totalCapacityGb), locale),
         tone: 'bad',
       },
       { label: t('dashboard:gaps.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
     ],
     table: {
       columns: [t('common:col.name'), t('common:col.type'), t('common:col.size')],
-      rows: gaps.top.items.map((a) => [a.name, a.type, formatBytes(gb(a.sizeGb), locale)]),
+      rows: gaps.top.items.map((a) => [a.name, a.type, formatBytes(gbToBytes(a.sizeGb), locale)]),
       caption: t('common:topOf', { shown: gaps.top.shown, total: gaps.top.total }),
     },
   }
@@ -150,7 +149,7 @@ export function buildExportModel(
       {
         label: t('dashboard:compliance.immutable'),
         value: fmtPercent(compliance.immutablePct, locale),
-        tone: compliance.immutablePct === 0 ? 'bad' : 'ok',
+        tone: immutableTone(compliance.immutablePct),
       },
       {
         label: t('dashboard:compliance.replicated'),
@@ -193,28 +192,18 @@ export function buildExportModel(
     },
   }
 
-  const inOrder =
-    flavor === 'ops'
-      ? [
-          jobsSection,
-          complianceSection,
-          capacitySection,
-          coverageSection,
-          gapsSection,
-          idleSection,
-          policiesSection,
-        ]
-      : [
-          coverageSection,
-          gapsSection,
-          idleSection,
-          jobsSection,
-          complianceSection,
-          capacitySection,
-          policiesSection,
-        ]
-
-  const sections = inOrder.filter((s): s is ExportSection => s !== null)
+  const byId: Record<SectionId, ExportSection | null> = {
+    coverage: coverageSection,
+    gaps: gapsSection,
+    idle: idleSection,
+    jobs: jobsSection,
+    compliance: complianceSection,
+    capacity: capacitySection,
+    policies: policiesSection,
+  }
+  const sections = SECTION_ORDER[flavor]
+    .map((id) => byId[id])
+    .filter((s): s is ExportSection => s !== null)
 
   const captured = meta.capturedAt ? meta.capturedAt.slice(0, 10) : ''
   const footerParts = [

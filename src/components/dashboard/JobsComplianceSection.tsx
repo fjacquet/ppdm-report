@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { immutableTone } from '../../engines/export/tone'
 import type { ReportView } from '../../types/reportView'
 import { fmtInt, fmtPercent } from '../../utils/format'
 import { KpiCard } from '../KpiCard'
@@ -12,8 +13,6 @@ export function JobsComplianceSection({ view }: JobsComplianceSectionProps) {
   const locale = i18n.language
 
   const { jobs, compliance } = view
-
-  const immutableTone = compliance.immutablePct === 0 ? 'bad' : 'ok'
 
   return (
     <section aria-label={t('dashboard:jobs.title')}>
@@ -74,7 +73,7 @@ export function JobsComplianceSection({ view }: JobsComplianceSectionProps) {
         <KpiCard
           value={fmtPercent(compliance.immutablePct, locale)}
           label={t('dashboard:compliance.immutable')}
-          tone={immutableTone}
+          tone={immutableTone(compliance.immutablePct)}
         />
         <KpiCard
           value={fmtPercent(compliance.replicatedPct, locale)}

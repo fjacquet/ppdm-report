@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { ReportView } from '../../types/reportView'
-import { fmtInt, formatBytes } from '../../utils/format'
+import { fmtInt, formatBytes, gbToBytes } from '../../utils/format'
 
 interface GapsSectionProps {
   view: ReportView
@@ -10,7 +10,7 @@ export function GapsSection({ view }: GapsSectionProps) {
   const { t, i18n } = useTranslation(['dashboard', 'common'])
   const locale = i18n.language
 
-  const totalBytes = view.gaps.totalCapacityGb * 1e9
+  const totalBytes = gbToBytes(view.gaps.totalCapacityGb)
   const { top, count } = view.gaps
 
   return (
@@ -57,7 +57,7 @@ export function GapsSection({ view }: GapsSectionProps) {
                     <td className="py-1.5 pr-4">{item?.name}</td>
                     <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{item?.type}</td>
                     <td className="py-1.5 text-right">
-                      {formatBytes((item?.sizeGb ?? 0) * 1e9, locale)}
+                      {formatBytes(gbToBytes(item?.sizeGb ?? 0), locale)}
                     </td>
                   </tr>
                 )

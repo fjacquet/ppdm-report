@@ -1,24 +1,10 @@
 import pptxgen from 'pptxgenjs'
 import { DARK, LIGHT } from '../../../theme/palette'
-import type { ExportModel, ExportSection, ExportTheme, ExportTone } from '../types'
+import { toneHex } from '../tone'
+import type { ExportModel, ExportSection, ExportTheme } from '../types'
 
 /** pptxgenjs wants hex without the leading '#'. */
 const hx = (c: string) => c.replace('#', '')
-
-function tone(t: ExportTone, p: typeof LIGHT): string {
-  switch (t) {
-    case 'ok':
-      return hx(p.ok)
-    case 'warn':
-      return hx(p.warn)
-    case 'bad':
-      return hx(p.bad)
-    case 'muted':
-      return hx(p.muted)
-    default:
-      return hx(p.accent)
-  }
-}
 
 function addSection(pptx: pptxgen, s: ExportSection, p: typeof LIGHT, bg: string) {
   const ink = hx(p.ink)
@@ -41,7 +27,10 @@ function addSection(pptx: pptxgen, s: ExportSection, p: typeof LIGHT, bg: string
     s.kpis.forEach((k, i) => {
       slide.addText(
         [
-          { text: `${k.value}  `, options: { bold: true, color: tone(k.tone, p), fontSize: 18 } },
+          {
+            text: `${k.value}  `,
+            options: { bold: true, color: hx(toneHex(k.tone, p)), fontSize: 18 },
+          },
           { text: k.label, options: { color: muted, fontSize: 11 } },
         ],
         { x: 0.5 + i * 4.2, y, w: 4, h: 0.5, fontFace: 'Arial' },
@@ -166,7 +155,10 @@ export async function buildPptx(model: ExportModel, theme: ExportTheme): Promise
   model.kpis.forEach((k, i) => {
     exec.addText(
       [
-        { text: `${k.value}\n`, options: { bold: true, color: tone(k.tone, p), fontSize: 30 } },
+        {
+          text: `${k.value}\n`,
+          options: { bold: true, color: hx(toneHex(k.tone, p)), fontSize: 30 },
+        },
         { text: k.label, options: { color: muted, fontSize: 12 } },
       ],
       { x: 0.5 + i * 3.15, y: 2, w: 3, h: 1.6, fontFace: 'Arial', valign: 'top' },

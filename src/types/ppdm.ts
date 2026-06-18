@@ -58,3 +58,9 @@ export const AGENT_SHEETS = [
 
 /** Live Optics truncates large sheet exports at exactly this many data rows. */
 export const LIVE_OPTICS_ROW_CAP = 10_000
+
+/** Storage-target utilization (%) at or above which a target is flagged at-risk. */
+export const FLAG_THRESHOLD_PCT = 80
+
+/** Default size of the largest-N list surfaced for capped windows (e.g. gaps). */
+export const TOP_N_DEFAULT = 25

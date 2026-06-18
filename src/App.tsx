@@ -22,7 +22,7 @@ export default function App() {
           <FlavorToggle />
           <LanguageToggle />
           <ThemeToggle />
-          <ExportButtons />
+          <ExportButtons view={view} />
         </div>
       </header>
       <main className="space-y-6 p-6">

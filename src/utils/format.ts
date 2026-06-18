@@ -108,3 +108,6 @@ export const fmtDate = (iso: string, locale = 'fr-FR'): string => {
  * Alias matching the task-brief interface name.
  */
 export const formatDate = fmtDate
+
+/** Convert gigabytes (base-10) to bytes. */
+export const gbToBytes = (gb: number): number => gb * 1e9

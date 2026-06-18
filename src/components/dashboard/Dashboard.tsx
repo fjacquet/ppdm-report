@@ -1,3 +1,4 @@
+import { SECTION_ORDER, type SectionId } from '../../engines/export/sectionOrder'
 import { useTheme } from '../../hooks/useTheme'
 import { useReportStore } from '../../store/reportStore'
 import type { ReportView } from '../../types/reportView'
@@ -23,27 +24,24 @@ export function Dashboard({ view }: DashboardProps) {
   const dark = useTheme().resolved === 'dark'
   const flavor = useReportStore((s) => s.flavor)
 
-  const assessment = (
-    <>
-      <CoverageSection view={view} dark={dark} />
-      <GapsSection view={view} />
-      <IdleAgentsSection view={view} />
-      <JobsComplianceSection view={view} />
-      <CapacitySection view={view} />
-      <PoliciesSection view={view} />
-    </>
-  )
-
-  const ops = (
-    <>
-      <JobsComplianceSection view={view} />
-      <CapacitySection view={view} />
-      <CoverageSection view={view} dark={dark} />
-      <GapsSection view={view} />
-      <IdleAgentsSection view={view} />
-      <PoliciesSection view={view} />
-    </>
-  )
+  function renderSection(id: SectionId) {
+    switch (id) {
+      case 'coverage':
+        return <CoverageSection key={id} view={view} dark={dark} />
+      case 'gaps':
+        return <GapsSection key={id} view={view} />
+      case 'idle':
+        return <IdleAgentsSection key={id} view={view} />
+      case 'jobs':
+        return <JobsComplianceSection key={id} view={view} />
+      case 'compliance':
+        return null
+      case 'capacity':
+        return <CapacitySection key={id} view={view} />
+      case 'policies':
+        return <PoliciesSection key={id} view={view} />
+    }
+  }
 
   return (
     <div
@@ -51,7 +49,7 @@ export function Dashboard({ view }: DashboardProps) {
       style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
     >
       <ExecutiveKpis view={view} />
-      {flavor === 'assessment' ? assessment : ops}
+      {SECTION_ORDER[flavor].map((id) => renderSection(id))}
     </div>
   )
 }

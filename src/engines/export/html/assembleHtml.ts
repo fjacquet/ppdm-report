@@ -1,4 +1,5 @@
 import { DARK, LIGHT } from '../../../theme/palette'
+import { toneHex } from '../tone'
 import type { ExportModel, ExportSection, ExportTheme, ExportTone } from '../types'
 
 /** Escape text for safe HTML embedding. */
@@ -11,27 +12,12 @@ function esc(s: string): string {
     .replace(/'/g, '&#39;')
 }
 
-function toneColor(tone: ExportTone, p: typeof LIGHT): string {
-  switch (tone) {
-    case 'ok':
-      return p.ok
-    case 'warn':
-      return p.warn
-    case 'bad':
-      return p.bad
-    case 'muted':
-      return p.muted
-    default:
-      return p.accent
-  }
-}
-
 function kpiCardHtml(
   k: { label: string; value: string; detail?: string; tone: ExportTone },
   p: typeof LIGHT,
 ): string {
-  return `<div class="kpi" style="border-left-color:${toneColor(k.tone, p)}">
-    <div class="kpi-v" style="color:${toneColor(k.tone, p)}">${esc(k.value)}</div>
+  return `<div class="kpi" style="border-left-color:${toneHex(k.tone, p)}">
+    <div class="kpi-v" style="color:${toneHex(k.tone, p)}">${esc(k.value)}</div>
     <div class="kpi-l">${esc(k.label)}</div>
     ${k.detail ? `<div class="kpi-d">${esc(k.detail)}</div>` : ''}
   </div>`
