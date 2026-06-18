@@ -1,5 +1,21 @@
+# dependencies & build output
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.vite/
+
+# OS / editor
+.DS_Store
+*.log
+npm-debug.log*
+
+# local-only inputs (customer data + scratch — never commit)
+/ref/
+/data/
+
+# existing project ignores
 refs/
 .claude
 .vscode/
-# Visual brainstorming companion
 .superpowers/
