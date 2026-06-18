@@ -14,6 +14,7 @@ import { immutableTone, toneHex } from './tone'
 import type {
   DeckBar,
   DeckStack,
+  ExportKpi,
   ExportModel,
   ExportSection,
   ExportTheme,
@@ -23,7 +24,8 @@ import type {
 /** Minimal translator surface (i18next TFunction, resolving `ns:key`). */
 type TFn = (key: string, opts?: Record<string, unknown>) => string
 
-/** Build ratio-normalized bars from (label, magnitude) pairs. */
+/** Build ratio-normalized bars from (label, magnitude) pairs.
+ * magnitude may be a 0..1 ratio (percent bars fill relative to 100%) or a raw count (bars normalize to the largest value). */
 function toBars(
   rows: { label: string; magnitude: number; value: string; tone: ExportTone }[],
   pal: Palette,
@@ -153,31 +155,25 @@ export function buildExportModel(
     },
   }
 
+  const gapsKpis: ExportKpi[] = [
+    {
+      label: t('dashboard:gaps.unprotectedTb'),
+      value: formatBytes(gbToBytes(gaps.totalCapacityGb), locale),
+      tone: 'bad',
+    },
+    { label: t('dashboard:gaps.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
+  ]
   const gapsSection: ExportSection = {
     id: 'gaps',
     title: t('dashboard:gaps.title'),
-    kpis: [
-      {
-        label: t('dashboard:gaps.unprotectedTb'),
-        value: formatBytes(gbToBytes(gaps.totalCapacityGb), locale),
-        tone: 'bad',
-      },
-      { label: t('dashboard:gaps.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
-    ],
+    kpis: gapsKpis,
     table: {
       columns: [t('common:col.name'), t('common:col.type'), t('common:col.size')],
       rows: gaps.top.items.map((a) => [a.name, a.type, formatBytes(gbToBytes(a.sizeGb), locale)]),
       caption: t('common:topOf', { shown: gaps.top.shown, total: gaps.top.total }),
     },
     deck: {
-      kpiChips: [
-        {
-          label: t('dashboard:gaps.unprotectedTb'),
-          value: formatBytes(gbToBytes(gaps.totalCapacityGb), locale),
-          tone: 'bad',
-        },
-        { label: t('dashboard:gaps.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
-      ],
+      kpiChips: gapsKpis,
       bars: toBars(
         gaps.top.items.slice(0, 10).map((a) => ({
           label: a.name,
@@ -189,7 +185,7 @@ export function buildExportModel(
       ),
     },
     notes: [
-      t('common:topOf', { shown: Math.min(10, gaps.top.total), total: gaps.top.total }),
+      t('common:topOf', { shown: Math.min(10, gaps.top.items.length), total: gaps.top.total }),
       t('common:fullListInExcel'),
     ],
   }
@@ -208,28 +204,23 @@ export function buildExportModel(
         }
       : null
 
+  const jobsKpis: ExportKpi[] = [
+    {
+      label: t('dashboard:jobs.success'),
+      value: fmtPercent(jobs.successPct, locale),
+      tone: 'ok',
+    },
+  ]
   const jobsSection: ExportSection = {
     id: 'jobs',
     title: t('dashboard:jobs.title'),
-    kpis: [
-      {
-        label: t('dashboard:jobs.success'),
-        value: fmtPercent(jobs.successPct, locale),
-        tone: 'ok',
-      },
-    ],
+    kpis: jobsKpis,
     notes: [
       ...Object.entries(jobs.counts).map(([status, n]) => `${status}: ${fmtInt(n, locale)}`),
       ...(jobs.capped ? [t('common:capped', { n: fmtInt(jobs.windowSize, locale) })] : []),
     ],
     deck: {
-      kpiChips: [
-        {
-          label: t('dashboard:jobs.success'),
-          value: fmtPercent(jobs.successPct, locale),
-          tone: 'ok',
-        },
-      ],
+      kpiChips: jobsKpis,
       bars: toBars(
         Object.entries(jobs.counts).map(([status, n]) => ({
           label: status,
@@ -333,28 +324,23 @@ export function buildExportModel(
     },
   }
 
+  const policiesKpis: ExportKpi[] = [
+    {
+      label: t('dashboard:policies.title'),
+      value: fmtInt(policies.count, locale),
+      tone: 'accent',
+    },
+  ]
   const policiesSection: ExportSection = {
     id: 'policies',
     title: t('dashboard:policies.title'),
-    kpis: [
-      {
-        label: t('dashboard:policies.title'),
-        value: fmtInt(policies.count, locale),
-        tone: 'accent',
-      },
-    ],
+    kpis: policiesKpis,
     table: {
       columns: [t('dashboard:policies.col.purpose'), t('dashboard:policies.col.count')],
       rows: Object.entries(policies.byPurpose).map(([purpose, n]) => [purpose, fmtInt(n, locale)]),
     },
     deck: {
-      kpiChips: [
-        {
-          label: t('dashboard:policies.title'),
-          value: fmtInt(policies.count, locale),
-          tone: 'accent',
-        },
-      ],
+      kpiChips: policiesKpis,
       bars: toBars(
         Object.entries(policies.byPurpose).map(([purpose, n], i) => ({
           label: purpose,

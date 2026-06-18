@@ -208,4 +208,27 @@ describe('buildExportModel', () => {
     expect(gaps?.deck?.bars).toHaveLength(10)
     expect(gaps?.notes?.some((n) => /Excel/.test(n))).toBe(true)
   })
+
+  it('coverage deck bars are capped at 6 and sorted descending by pct', () => {
+    const localView = {
+      ...view,
+      coverage: {
+        ...view.coverage,
+        byType: {
+          TypeA: { protected: 10, unprotected: 90, excluded: 0, pct: 0.1, pctInclExcluded: 0.1 },
+          TypeB: { protected: 80, unprotected: 20, excluded: 0, pct: 0.8, pctInclExcluded: 0.8 },
+          TypeC: { protected: 50, unprotected: 50, excluded: 0, pct: 0.5, pctInclExcluded: 0.5 },
+          TypeD: { protected: 95, unprotected: 5, excluded: 0, pct: 0.95, pctInclExcluded: 0.95 },
+          TypeE: { protected: 30, unprotected: 70, excluded: 0, pct: 0.3, pctInclExcluded: 0.3 },
+          TypeF: { protected: 70, unprotected: 30, excluded: 0, pct: 0.7, pctInclExcluded: 0.7 },
+          TypeG: { protected: 60, unprotected: 40, excluded: 0, pct: 0.6, pctInclExcluded: 0.6 },
+        },
+      },
+    }
+    const cov = buildExportModel(localView, 'assessment', 'light', t, 'en').sections.find(
+      (s) => s.id === 'coverage',
+    )
+    expect(cov?.deck?.bars).toHaveLength(6)
+    expect(cov?.deck?.bars?.[0]?.label).toBe('TypeD')
+  })
 })
