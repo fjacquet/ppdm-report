@@ -38,5 +38,9 @@
   "units": {
     "base10": "unità base-10"
   },
-  "docs": "Docs"
+  "docs": "Docs",
+  "update": {
+    "available": "Nuova versione disponibile",
+    "reload": "Ricarica"
+  }
 }
