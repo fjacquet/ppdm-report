@@ -1,6 +1,9 @@
 /** A single spreadsheet cell value after SheetJS parsing. */
 export type Cell = string | number | boolean | null
 
+/** The backup product a workbook came from. */
+export type ProductId = 'ppdm' | 'avamar' | 'networker' | 'unknown'
+
 export type ProtectionStatus = 'PROTECTED' | 'UNPROTECTED' | 'EXCLUDED'
 
 /** One worksheet, rows keyed by header. */
