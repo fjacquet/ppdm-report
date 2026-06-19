@@ -25,6 +25,6 @@ Parsing is performed by `src/engines/parser/readWorkbook.ts` via SheetJS inside 
 
 ## Consequences
 
-- No multi-extract merge or trend analysis in v1 (single extract per session).
+- Multi-extract **merge** is supported (see ADR 0009): several Live Optics exports combine into one estate. Trend/time-series analysis across snapshots remains out of scope.
 - The tool is resilient to PPDM API changes; only Live Optics export format changes can break ingestion.
 - Fixture-based testing is straightforward: the sample `ref/PPDM.xlsx` plus synthetic workbooks covering edge cases serve as the complete test corpus.

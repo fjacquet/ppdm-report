@@ -8,12 +8,13 @@
 
 1. [What you need](#1-what-you-need)
 2. [Getting started](#2-getting-started)
-3. [Reading the dashboard](#3-reading-the-dashboard)
-4. [Switching flavor](#4-switching-flavor)
-5. [Language and theme](#5-language-and-theme)
-6. [Exporting](#6-exporting)
-7. [Reading the numbers honestly](#7-reading-the-numbers-honestly)
-8. [Privacy](#8-privacy)
+3. [Multi-server estates](#3-multi-server-estates)
+4. [Reading the dashboard](#4-reading-the-dashboard)
+5. [Switching flavor](#5-switching-flavor)
+6. [Language and theme](#6-language-and-theme)
+7. [Exporting](#7-exporting)
+8. [Reading the numbers honestly](#8-reading-the-numbers-honestly)
+9. [Privacy](#9-privacy)
 
 ---
 
@@ -53,7 +54,19 @@ Parsing happens entirely in a background browser worker — the main thread stay
 
 ---
 
-## 3. Reading the dashboard
+## 3. Multi-server estates
+
+If your customer runs more than one PPDM appliance, you can load each server's Live Optics export separately and let the tool merge them into a single combined estate report. Drop the first `.xlsx` file as usual, then drop additional files onto the same upload zone — or use **"Choose file"** again — and each one is added to the loaded-servers list without replacing the previous one. You can also load files in one batch by selecting multiple files at once in the file picker. The combined dashboard updates immediately after each addition.
+
+Loaded servers appear as a chip strip below the upload zone, labelled by the appliance Host Name from the `System Information` sheet (falling back to the project name, then the filename). Each chip carries a remove button (×) so you can drop a specific server without clearing the rest; a **"Clear all"** control removes every loaded file and returns the tool to its initial state.
+
+When two or more servers are loaded, a **Per-server breakdown** section appears in the dashboard, showing each server's coverage percentage and a summary table so you can compare contributions at a glance. The same breakdown is included in both the PPTX and HTML exports.
+
+If the app detects a potential issue — sources with mismatched base-10 / base-2 unit conventions, what looks like the same file loaded twice (matching appliance host or project and snapshot), or sheets that are capped across multiple sources — it raises a warning in the dashboard and in both exports. These warnings are informational: they never block the report from loading or exporting. Review them to decide whether the combination of sources is meaningful for your analysis.
+
+---
+
+## 4. Reading the dashboard
 
 The dashboard is one scrollable page. Every section derives its numbers from the same underlying data; nothing is cached between sessions and nothing is stored beyond the current browser tab.
 
@@ -113,7 +126,7 @@ These two sub-sections share one dashboard card:
 
 ---
 
-## 4. Switching flavor
+## 5. Switching flavor
 
 The **flavor toggle** in the header bar lets you choose between two views of the same data:
 
@@ -126,7 +139,7 @@ The underlying numbers are identical in both flavors. Only the order of sections
 
 ---
 
-## 5. Language and theme
+## 6. Language and theme
 
 ### Language
 
@@ -148,7 +161,7 @@ Your theme choice is persisted in `localStorage` under the key `ppdm-report-them
 
 ---
 
-## 6. Exporting
+## 7. Exporting
 
 The export buttons appear in the header bar once a workbook has been loaded. Both buttons are disabled while an export is in progress.
 
@@ -175,7 +188,7 @@ Click **"Export HTML"** to download a self-contained `.html` file.
 
 ---
 
-## 7. Reading the numbers honestly
+## 8. Reading the numbers honestly
 
 ### Base-10 units
 
@@ -199,7 +212,7 @@ The headline coverage figure is `PROTECTED / (PROTECTED + UNPROTECTED)`. Assets 
 
 ---
 
-## 8. Privacy
+## 9. Privacy
 
 Your workbook never leaves your browser. Specifically:
 

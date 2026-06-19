@@ -29,6 +29,7 @@ Key capabilities:
 - **Agent classification** — asset types with only N/A placeholder rows are listed on a dedicated "present but not in use" slide; dedicated per-type detail slides are generated only for in-use types.
 - **Auto dark mode** — follows `prefers-color-scheme`; light/dark override persisted in `localStorage`.
 - **FR / EN / DE / IT** — full UI and export strings; a key-parity test fails CI on any missing translation key.
+- **Multi-server estate** — drop several Live Optics exports to merge them into one combined report, with a per-server breakdown and clear caveats when sources don't cleanly combine.
 - **PPTX + HTML export** — both follow the live theme (light or dark) and the selected language. PPTX filename: `ppdm-report_<customer>_<ISO date>.pptx`. HTML is self-contained, CSS-inlined, zero JavaScript.
 
 ---
