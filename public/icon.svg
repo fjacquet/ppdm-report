@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>PPDM Report</title>
+  <rect width="512" height="512" rx="112" fill="#1d4ed8"/>
+  <path d="M256 92 L394 146 V272 C394 364 330 414 256 438 C182 414 118 364 118 272 V146 Z" fill="#ffffff"/>
+  <path d="M202 262 L242 304 L320 212" fill="none" stroke="#1d4ed8" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
