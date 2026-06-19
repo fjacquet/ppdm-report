@@ -15,18 +15,22 @@ export function ExecutiveKpis({ view }: ExecutiveKpisProps) {
   const coverageValue = fmtPercent(view.coverage.overall.pct, locale)
   const unprotectedValue = formatBytes(gbToBytes(view.gaps.totalCapacityGb), locale)
   const jobSuccessValue = fmtPercent(view.jobs.successPct, locale)
-  const immutableValue = fmtPercent(view.compliance.immutablePct, locale)
+  const complianceAvailable = view.provenance.compliance.available
 
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       <KpiCard value={coverageValue} label={t('kpi.coverage')} tone="ok" />
       <KpiCard value={unprotectedValue} label={t('kpi.unprotected')} tone="warn" />
       <KpiCard value={jobSuccessValue} label={t('kpi.jobSuccess')} tone="ok" />
-      <KpiCard
-        value={immutableValue}
-        label={t('kpi.immutable')}
-        tone={immutableTone(view.compliance.immutablePct)}
-      />
+      {complianceAvailable ? (
+        <KpiCard
+          value={fmtPercent(view.compliance.immutablePct, locale)}
+          label={t('kpi.immutable')}
+          tone={immutableTone(view.compliance.immutablePct)}
+        />
+      ) : (
+        <KpiCard value="—" label={t('kpi.immutable')} tone="muted" />
+      )}
     </div>
   )
 }

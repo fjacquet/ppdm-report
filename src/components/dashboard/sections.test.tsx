@@ -357,6 +357,37 @@ describe('PoliciesSection', () => {
 
 const makeView = (overrides: Partial<ReportView>): ReportView => ({ ...fixture, ...overrides })
 
+// ── ExecutiveKpis — compliance provenance gate ────────────────────────────────
+
+describe('ExecutiveKpis — compliance provenance gate', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('shows em-dash for Immutable KPI when compliance provenance is unavailable', () => {
+    const view = makeView({
+      provenance: allUnavailable(100),
+      compliance: { ...fixture.compliance, immutablePct: 0 },
+    })
+    render(<ExecutiveKpis view={view} />)
+    // "—" must be present (the KpiCard value)
+    expect(screen.getByText('—')).toBeInTheDocument()
+    // "0%" must NOT appear as the immutable value
+    expect(screen.queryByText('0%')).toBeNull()
+  })
+
+  it('shows immutable percent when compliance provenance is available', () => {
+    const view = makeView({
+      provenance: allAvailable(100),
+      compliance: { ...fixture.compliance, immutablePct: 0.42 },
+    })
+    render(<ExecutiveKpis view={view} />)
+    expect(screen.getByText('42%')).toBeInTheDocument()
+    expect(screen.queryByText('—')).toBeNull()
+  })
+})
+
 describe('ProvenanceNote integration — summary-format provenance', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
@@ -405,5 +436,36 @@ describe('ProvenanceNote integration — summary-format provenance', () => {
   it('GapsSection shows NO provenance note when fully available', () => {
     render(<GapsSection view={gapsFixture} dark={false} />)
     expect(screen.queryByText(/not available/i)).toBeNull()
+  })
+
+  it('CoverageSection shows partial note when coverageByType covers 1 of 2 servers', () => {
+    const view = makeView({
+      provenance: {
+        ...allAvailable(100),
+        coverageByType: { available: true, serversCovered: 1, serversTotal: 2 },
+      },
+    })
+    render(<CoverageSection view={view} dark={false} />)
+    // expect the partial string "Covers 1 of 2 servers"
+    expect(screen.getByText(/covers 1 of 2 servers/i)).toBeInTheDocument()
+  })
+
+  it('JobsComplianceSection shows partialAssets note when compliance covers 1 of 2 servers with assets', () => {
+    const view = makeView({
+      provenance: {
+        ...allAvailable(3886),
+        compliance: {
+          available: true,
+          serversCovered: 1,
+          serversTotal: 2,
+          assetsCovered: 370,
+          assetsTotal: 3886,
+        },
+      },
+    })
+    render(<JobsComplianceSection view={view} dark={false} />)
+    // expect the partialAssets string containing server counts and asset counts
+    expect(screen.getByText(/covers 1 of 2 servers/i)).toBeInTheDocument()
+    expect(screen.getByText(/370 of 3886 assets/i)).toBeInTheDocument()
   })
 })

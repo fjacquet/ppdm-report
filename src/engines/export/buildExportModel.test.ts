@@ -280,6 +280,27 @@ describe('buildExportModel', () => {
     expect(compliance?.deck?.caveat ?? compliance?.notes?.join(' ')).toMatch(/not available/i)
   })
 
+  it('adds a partialAssets caveat when compliance has partial asset coverage', () => {
+    const partialView: ReportView = {
+      ...view,
+      provenance: {
+        ...allAvailable(3886),
+        compliance: {
+          available: true,
+          serversCovered: 1,
+          serversTotal: 2,
+          assetsCovered: 370,
+          assetsTotal: 3886,
+        },
+      },
+    }
+    const model = buildExportModel(partialView, 'assessment', 'light', t, 'en', [])
+    const compliance = model.sections.find((s) => s.id === 'compliance')
+    const caveatOrNotes = compliance?.deck?.caveat ?? compliance?.notes?.join(' ') ?? ''
+    expect(caveatOrNotes).toMatch(/1 of 2 servers/)
+    expect(caveatOrNotes).toMatch(/370 of 3886 assets/)
+  })
+
   it('does not add a caveat when provenance is fully available (byte-identical detail export)', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en', [])
     const compliance = model.sections.find((s) => s.id === 'compliance')
