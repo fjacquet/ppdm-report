@@ -217,6 +217,23 @@ describe('buildExportModel', () => {
     expect(gaps?.deck?.caveat).toMatch(/Excel/)
   })
 
+  it('omits the per-server section for a single source', () => {
+    const model = buildExportModel(view, 'assessment', 'light', t, 'en')
+    expect(model.sections.find((s) => s.id === 'perServer')).toBeUndefined()
+  })
+
+  it('emits a per-server section with one bar per server when multi-source', () => {
+    const perServer = [
+      { label: 'ppdm-a', version: '19.22', view },
+      { label: 'ppdm-b', version: '19.21', view },
+    ]
+    const model = buildExportModel(view, 'assessment', 'light', t, 'en', perServer)
+    const section = model.sections.find((s) => s.id === 'perServer')
+    expect(section).toBeDefined()
+    expect(section?.deck?.bars).toHaveLength(2)
+    expect(model.sections[0]?.id).toBe('perServer')
+  })
+
   it('coverage deck bars are capped at 6 and sorted descending by pct', () => {
     const localView = {
       ...view,
