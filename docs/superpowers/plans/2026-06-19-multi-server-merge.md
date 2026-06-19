@@ -19,7 +19,8 @@
 - i18n: any new UI string key MUST be added to all four locales (`en`, `de`, `fr`, `it`) in the same step — `src/i18n/keyParity.test.ts` enforces parity.
 - KISS / DRY / YAGNI / FP: reuse `buildReportView`; do not duplicate metric logic.
 - TDD: write the failing test first; commit after each green step. Run the full suite with `npm test -- --run`; a single file with `npm test -- --run <path>`.
-- Lint/format with Biome: `npx biome check --write <paths>` before each commit; type-check with `npx tsc -p tsconfig.app.json --noEmit`.
+- Lint/format with Biome: `npx biome check --write <paths>` before each commit.
+- Type-check with `npm run typecheck` (= `tsc --noEmit && tsc --noEmit -p tsconfig.test.json`) — this is what CI runs, and it checks BOTH source and test files. Note `tsconfig.test.json` has `noUncheckedIndexedAccess`, so in tests guard indexed access: `rows[0] ? Object.keys(rows[0]) : []`, and read possibly-absent map entries with optional chaining (`merged.sheets.Copies?.rows`) — Biome forbids `!` non-null assertions.
 
 ---
 
