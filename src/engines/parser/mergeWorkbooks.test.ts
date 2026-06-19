@@ -4,7 +4,7 @@ import { buildReportView } from '../aggregation/reportView'
 import { mergeWorkbooks } from './mergeWorkbooks'
 
 function sheet(name: string, rows: Record<string, string | number>[], capped = false): SheetData {
-  const headers = rows.length ? Object.keys(rows[0]) : []
+  const headers = rows[0] ? Object.keys(rows[0]) : []
   return { name, headers, rows, capped }
 }
 
@@ -50,9 +50,9 @@ describe('mergeWorkbooks — multiple sources', () => {
     const a = wb({ sheets: { Copies: sheet('Copies', [{ A: 1 }], true) } })
     const b = wb({ sheets: { Copies: sheet('Copies', [{ A: 2, B: 3 }], false) } })
     const merged = mergeWorkbooks([srv('a', a), srv('b', b)])
-    expect(merged.sheets.Copies.rows).toEqual([{ A: 1 }, { A: 2, B: 3 }])
-    expect(merged.sheets.Copies.headers).toEqual(['A', 'B'])
-    expect(merged.sheets.Copies.capped).toBe(true)
+    expect(merged.sheets.Copies?.rows).toEqual([{ A: 1 }, { A: 2, B: 3 }])
+    expect(merged.sheets.Copies?.headers).toEqual(['A', 'B'])
+    expect(merged.sheets.Copies?.capped).toBe(true)
   })
 
   it('unions sheet names across sources', () => {
