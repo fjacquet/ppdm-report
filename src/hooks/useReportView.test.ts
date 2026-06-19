@@ -32,22 +32,26 @@ describe('useReportView', () => {
     expect(result.current).toBeNull()
   })
 
-  it('single server: combined present, multiSource false, perServer length 1', () => {
+  it('single server: one product section, multiSource false, perServer length 1', () => {
     useReportStore
       .getState()
       .addServers([srv('a', wb('ACME', { 'PowerProtect Version': '19.22' }))])
     const { result } = renderHook(() => useReportView())
-    expect(result.current?.multiSource).toBe(false)
-    expect(result.current?.perServer).toHaveLength(1)
-    expect(result.current?.perServer[0]?.version).toBe('19.22')
-    expect(result.current?.combined.meta.customer).toBe('ACME')
+    expect(result.current?.multiProduct).toBe(false)
+    expect(result.current?.products).toHaveLength(1)
+    const estate = result.current?.products[0]?.estate
+    expect(estate?.multiSource).toBe(false)
+    expect(estate?.perServer).toHaveLength(1)
+    expect(estate?.perServer[0]?.version).toBe('19.22')
+    expect(estate?.combined.meta.customer).toBe('ACME')
   })
 
-  it('two servers: multiSource true, perServer length 2', () => {
+  it('two servers: one product section, multiSource true, perServer length 2', () => {
     useReportStore.getState().addServers([srv('a', wb('ACME')), srv('b', wb('ACME'))])
     const { result } = renderHook(() => useReportView())
-    expect(result.current?.multiSource).toBe(true)
-    expect(result.current?.perServer.map((p) => p.label)).toEqual(['a', 'b'])
+    const estate = result.current?.products[0]?.estate
+    expect(estate?.multiSource).toBe(true)
+    expect(estate?.perServer.map((p) => p.label)).toEqual(['a', 'b'])
   })
 
   it('merges a summary server into the estate with a coverage note and umbrella warning', () => {
@@ -57,7 +61,7 @@ describe('useReportView', () => {
       .getState()
       .addServers([srv('detail-server', detailWb), srv('summary-server', summaryWb)])
     const { result } = renderHook(() => useReportView())
-    const estate = result.current
+    const estate = result.current?.products[0]?.estate
     expect(estate?.multiSource).toBe(true)
     expect(estate?.combined.provenance.compliance).toMatchObject({
       available: true,

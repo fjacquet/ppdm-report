@@ -1,4 +1,4 @@
-import type { CaptureMeta } from './ppdm'
+import type { CaptureMeta, ProductId } from './ppdm'
 
 export type MetricKey = 'coverageByType' | 'gapsList' | 'compliance' | 'storageTargets'
 
@@ -121,4 +121,16 @@ export interface EstateView {
   combined: ReportView
   perServer: ServerView[]
   multiSource: boolean
+}
+
+/** One product's estate within a multi-product document. */
+export interface ProductEstate {
+  product: ProductId
+  estate: EstateView
+}
+
+/** The whole loaded set: one estate section per product. No cross-product totals. */
+export interface EstateDocument {
+  products: ProductEstate[]
+  multiProduct: boolean
 }

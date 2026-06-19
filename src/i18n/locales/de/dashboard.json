@@ -55,6 +55,7 @@
     "title": "Aufschlüsselung pro Server",
     "col": { "server": "Server", "version": "Version", "captured": "Erfasst" }
   },
+  "product": { "badge": "Quellprodukt" },
   "provenance": {
     "unavailable": "Für Berichte im Summenformat nicht verfügbar",
     "partial": "Deckt {{covered}} von {{total}} Servern ab",

@@ -4,7 +4,7 @@ import { buildExportModel } from '../engines/export/buildExportModel'
 import { assembleHtml } from '../engines/export/html/assembleHtml'
 import type { ExportKind } from '../engines/export/types'
 import { useReportStore } from '../store/reportStore'
-import type { EstateView } from '../types/reportView'
+import type { EstateDocument } from '../types/reportView'
 import { useTheme } from './useTheme'
 
 const PPTX_MIME = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
@@ -24,15 +24,19 @@ function download(data: ArrayBuffer | string, filename: string, mime: string): v
 }
 
 /**
- * Drives report export on the main thread: resolves the live EstateView, flavor,
+ * Drives report export on the main thread: resolves the live EstateDocument, flavor,
  * resolved theme and active locale into a render-ready model, generates the PPTX or
  * HTML, and triggers a download. (pptxgenjs is not Web-Worker-safe, and a ~10-slide
  * deck generates in well under a second, so a worker would add risk for no benefit.)
  *
- * Takes the already-derived EstateView as an argument so it is computed once at the
+ * Takes the already-derived EstateDocument as an argument so it is computed once at the
  * app root (App's memo) rather than re-derived per consumer.
+ *
+ * Phase-1 invariant: upload rejects non-PPDM files, so a document always holds exactly
+ * one product. We operate on products[0] throughout. Multi-product export composition
+ * is deferred to a later phase — no silent truncation occurs here.
  */
-export function useExport(estate: EstateView | null) {
+export function useExport(document: EstateDocument | null) {
   const flavor = useReportStore((s) => s.flavor)
   const { resolved } = useTheme()
   const { i18n } = useTranslation()
@@ -40,6 +44,8 @@ export function useExport(estate: EstateView | null) {
   const [error, setError] = useState<string | null>(null)
 
   async function run(kind: ExportKind): Promise<void> {
+    // Phase-1: products[0] is always the sole PPDM section.
+    const estate = document?.products[0]?.estate
     if (!estate) return
     setBusy(kind)
     setError(null)
@@ -54,6 +60,7 @@ export function useExport(estate: EstateView | null) {
         estate.perServer,
       )
       const stamp = new Date().toISOString().slice(0, 10)
+      // Phase-1 product is always PPDM, so the stem uses the ppdm-report prefix.
       const base = `ppdm-report_${sanitize(estate.combined.meta.customer)}_${stamp}`
       if (kind === 'pptx') {
         // Dynamically imported so pptxgenjs + jszip stay out of the main bundle.

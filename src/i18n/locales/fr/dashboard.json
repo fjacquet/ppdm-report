@@ -55,6 +55,7 @@
     "title": "Détail par serveur",
     "col": { "server": "Serveur", "version": "Version", "captured": "Capturé le" }
   },
+  "product": { "badge": "Produit source" },
   "provenance": {
     "unavailable": "Non disponible pour les rapports au format synthétique",
     "partial": "Couvre {{covered}} serveurs sur {{total}}",
