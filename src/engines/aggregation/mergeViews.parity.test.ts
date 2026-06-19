@@ -1,5 +1,5 @@
-import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
+import { detailWorkbookBuffer } from '../../test-helpers/workbooks'
 import { mergeWorkbooks } from '../parser/mergeWorkbooks'
 import { normalizeWorkbook } from '../parser/normalizeWorkbook'
 import { mergeViews } from './mergeViews'
@@ -21,7 +21,7 @@ function strip(v: ReturnType<typeof buildReportView>) {
 
 describe('mergeViews parity with legacy sheet-level merge (detail estate)', () => {
   it('produces identical metrics for a two-server detail estate', () => {
-    const wb = normalizeWorkbook(new Uint8Array(readFileSync('ref/PPDM.xlsx')).buffer)
+    const wb = normalizeWorkbook(detailWorkbookBuffer())
     const servers = [
       { label: 'srv-a', workbook: wb },
       { label: 'srv-b', workbook: wb },
@@ -29,11 +29,11 @@ describe('mergeViews parity with legacy sheet-level merge (detail estate)', () =
     const legacy = buildReportView(mergeWorkbooks(servers))
     const next = mergeViews(servers.map((s) => buildReportView(s.workbook)))
 
-    // IEEE-754 non-associativity: per-server subtotal summation differs from raw-row summation
-    // by ~5.8e-10. Assert within 6 decimal places (far tighter than the actual delta).
+    // IEEE-754 non-associativity: per-server subtotal summation differs from raw-row summation.
+    // (With integer synthetic sizes the two paths coincide exactly; the tolerance still holds.)
     expect(next.gaps.totalCapacityGb).toBeCloseTo(legacy.gaps.totalCapacityGb, 6)
 
     // All other fields must match exactly (provenance and warnings are structurally excluded).
     expect(strip(next)).toEqual(strip(legacy))
-  }, 15_000) // PPDM.xlsx is ~2.4 MB; allow extra time when running under full parallel load
+  })
 })
