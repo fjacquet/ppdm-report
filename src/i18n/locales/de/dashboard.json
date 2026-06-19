@@ -54,5 +54,10 @@
   "perServer": {
     "title": "Aufschlüsselung pro Server",
     "col": { "server": "Server", "version": "Version", "captured": "Erfasst" }
+  },
+  "provenance": {
+    "unavailable": "Für Berichte im Summenformat nicht verfügbar",
+    "partial": "Deckt {{covered}} von {{total}} Servern ab",
+    "partialAssets": "Deckt {{covered}} von {{total}} Servern ab ({{assetsCovered}} von {{assetsTotal}} Assets)"
   }
 }

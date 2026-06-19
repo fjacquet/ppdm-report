@@ -54,5 +54,10 @@
   "perServer": {
     "title": "Per-server breakdown",
     "col": { "server": "Server", "version": "Version", "captured": "Captured" }
+  },
+  "provenance": {
+    "unavailable": "Not available for summary-format reports",
+    "partial": "Covers {{covered}} of {{total}} servers",
+    "partialAssets": "Covers {{covered}} of {{total}} servers ({{assetsCovered}} of {{assetsTotal}} assets)"
   }
 }

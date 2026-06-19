@@ -54,5 +54,10 @@
   "perServer": {
     "title": "Détail par serveur",
     "col": { "server": "Serveur", "version": "Version", "captured": "Capturé le" }
+  },
+  "provenance": {
+    "unavailable": "Non disponible pour les rapports au format synthétique",
+    "partial": "Couvre {{covered}} serveurs sur {{total}}",
+    "partialAssets": "Couvre {{covered}} serveurs sur {{total}} ({{assetsCovered}} actifs sur {{assetsTotal}})"
   }
 }
