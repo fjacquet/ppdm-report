@@ -14,7 +14,7 @@ describe('detectFormat', () => {
 
   it('classifies current per-asset exports as detail', () => {
     expect(detectFormat(load('ref/PPDM.xlsx'))).toBe('detail')
-  })
+  }, 15_000) // PPDM.xlsx is ~2.4 MB; allow extra time when running under full parallel load
 
   it('treats an unrecognized workbook as detail', () => {
     const wb = { meta: {} as never, sheets: {}, inUse: [], idleAgents: [], warnings: [] }

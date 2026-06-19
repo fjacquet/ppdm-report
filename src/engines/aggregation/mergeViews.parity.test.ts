@@ -35,5 +35,5 @@ describe('mergeViews parity with legacy sheet-level merge (detail estate)', () =
 
     // All other fields must match exactly (provenance and warnings are structurally excluded).
     expect(strip(next)).toEqual(strip(legacy))
-  })
+  }, 15_000) // PPDM.xlsx is ~2.4 MB; allow extra time when running under full parallel load
 })
