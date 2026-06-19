@@ -50,6 +50,10 @@ describe('deriveLabel helpers', () => {
     expect(deriveLabel(wbWith(null, ''), 'paris.xlsx')).toBe('paris')
   })
 
+  it('ignores whitespace-only customer and falls back to filename', () => {
+    expect(deriveLabel(wbWith(null, '   '), 'paris.xlsx')).toBe('paris')
+  })
+
   it('suffixes colliding labels', () => {
     expect(withUniqueLabel([], 'ppdm')).toBe('ppdm')
     expect(withUniqueLabel(['ppdm'], 'ppdm')).toBe('ppdm (2)')

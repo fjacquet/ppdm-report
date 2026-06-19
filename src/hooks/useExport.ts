@@ -24,12 +24,12 @@ function download(data: ArrayBuffer | string, filename: string, mime: string): v
 }
 
 /**
- * Drives report export on the main thread: resolves the live ReportView, flavor,
+ * Drives report export on the main thread: resolves the live EstateView, flavor,
  * resolved theme and active locale into a render-ready model, generates the PPTX or
  * HTML, and triggers a download. (pptxgenjs is not Web-Worker-safe, and a ~10-slide
  * deck generates in well under a second, so a worker would add risk for no benefit.)
  *
- * Takes the already-derived ReportView as an argument so it is computed once at the
+ * Takes the already-derived EstateView as an argument so it is computed once at the
  * app root (App's memo) rather than re-derived per consumer.
  */
 export function useExport(estate: EstateView | null) {

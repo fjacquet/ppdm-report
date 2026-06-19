@@ -387,17 +387,20 @@ export async function buildPptx(model: ExportModel, theme: ExportTheme): Promise
     fontFace: FONT,
   })
   if (model.warnings && model.warnings.length > 0) {
-    title.addText(`⚠ ${model.warnings.slice(0, 6).join('\n')}`, {
-      x: M,
-      y: 4.6,
-      w: CONTENT_W,
-      h: 2.2,
-      fontSize: 10,
-      italic: true,
-      color: hx(p.muted),
-      valign: 'top',
-      fontFace: FONT,
-    })
+    title.addText(
+      `⚠ ${model.warningsTitle ?? 'Data caveats'}\n${model.warnings.slice(0, 6).join('\n')}`,
+      {
+        x: M,
+        y: 4.6,
+        w: CONTENT_W,
+        h: 2.2,
+        fontSize: 10,
+        italic: true,
+        color: hx(p.muted),
+        valign: 'top',
+        fontFace: FONT,
+      },
+    )
   }
 
   // Executive summary (full-width single)

@@ -240,6 +240,11 @@ describe('buildExportModel', () => {
     expect(model.warnings).toEqual(['cap note', 'merge note'])
   })
 
+  it('includes the localized warnings title', () => {
+    const model = buildExportModel(view, 'assessment', 'light', t, 'en')
+    expect(model.warningsTitle).toBe('Data caveats')
+  })
+
   it('coverage deck bars are capped at 6 and sorted descending by pct', () => {
     const localView = {
       ...view,

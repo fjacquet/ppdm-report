@@ -15,6 +15,7 @@ export function UploadZone() {
 
   function onChange(e: ChangeEvent<HTMLInputElement>) {
     handleFiles(e.target.files)
+    e.target.value = ''
   }
 
   function onDrop(e: DragEvent<HTMLDivElement>) {

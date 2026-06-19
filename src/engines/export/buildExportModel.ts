@@ -457,6 +457,7 @@ export function buildExportModel(
     sections,
     footer: footerParts.join(' · '),
     warnings: [...new Set(view.warnings)],
+    warningsTitle: t('common:warnings.title'),
     posture,
   }
 }

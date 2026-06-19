@@ -24,7 +24,8 @@ export function appVersion(wb: ParsedWorkbook): string {
 export function deriveLabel(wb: ParsedWorkbook, filename: string): string {
   const host = appHostName(wb)
   if (host) return host
-  if (wb.meta.customer) return wb.meta.customer
+  const customer = wb.meta.customer.trim()
+  if (customer) return customer
   return filename.replace(/\.xlsx$/i, '')
 }
 

@@ -130,7 +130,7 @@ export function assembleHtml(model: ExportModel, theme: ExportTheme): string {
   const posture = model.posture ? postureHtml(model.posture) : ''
   const warnings =
     model.warnings && model.warnings.length > 0
-      ? `<section class="warnings"><h2>⚠ ${esc('Data caveats')}</h2><ul>${model.warnings
+      ? `<section class="warnings"><h2>⚠ ${esc(model.warningsTitle ?? 'Data caveats')}</h2><ul>${model.warnings
           .map((w) => `<li>${esc(w)}</li>`)
           .join('')}</ul></section>`
       : ''

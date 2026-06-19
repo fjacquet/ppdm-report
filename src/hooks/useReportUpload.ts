@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { deriveLabel } from '../engines/parser/deriveLabel'
 import { parseInWorker } from '../engines/parser/parseInWorker'
 import { useReportStore } from '../store/reportStore'
@@ -8,8 +8,11 @@ export function useReportUpload() {
   const addServers = useReportStore((s) => s.addServers)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const inFlight = useRef(false)
 
   async function upload(files: File[]): Promise<void> {
+    if (inFlight.current) return
+    inFlight.current = true
     setBusy(true)
     setError(null)
     const ready: ServerWorkbook[] = []
@@ -26,6 +29,7 @@ export function useReportUpload() {
       if (ready.length > 0) addServers(ready)
       if (failed.length > 0) setError(`Could not parse: ${failed.join(', ')}`)
     } finally {
+      inFlight.current = false
       setBusy(false)
     }
   }
