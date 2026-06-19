@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
+import { allAvailable, allUnavailable } from '../aggregation/provenance'
 import { buildExportModel } from './buildExportModel'
 
 const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, o) as string
@@ -50,6 +51,9 @@ const view: ReportView = {
     appConsistentPct: 0.77,
     immutablePct: 0,
     replicatedPct: 0.32,
+    appConsistentCount: 7700,
+    immutableCount: 0,
+    replicatedCount: 3200,
     backupLevelMix: {},
     windowSize: 10000,
     capped: true,
@@ -60,6 +64,7 @@ const view: ReportView = {
     mtreeCount: 17,
   },
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
+  provenance: allAvailable(0),
 }
 
 describe('buildExportModel', () => {
@@ -266,5 +271,47 @@ describe('buildExportModel', () => {
     )
     expect(cov?.deck?.bars).toHaveLength(6)
     expect(cov?.deck?.bars?.[0]?.label).toBe('TypeD')
+  })
+
+  it('appends an unavailable caveat to detail-only sections for summary provenance', () => {
+    const summaryView: ReportView = { ...view, provenance: allUnavailable(100) }
+    const model = buildExportModel(summaryView, 'assessment', 'light', t, 'en', [])
+    const compliance = model.sections.find((s) => s.id === 'compliance')
+    expect(compliance?.deck?.caveat ?? compliance?.notes?.join(' ')).toMatch(/not available/i)
+  })
+
+  it('adds a partialAssets caveat when compliance has partial asset coverage', () => {
+    const partialView: ReportView = {
+      ...view,
+      provenance: {
+        ...allAvailable(3886),
+        compliance: {
+          available: true,
+          serversCovered: 1,
+          serversTotal: 2,
+          assetsCovered: 370,
+          assetsTotal: 3886,
+        },
+      },
+    }
+    const model = buildExportModel(partialView, 'assessment', 'light', t, 'en', [])
+    const compliance = model.sections.find((s) => s.id === 'compliance')
+    const caveatOrNotes = compliance?.deck?.caveat ?? compliance?.notes?.join(' ') ?? ''
+    expect(caveatOrNotes).toMatch(/1 of 2 servers/)
+    expect(caveatOrNotes).toMatch(/370 of 3886 assets/)
+  })
+
+  it('does not add a caveat when provenance is fully available (byte-identical detail export)', () => {
+    const model = buildExportModel(view, 'assessment', 'light', t, 'en', [])
+    const compliance = model.sections.find((s) => s.id === 'compliance')
+    const coverage = model.sections.find((s) => s.id === 'coverage')
+    const gaps = model.sections.find((s) => s.id === 'gaps')
+    const capacity = model.sections.find((s) => s.id === 'capacity')
+    // none of the four detail-only sections should carry a provenance caveat
+    const hasUnavailable = (notes?: string[]) => (notes ?? []).some((n) => /not available/i.test(n))
+    expect(hasUnavailable(compliance?.notes)).toBe(false)
+    expect(hasUnavailable(coverage?.notes)).toBe(false)
+    expect(hasUnavailable(gaps?.notes)).toBe(false)
+    expect(hasUnavailable(capacity?.notes)).toBe(false)
   })
 })

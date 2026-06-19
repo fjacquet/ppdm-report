@@ -15,9 +15,19 @@ export function appHostName(wb: ParsedWorkbook): string {
   return field(wb, 'Host Name')
 }
 
-/** PowerProtect (PPDM) version from System Information; '' when absent. */
+/** A System Information field with 'N/A' normalized to empty. */
+function ppdmField(wb: ParsedWorkbook, key: string): string {
+  const v = field(wb, key)
+  return v.toUpperCase() === 'N/A' ? '' : v
+}
+
+/** PPDM version from System Information; falls back through naming variants. '' when absent. */
 export function appVersion(wb: ParsedWorkbook): string {
-  return field(wb, 'PowerProtect Version')
+  return (
+    ppdmField(wb, 'PowerProtect Version') ||
+    ppdmField(wb, 'Power Protect Version') ||
+    ppdmField(wb, 'Product Version')
+  )
 }
 
 /** A server's display label: appliance host name → Project Name → filename. */

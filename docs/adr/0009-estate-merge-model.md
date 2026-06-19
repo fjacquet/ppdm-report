@@ -35,3 +35,13 @@ surfaced in the dashboard and both exports. A server's label is the appliance
   *files* are flagged, not removed.
 - Capacity figures across mixed base-10/base-2 sources are flagged, not
   converted (the app surfaces utilization % and mtree counts, not summed bytes).
+
+## Amendment — format-aware ingestion (ADR 0010)
+
+The runtime merge path has moved from the sheet level to the view level.
+`useReportView` now calls `buildReportView(s.workbook)` per server to obtain a
+`ReportView`, then folds the results with `mergeViews`
+(`src/engines/aggregation/mergeViews.ts`). `mergeWorkbooks` is retained as the
+parity reference for the `mergeViews.parity.test.ts` gate but is no longer on
+the runtime path. The estate model — warnings, labels, always-warn/never-block
+policy, `EstateView` shape — is unchanged. See [ADR 0010](0010-format-aware-ingestion.md).

@@ -2,11 +2,11 @@ import type { ParsedWorkbook } from '../../types/ppdm'
 import type { Coverage, CoverageBand } from '../../types/reportView'
 import { cellStr } from './rows'
 
-function emptyBand(): CoverageBand {
+export function emptyBand(): CoverageBand {
   return { protected: 0, unprotected: 0, excluded: 0, pct: 0, pctInclExcluded: 0 }
 }
 
-function finalize(b: CoverageBand): CoverageBand {
+export function finalizeBand(b: CoverageBand): CoverageBand {
   const denom = b.protected + b.unprotected
   const denomAll = denom + b.excluded
   return {
@@ -34,8 +34,8 @@ export function computeCoverage(wb: ParsedWorkbook): Coverage {
     overall.protected += band.protected
     overall.unprotected += band.unprotected
     overall.excluded += band.excluded
-    byType[name] = finalize(band)
+    byType[name] = finalizeBand(band)
   }
 
-  return { byType, overall: finalize(overall) }
+  return { byType, overall: finalizeBand(overall) }
 }

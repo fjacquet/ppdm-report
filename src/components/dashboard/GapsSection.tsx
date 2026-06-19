@@ -7,6 +7,7 @@ import { fmtInt, formatBytes, gbToBytes } from '../../utils/format'
 import { Chart } from '../Chart'
 import { Details } from '../Details'
 import { type BarDatum, horizontalBarOption } from './barOption'
+import { ProvenanceNote } from './ProvenanceNote'
 
 interface GapsSectionProps {
   view: ReportView
@@ -106,6 +107,7 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
           </Details>
         </>
       )}
+      <ProvenanceNote p={view.provenance.gapsList} dark={dark} />
     </section>
   )
 }

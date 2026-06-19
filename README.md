@@ -30,6 +30,7 @@ Key capabilities:
 - **Auto dark mode** — follows `prefers-color-scheme`; light/dark override persisted in `localStorage`.
 - **FR / EN / DE / IT** — full UI and export strings; a key-parity test fails CI on any missing translation key.
 - **Multi-server estate** — drop several Live Optics exports to merge them into one combined report, with a per-server breakdown and clear caveats when sources don't cleanly combine.
+- **Summary-format support** — older PPDM releases produce pre-aggregated "summary" exports (sheets named `... Count And Cap` / `... Assets & Cap`) rather than per-asset rows. These are supported and can be mixed freely with current detail exports in the same estate. Overall coverage counts, capacity, jobs, policies, DD mtree count, and in-use agent types are recovered from summary files. Per-asset detail — per-type coverage breakdown, the unprotected-asset list, copy compliance (immutability / replication), and storage-target utilization — is not present in older exports and is shown as "not available" with a coverage note indicating how many servers contributed that metric.
 - **PPTX + HTML export** — both follow the live theme (light or dark) and the selected language. PPTX filename: `ppdm-report_<customer>_<ISO date>.pptx`. HTML is self-contained, CSS-inlined, zero JavaScript.
 
 ---

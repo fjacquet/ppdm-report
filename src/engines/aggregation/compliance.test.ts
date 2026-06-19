@@ -73,4 +73,38 @@ describe('computeCompliance', () => {
     expect(c.windowSize).toBe(0)
     expect(c.appConsistentPct).toBe(0)
   })
+
+  it('exposes raw numerators alongside percentages', () => {
+    const wb = {
+      meta: {} as never,
+      sheets: {
+        Copies: {
+          name: 'Copies',
+          headers: ['Data Consistency', 'Lock Status', 'Replica', 'Backup Level'],
+          rows: [
+            {
+              'Data Consistency': 'APPLICATION_CONSISTENT',
+              'Lock Status': 'GOVERNANCE',
+              Replica: 'TRUE',
+              'Backup Level': 'FULL',
+            },
+            {
+              'Data Consistency': 'CRASH_CONSISTENT',
+              'Lock Status': 'ALL_COPIES_UNLOCKED',
+              Replica: 'FALSE',
+              'Backup Level': 'FULL',
+            },
+          ],
+          capped: false,
+        },
+      },
+      inUse: [],
+      idleAgents: [],
+      warnings: [],
+    }
+    const c = computeCompliance(wb)
+    expect(c.appConsistentCount).toBe(1)
+    expect(c.immutableCount).toBe(1)
+    expect(c.replicatedCount).toBe(1)
+  })
 })

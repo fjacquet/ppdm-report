@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { summaryWorkbookBuffer } from '../../test-helpers/workbooks'
 import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import { normalizeWorkbook } from '../parser/normalizeWorkbook'
+import { allAvailable } from './provenance'
 import { buildReportView } from './reportView'
 
 function sheet(name: string, rows: Array<Record<string, string>>): SheetData {
@@ -43,5 +46,12 @@ describe('buildReportView', () => {
     expect(view.jobs.total).toBe(0) // no job sheet → safe zero
     expect(view.compliance.windowSize).toBe(0)
     expect(view.capacity.mtreeCount).toBe(0)
+    expect(view.provenance).toEqual(allAvailable(2))
+  })
+
+  it('dispatches summary-format workbooks to the summary extractor', () => {
+    const view = buildReportView(normalizeWorkbook(summaryWorkbookBuffer()))
+    expect(view.coverage.overall.protected).toBe(80)
+    expect(view.provenance.compliance.available).toBe(false)
   })
 })

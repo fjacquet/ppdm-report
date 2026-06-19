@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import i18n from '../../../i18n'
 import type { ReportView } from '../../../types/reportView'
+import { allAvailable } from '../../aggregation/provenance'
 import { buildExportModel } from '../buildExportModel'
 import { assembleHtml } from './assembleHtml'
 
@@ -51,6 +52,9 @@ const view: ReportView = {
     appConsistentPct: 0.77,
     immutablePct: 0,
     replicatedPct: 0.32,
+    appConsistentCount: 7700,
+    immutableCount: 0,
+    replicatedCount: 3200,
     backupLevelMix: {},
     windowSize: 10000,
     capped: true,
@@ -61,6 +65,7 @@ const view: ReportView = {
     mtreeCount: 17,
   },
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
+  provenance: allAvailable(0),
 }
 
 const model = (locale = 'en') => buildExportModel(view, 'assessment', 'light', t, locale)

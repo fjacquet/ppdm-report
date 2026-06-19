@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { allAvailable } from '../../engines/aggregation/provenance'
 import i18n from '../../i18n'
 import { useReportStore } from '../../store/reportStore'
 import type { ReportView } from '../../types/reportView'
@@ -50,6 +51,9 @@ const fixture: ReportView = {
     appConsistentPct: 0.8,
     immutablePct: 0,
     replicatedPct: 0.7,
+    appConsistentCount: 80,
+    immutableCount: 0,
+    replicatedCount: 70,
     backupLevelMix: {},
     windowSize: 100,
     capped: false,
@@ -66,6 +70,7 @@ const fixture: ReportView = {
       { name: 'SQL - Prod', purpose: 'CENTRALIZED', assetCount: 380, protectionCapacityGb: 1234.5 },
     ],
   },
+  provenance: allAvailable(0),
 }
 
 describe('Dashboard', () => {

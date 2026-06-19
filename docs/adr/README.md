@@ -12,3 +12,5 @@ This directory contains the Architecture Decision Records (ADRs) for ppdm-report
 | [0006](0006-report-flavors.md) | Two Report Flavors Over One Shared Metric Engine | Accepted |
 | [0007](0007-pptx-main-thread-dynamic-import.md) | Dual-Theme PPTX + HTML Export on the Main Thread; pptxgenjs Dynamically Imported | Accepted |
 | [0008](0008-xlsx-cdn-pin.md) | xlsx Pinned to the SheetJS CDN Tarball; Supply-Chain CI Gate | Accepted |
+| [0009](0009-estate-merge-model.md) | Estate Merge Model (Multiple PPDM Servers) | Accepted |
+| [0010](0010-format-aware-ingestion.md) | Format-Aware Ingestion: Summary vs Detail PPDM Exports | Accepted |

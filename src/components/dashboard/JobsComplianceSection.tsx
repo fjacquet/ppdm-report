@@ -9,6 +9,7 @@ import { Chart } from '../Chart'
 import { Details } from '../Details'
 import { KpiCard } from '../KpiCard'
 import { type BarDatum, horizontalBarOption } from './barOption'
+import { ProvenanceNote } from './ProvenanceNote'
 
 interface JobsComplianceSectionProps {
   view: ReportView
@@ -145,6 +146,7 @@ export function JobsComplianceSection({ view, dark }: JobsComplianceSectionProps
           {t('common:capped', { n: fmtInt(compliance.windowSize, locale) })}
         </p>
       )}
+      <ProvenanceNote p={view.provenance.compliance} dark={dark} />
     </section>
   )
 }

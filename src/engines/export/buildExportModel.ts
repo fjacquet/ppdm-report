@@ -1,6 +1,6 @@
 import type { Palette } from '../../theme/palette'
 import { DARK, LIGHT } from '../../theme/palette'
-import type { ReportView, ServerView } from '../../types/reportView'
+import type { MetricKey, MetricProvenance, ReportView, ServerView } from '../../types/reportView'
 import {
   fmtInt,
   fmtPercent,
@@ -23,6 +23,36 @@ import type {
 
 /** Minimal translator surface (i18next TFunction, resolving `ns:key`). */
 type TFn = (key: string, opts?: Record<string, unknown>) => string
+
+/** Localized provenance caveat for a detail-only section; '' when fully available. */
+function provenanceCaveat(p: MetricProvenance, t: TFn): string {
+  if (p.available && p.serversCovered >= p.serversTotal) return ''
+  if (!p.available) return t('dashboard:provenance.unavailable')
+  return p.assetsCovered !== undefined && p.assetsTotal !== undefined
+    ? t('dashboard:provenance.partialAssets', {
+        covered: p.serversCovered,
+        total: p.serversTotal,
+        assetsCovered: p.assetsCovered,
+        assetsTotal: p.assetsTotal,
+      })
+    : t('dashboard:provenance.partial', { covered: p.serversCovered, total: p.serversTotal })
+}
+
+/** Fold a provenance caveat into a section's notes + deck caveat. */
+function withCaveat(
+  section: ExportSection,
+  key: MetricKey,
+  view: ReportView,
+  t: TFn,
+): ExportSection {
+  const note = provenanceCaveat(view.provenance[key], t)
+  if (!note) return section
+  return {
+    ...section,
+    notes: [...(section.notes ?? []), note],
+    deck: { ...section.deck, caveat: [section.deck?.caveat, note].filter(Boolean).join(' · ') },
+  }
+}
 
 /** Build ratio-normalized bars from (label, magnitude) pairs.
  * magnitude may be a 0..1 ratio (percent bars fill relative to 100%) or a raw count (bars normalize to the largest value). */
@@ -400,12 +430,12 @@ export function buildExportModel(
 
   const byId: Record<SectionId, ExportSection | null> = {
     perServer: perServerSection,
-    coverage: coverageSection,
-    gaps: gapsSection,
+    coverage: withCaveat(coverageSection, 'coverageByType', view, t),
+    gaps: withCaveat(gapsSection, 'gapsList', view, t),
     idle: idleSection,
     jobs: jobsSection,
-    compliance: complianceSection,
-    capacity: capacitySection,
+    compliance: withCaveat(complianceSection, 'compliance', view, t),
+    capacity: withCaveat(capacitySection, 'storageTargets', view, t),
     policies: policiesSection,
   }
   const sections = SECTION_ORDER[flavor]

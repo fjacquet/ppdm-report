@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { allAvailable, allUnavailable } from '../../engines/aggregation/provenance'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { CapacitySection } from './CapacitySection'
@@ -55,6 +56,9 @@ const fixture: ReportView = {
     appConsistentPct: 0.8,
     immutablePct: 0,
     replicatedPct: 0.7,
+    appConsistentCount: 80,
+    immutableCount: 0,
+    replicatedCount: 70,
     backupLevelMix: {},
     windowSize: 100,
     capped: false,
@@ -69,6 +73,7 @@ const fixture: ReportView = {
     byPurpose: {},
     perPolicy: [],
   },
+  provenance: allAvailable(0),
 }
 
 describe('ExecutiveKpis', () => {
@@ -233,6 +238,9 @@ const jobsComplianceFixture: ReportView = {
     appConsistentPct: 0.77,
     immutablePct: 0,
     replicatedPct: 0.32,
+    appConsistentCount: 7700,
+    immutableCount: 0,
+    replicatedCount: 3200,
     capped: true,
     windowSize: 10000,
     backupLevelMix: {},
@@ -342,5 +350,122 @@ describe('PoliciesSection', () => {
     expect(screen.getByText('Show details')).toBeInTheDocument()
     expect(screen.getAllByText('CENTRALIZED').length).toBeGreaterThan(0)
     expect(screen.getByText('SQL - Prod')).toBeInTheDocument()
+  })
+})
+
+// ── Provenance notes (summary-format) ────────────────────────────────────────
+
+const makeView = (overrides: Partial<ReportView>): ReportView => ({ ...fixture, ...overrides })
+
+// ── ExecutiveKpis — compliance provenance gate ────────────────────────────────
+
+describe('ExecutiveKpis — compliance provenance gate', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('shows em-dash for Immutable KPI when compliance provenance is unavailable', () => {
+    const view = makeView({
+      provenance: allUnavailable(100),
+      compliance: { ...fixture.compliance, immutablePct: 0 },
+    })
+    render(<ExecutiveKpis view={view} />)
+    // "—" must be present (the KpiCard value)
+    expect(screen.getByText('—')).toBeInTheDocument()
+    // "0%" must NOT appear as the immutable value
+    expect(screen.queryByText('0%')).toBeNull()
+  })
+
+  it('shows immutable percent when compliance provenance is available', () => {
+    const view = makeView({
+      provenance: allAvailable(100),
+      compliance: { ...fixture.compliance, immutablePct: 0.42 },
+    })
+    render(<ExecutiveKpis view={view} />)
+    expect(screen.getByText('42%')).toBeInTheDocument()
+    expect(screen.queryByText('—')).toBeNull()
+  })
+})
+
+describe('ProvenanceNote integration — summary-format provenance', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('CapacitySection shows the unavailable note for summary provenance', () => {
+    const view = makeView({ provenance: allUnavailable(100) })
+    render(<CapacitySection view={view} dark={false} />)
+    expect(screen.getByText(/not available/i)).toBeInTheDocument()
+  })
+
+  it('JobsComplianceSection shows the unavailable note for summary provenance', () => {
+    const view = makeView({ provenance: allUnavailable(100) })
+    render(<JobsComplianceSection view={view} dark={false} />)
+    expect(screen.getByText(/not available/i)).toBeInTheDocument()
+  })
+
+  it('CoverageSection shows the unavailable note for summary provenance', () => {
+    const view = makeView({ provenance: allUnavailable(100) })
+    render(<CoverageSection view={view} dark={false} />)
+    expect(screen.getByText(/not available/i)).toBeInTheDocument()
+  })
+
+  it('GapsSection shows the unavailable note for summary provenance', () => {
+    const view = makeView({ provenance: allUnavailable(100) })
+    render(<GapsSection view={view} dark={false} />)
+    expect(screen.getByText(/not available/i)).toBeInTheDocument()
+  })
+
+  it('CapacitySection shows NO provenance note when fully available', () => {
+    render(<CapacitySection view={capacityFixture} dark={false} />)
+    expect(screen.queryByText(/not available/i)).toBeNull()
+  })
+
+  it('JobsComplianceSection shows NO provenance note when fully available', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
+    expect(screen.queryByText(/not available/i)).toBeNull()
+  })
+
+  it('CoverageSection shows NO provenance note when fully available', () => {
+    render(<CoverageSection view={fixture} dark={false} />)
+    expect(screen.queryByText(/not available/i)).toBeNull()
+  })
+
+  it('GapsSection shows NO provenance note when fully available', () => {
+    render(<GapsSection view={gapsFixture} dark={false} />)
+    expect(screen.queryByText(/not available/i)).toBeNull()
+  })
+
+  it('CoverageSection shows partial note when coverageByType covers 1 of 2 servers', () => {
+    const view = makeView({
+      provenance: {
+        ...allAvailable(100),
+        coverageByType: { available: true, serversCovered: 1, serversTotal: 2 },
+      },
+    })
+    render(<CoverageSection view={view} dark={false} />)
+    // expect the partial string "Covers 1 of 2 servers"
+    expect(screen.getByText(/covers 1 of 2 servers/i)).toBeInTheDocument()
+  })
+
+  it('JobsComplianceSection shows partialAssets note when compliance covers 1 of 2 servers with assets', () => {
+    const view = makeView({
+      provenance: {
+        ...allAvailable(3886),
+        compliance: {
+          available: true,
+          serversCovered: 1,
+          serversTotal: 2,
+          assetsCovered: 370,
+          assetsTotal: 3886,
+        },
+      },
+    })
+    render(<JobsComplianceSection view={view} dark={false} />)
+    // expect the partialAssets string containing server counts and asset counts
+    expect(screen.getByText(/covers 1 of 2 servers/i)).toBeInTheDocument()
+    expect(screen.getByText(/370 of 3886 assets/i)).toBeInTheDocument()
   })
 })
