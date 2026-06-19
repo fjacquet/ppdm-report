@@ -1,7 +1,8 @@
-import type { CaptureMeta, ParsedWorkbook, ServerWorkbook, SheetData } from '../../types/ppdm'
+import type { ParsedWorkbook, ServerWorkbook, SheetData } from '../../types/ppdm'
 import { LIVE_OPTICS_ROW_CAP } from '../../types/ppdm'
 import { appHostName } from './deriveLabel'
 import { classifyAgents } from './detectInUse'
+import { foldMeta } from './foldMeta'
 
 /** Fold N parsed PPDM workbooks into one estate workbook. Pure.
  * Single source returns that workbook unchanged (identity). */
@@ -38,23 +39,7 @@ export function mergeWorkbooks(servers: ServerWorkbook[]): ParsedWorkbook {
 
   const { inUse, idleAgents } = classifyAgents(Object.values(sheets))
 
-  const metas = workbooks.map((w) => w.meta)
-  const dates = metas
-    .map((m) => m.capturedAt)
-    .filter(Boolean)
-    .sort()
-  const firstMeta = first.workbook.meta
-  const meta: CaptureMeta = {
-    projectId: firstMeta.projectId,
-    customer: firstMeta.customer,
-    collectorBuild: firstMeta.collectorBuild,
-    capturedAt: dates.at(-1) ?? '',
-    baseTen: metas.every((m) => m.baseTen)
-      ? true
-      : metas.every((m) => !m.baseTen)
-        ? false
-        : firstMeta.baseTen,
-  }
+  const meta = foldMeta(workbooks.map((w) => w.meta))
 
   return { meta, sheets, inUse, idleAgents, warnings: mergeWarnings(servers) }
 }
