@@ -1,6 +1,13 @@
 # ppdm-report
 
 [![CI](https://github.com/fjacquet/ppdm-report/actions/workflows/ci.yml/badge.svg)](https://github.com/fjacquet/ppdm-report/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/fjacquet/ppdm-report?sort=semver&label=release)](https://github.com/fjacquet/ppdm-report/releases)
+[![PWA](https://img.shields.io/badge/PWA-installable%20%C2%B7%20offline-5A0FC8?logo=pwa&logoColor=white)](docs/USER-GUIDE.md)
+[![Privacy](https://img.shields.io/badge/privacy-100%25%20client--side-2ea44f)](docs/adr/0001-privacy-invariant.md)
+
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vite.dev)
 
 Drop a Dell Live Optics PPDM `.xlsx` extract and get a professional, multilingual dashboard with one-click PPTX and HTML export — 100% client-side. Your workbook never leaves the browser.
 
