@@ -64,6 +64,19 @@ When two or more servers are loaded, a **Per-server breakdown** section appears 
 
 If the app detects a potential issue — sources with mismatched base-10 / base-2 unit conventions, what looks like the same file loaded twice (matching appliance host or project and snapshot), or sheets that are capped across multiple sources — it raises a warning in the dashboard and in both exports. These warnings are informational: they never block the report from loading or exporting. Review them to decide whether the combination of sources is meaningful for your analysis.
 
+### Mixing older summary-format exports with current exports
+
+Older PPDM releases produce a different export format: instead of per-asset rows the workbook carries pre-aggregated sheets named with patterns like `VMs Count And Cap` or `FileSystem Assets Count & Cap`. These **summary-format** exports are accepted and can be loaded alongside current **detail-format** exports in the same estate session.
+
+Summary exports recover overall coverage counts (protected, unprotected, excluded), unprotected capacity, job result distribution, policy list, in-use agent types, and Data Domain mtree count. Four metrics are not present in older exports and are shown as **"not available"** with a note indicating how many servers in the estate contributed that data:
+
+- **Per-type coverage breakdown** — protected / unprotected / excluded counts for each asset type
+- **Unprotected-asset list** — the ranked list of unprotected assets by size
+- **Copy compliance** — app-consistency, immutability, and replication percentages
+- **Storage-target utilization** — Data Domain and protection storage target utilization percentages
+
+When an estate mixes detail and summary exports the dashboard raises an informational warning so you know which metrics are partial.
+
 ---
 
 ## 4. Reading the dashboard
