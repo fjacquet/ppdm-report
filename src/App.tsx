@@ -38,7 +38,7 @@ export default function App() {
       <main className="space-y-6 p-6">
         <UploadZone />
         <ServerList />
-        {view && <Dashboard view={view.combined} />}
+        {view && <Dashboard view={view.combined} perServer={view.perServer} />}
       </main>
       <PwaUpdater />
     </div>

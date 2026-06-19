@@ -50,5 +50,9 @@
     "unprotected": "Unprotected",
     "jobSuccess": "Job success rate",
     "immutable": "Immutable"
+  },
+  "perServer": {
+    "title": "Per-server breakdown",
+    "col": { "server": "Server", "version": "Version", "captured": "Captured" }
   }
 }
