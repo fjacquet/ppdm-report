@@ -10,6 +10,9 @@
     "clearAll": "Tout effacer",
     "remove": "Supprimer {{label}}"
   },
+  "warnings": {
+    "title": "Mises en garde"
+  },
   "lang": {
     "label": "Langue",
     "en": "English",

@@ -10,6 +10,9 @@
     "clearAll": "Alle entfernen",
     "remove": "{{label}} entfernen"
   },
+  "warnings": {
+    "title": "Datenhinweise"
+  },
   "lang": {
     "label": "Sprache",
     "en": "English",

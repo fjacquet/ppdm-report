@@ -10,6 +10,9 @@
     "clearAll": "Clear all",
     "remove": "Remove {{label}}"
   },
+  "warnings": {
+    "title": "Data caveats"
+  },
   "lang": {
     "label": "Language",
     "en": "English",

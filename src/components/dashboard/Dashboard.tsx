@@ -9,6 +9,7 @@ import { GapsSection } from './GapsSection'
 import { IdleAgentsSection } from './IdleAgentsSection'
 import { JobsComplianceSection } from './JobsComplianceSection'
 import { PoliciesSection } from './PoliciesSection'
+import { WarningsBanner } from './WarningsBanner'
 
 interface DashboardProps {
   view: ReportView
@@ -48,6 +49,7 @@ export function Dashboard({ view }: DashboardProps) {
       className="w-full space-y-8 bg-white p-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
       style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
     >
+      <WarningsBanner warnings={view.warnings} />
       <ExecutiveKpis view={view} />
       {SECTION_ORDER[flavor].map((id) => renderSection(id))}
     </div>
