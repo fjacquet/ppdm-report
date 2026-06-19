@@ -1,5 +1,7 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import { normalizeWorkbook } from '../parser/normalizeWorkbook'
 import { allAvailable } from './provenance'
 import { buildReportView } from './reportView'
 
@@ -45,5 +47,12 @@ describe('buildReportView', () => {
     expect(view.compliance.windowSize).toBe(0)
     expect(view.capacity.mtreeCount).toBe(0)
     expect(view.provenance).toEqual(allAvailable(2))
+  })
+
+  it('dispatches summary-format workbooks to the summary extractor', () => {
+    const wb = normalizeWorkbook(new Uint8Array(readFileSync('ref/chuv-a1n01136i.xlsx')).buffer)
+    const view = buildReportView(wb)
+    expect(view.coverage.overall.protected).toBe(1782)
+    expect(view.provenance.compliance.available).toBe(false)
   })
 })
