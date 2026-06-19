@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
-import { allAvailable } from '../aggregation/provenance'
+import { allAvailable, allUnavailable } from '../aggregation/provenance'
 import { buildExportModel } from './buildExportModel'
 
 const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, o) as string
@@ -271,5 +271,26 @@ describe('buildExportModel', () => {
     )
     expect(cov?.deck?.bars).toHaveLength(6)
     expect(cov?.deck?.bars?.[0]?.label).toBe('TypeD')
+  })
+
+  it('appends an unavailable caveat to detail-only sections for summary provenance', () => {
+    const summaryView: ReportView = { ...view, provenance: allUnavailable(100) }
+    const model = buildExportModel(summaryView, 'assessment', 'light', t, 'en', [])
+    const compliance = model.sections.find((s) => s.id === 'compliance')
+    expect(compliance?.deck?.caveat ?? compliance?.notes?.join(' ')).toMatch(/not available/i)
+  })
+
+  it('does not add a caveat when provenance is fully available (byte-identical detail export)', () => {
+    const model = buildExportModel(view, 'assessment', 'light', t, 'en', [])
+    const compliance = model.sections.find((s) => s.id === 'compliance')
+    const coverage = model.sections.find((s) => s.id === 'coverage')
+    const gaps = model.sections.find((s) => s.id === 'gaps')
+    const capacity = model.sections.find((s) => s.id === 'capacity')
+    // none of the four detail-only sections should carry a provenance caveat
+    const hasUnavailable = (notes?: string[]) => (notes ?? []).some((n) => /not available/i.test(n))
+    expect(hasUnavailable(compliance?.notes)).toBe(false)
+    expect(hasUnavailable(coverage?.notes)).toBe(false)
+    expect(hasUnavailable(gaps?.notes)).toBe(false)
+    expect(hasUnavailable(capacity?.notes)).toBe(false)
   })
 })
