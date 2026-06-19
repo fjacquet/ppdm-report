@@ -39,6 +39,7 @@
     "base10": "Base-10-Einheiten"
   },
   "docs": "Docs",
+  "showDetails": "Details anzeigen",
   "update": {
     "available": "Neue Version verfügbar",
     "reload": "Neu laden"

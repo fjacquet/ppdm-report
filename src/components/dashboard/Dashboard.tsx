@@ -29,17 +29,17 @@ export function Dashboard({ view }: DashboardProps) {
       case 'coverage':
         return <CoverageSection key={id} view={view} dark={dark} />
       case 'gaps':
-        return <GapsSection key={id} view={view} />
+        return <GapsSection key={id} view={view} dark={dark} />
       case 'idle':
         return <IdleAgentsSection key={id} view={view} />
       case 'jobs':
-        return <JobsComplianceSection key={id} view={view} />
+        return <JobsComplianceSection key={id} view={view} dark={dark} />
       case 'compliance':
         return null
       case 'capacity':
-        return <CapacitySection key={id} view={view} />
+        return <CapacitySection key={id} view={view} dark={dark} />
       case 'policies':
-        return <PoliciesSection key={id} view={view} />
+        return <PoliciesSection key={id} view={view} dark={dark} />
     }
   }
 

@@ -156,9 +156,9 @@ describe('CoverageSection', () => {
     expect(screen.getByText('51.7%')).toBeInTheDocument()
   })
 
-  it('renders aria-label on the donut chart', () => {
+  it('renders the donut chart (decorative, found by testid)', () => {
     render(<CoverageSection view={fixture} dark={false} />)
-    expect(screen.getByRole('img', { name: /coverage donut/i })).toBeInTheDocument()
+    expect(screen.getByTestId('coverage-donut')).toBeInTheDocument()
   })
 })
 
@@ -179,29 +179,24 @@ describe('GapsSection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
+  afterEach(() => cleanup())
 
-  afterEach(() => {
-    cleanup()
-  })
-
-  it('renders total unprotected capacity as "263.0 TB"', () => {
-    render(<GapsSection view={gapsFixture} />)
+  it('renders the two KPIs', () => {
+    render(<GapsSection view={gapsFixture} dark={false} />)
     expect(screen.getByText('263.0 TB')).toBeInTheDocument()
-  })
-
-  it('renders unprotected asset count "281"', () => {
-    render(<GapsSection view={gapsFixture} />)
     expect(screen.getAllByText('281').length).toBeGreaterThan(0)
   })
 
-  it('renders top-of caption via common:topOf', () => {
-    render(<GapsSection view={gapsFixture} />)
-    expect(screen.getByText('Top 1 of 281')).toBeInTheDocument()
+  it('renders the unprotected-by-size bar chart', () => {
+    render(<GapsSection view={gapsFixture} dark={false} />)
+    expect(screen.getByTestId('gaps-bars')).toBeInTheDocument()
   })
 
-  it('renders asset name "HR_PAYROLL_PROD" in the table', () => {
-    render(<GapsSection view={gapsFixture} />)
-    expect(screen.getByText('HR_PAYROLL_PROD')).toBeInTheDocument()
+  it('keeps the full list behind a Show details disclosure (asset name + caption present)', () => {
+    render(<GapsSection view={gapsFixture} dark={false} />)
+    expect(screen.getByText('Show details')).toBeInTheDocument()
+    expect(screen.getAllByText('HR_PAYROLL_PROD').length).toBeGreaterThan(0)
+    expect(screen.getByText('Top 1 of 281')).toBeInTheDocument()
   })
 })
 
@@ -209,18 +204,13 @@ describe('IdleAgentsSection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
+  afterEach(() => cleanup())
 
-  afterEach(() => {
-    cleanup()
-  })
-
-  it('renders "Oracle Databases" when idleAgents is non-empty', () => {
-    const view: ReportView = {
-      ...fixture,
-      idleAgents: ['Oracle Databases', 'SAP HANA Databases'],
-    }
+  it('renders all idle agents as tiles', () => {
+    const view: ReportView = { ...fixture, idleAgents: ['Oracle Databases', 'SAP HANA Databases'] }
     render(<IdleAgentsSection view={view} />)
     expect(screen.getByText('Oracle Databases')).toBeInTheDocument()
+    expect(screen.getByText('SAP HANA Databases')).toBeInTheDocument()
   })
 
   it('renders nothing when idleAgents is empty', () => {
@@ -253,34 +243,28 @@ describe('JobsComplianceSection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
+  afterEach(() => cleanup())
 
-  afterEach(() => {
-    cleanup()
-  })
-
-  it('renders job success percent "93%"', () => {
-    render(<JobsComplianceSection view={jobsComplianceFixture} />)
+  it('renders the job success KPI "93%"', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
     expect(screen.getByText('93%')).toBeInTheDocument()
   })
 
-  it('renders the jobs capped caveat containing the window size', () => {
-    render(<JobsComplianceSection view={jobsComplianceFixture} />)
-    // common:capped with n=10000 → "Based on most recent 10,000 — a window, not the full set"
-    const cappedEls = screen.getAllByText(/10[,.]?000/)
-    expect(cappedEls.length).toBeGreaterThan(0)
+  it('renders the jobs result-mix and compliance bar charts', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
+    expect(screen.getByTestId('jobs-bars')).toBeInTheDocument()
+    expect(screen.getByTestId('compliance-bars')).toBeInTheDocument()
   })
 
-  it('renders immutable "0%" with a bad/red tone class', () => {
-    render(<JobsComplianceSection view={jobsComplianceFixture} />)
-    expect(screen.getByText('0%')).toBeInTheDocument()
-    const redBorder = document.querySelector('.border-red-500, .border-red-400')
-    expect(redBorder).not.toBeNull()
+  it('keeps the status counts behind Show details', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
+    expect(screen.getByText('Show details')).toBeInTheDocument()
+    expect(screen.getAllByText('SUCCESS').length).toBeGreaterThan(0)
   })
 
-  it('renders compliance capped caveat', () => {
-    render(<JobsComplianceSection view={jobsComplianceFixture} />)
-    const cappedEls = screen.getAllByText(/window, not the full set/i)
-    expect(cappedEls.length).toBeGreaterThan(0)
+  it('renders both capped caveats', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
+    expect(screen.getAllByText(/window, not the full set/i).length).toBeGreaterThanOrEqual(2)
   })
 })
 
@@ -297,31 +281,27 @@ describe('CapacitySection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
+  afterEach(() => cleanup())
 
-  afterEach(() => {
-    cleanup()
+  it('renders the mtree count', () => {
+    render(<CapacitySection view={capacityFixture} dark={false} />)
+    expect(screen.getByText(/17/)).toBeInTheDocument()
   })
 
-  it('renders target name "dd1"', () => {
-    render(<CapacitySection view={capacityFixture} />)
-    expect(screen.getByText('dd1')).toBeInTheDocument()
+  it('renders the utilization bar chart', () => {
+    render(<CapacitySection view={capacityFixture} dark={false} />)
+    expect(screen.getByTestId('capacity-bars')).toBeInTheDocument()
   })
 
-  it('renders utilization "87.6 %"', () => {
-    render(<CapacitySection view={capacityFixture} />)
-    expect(screen.getByText('87.6 %')).toBeInTheDocument()
-  })
-
-  it('renders flagged row with a warn/bad tone class', () => {
-    render(<CapacitySection view={capacityFixture} />)
+  it('keeps the targets table behind Show details (name + utilization present)', () => {
+    render(<CapacitySection view={capacityFixture} dark={false} />)
+    expect(screen.getByText('Show details')).toBeInTheDocument()
+    expect(screen.getAllByText('dd1').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('87.6 %').length).toBeGreaterThan(0)
     const flaggedRow = document.querySelector('[data-flagged="true"]')
     expect(flaggedRow).not.toBeNull()
-    expect(flaggedRow?.className).toMatch(/amber|red|warn/)
-  })
-
-  it('renders mtree count "17"', () => {
-    render(<CapacitySection view={capacityFixture} />)
-    expect(screen.getByText(/17/)).toBeInTheDocument()
+    // the flagged row must keep its amber warning tone (visual signal)
+    expect(flaggedRow?.className).toMatch(/amber/)
   })
 })
 
@@ -345,29 +325,22 @@ describe('PoliciesSection', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
   })
-
-  afterEach(() => {
-    cleanup()
-  })
+  afterEach(() => cleanup())
 
   it('renders total policy count "32 policies"', () => {
-    render(<PoliciesSection view={policiesFixture} />)
+    render(<PoliciesSection view={policiesFixture} dark={false} />)
     expect(screen.getByText('32 policies')).toBeInTheDocument()
   })
 
-  it('renders purpose tally "CENTRALIZED"', () => {
-    render(<PoliciesSection view={policiesFixture} />)
-    const els = screen.getAllByText('CENTRALIZED')
-    expect(els.length).toBeGreaterThan(0)
+  it('renders the by-purpose bar chart', () => {
+    render(<PoliciesSection view={policiesFixture} dark={false} />)
+    expect(screen.getByTestId('policies-bars')).toBeInTheDocument()
   })
 
-  it('renders purpose tally count "29"', () => {
-    render(<PoliciesSection view={policiesFixture} />)
-    expect(screen.getByText('29')).toBeInTheDocument()
-  })
-
-  it('renders policy name "SQL - Prod"', () => {
-    render(<PoliciesSection view={policiesFixture} />)
+  it('keeps the by-purpose and per-policy tables behind Show details', () => {
+    render(<PoliciesSection view={policiesFixture} dark={false} />)
+    expect(screen.getByText('Show details')).toBeInTheDocument()
+    expect(screen.getAllByText('CENTRALIZED').length).toBeGreaterThan(0)
     expect(screen.getByText('SQL - Prod')).toBeInTheDocument()
   })
 })

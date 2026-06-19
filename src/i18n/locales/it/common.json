@@ -39,6 +39,7 @@
     "base10": "unità base-10"
   },
   "docs": "Docs",
+  "showDetails": "Mostra dettagli",
   "update": {
     "available": "Nuova versione disponibile",
     "reload": "Ricarica"
