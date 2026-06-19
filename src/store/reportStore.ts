@@ -22,7 +22,7 @@ export const useReportStore = create<ReportState>((set) => ({
       const added: ServerWorkbook[] = []
       for (const s of incoming) {
         const label = withUniqueLabel([...labels, ...added.map((a) => a.label)], s.label)
-        added.push({ label, workbook: s.workbook })
+        added.push({ label, product: s.product, workbook: s.workbook })
       }
       return { servers: [...state.servers, ...added] }
     }),

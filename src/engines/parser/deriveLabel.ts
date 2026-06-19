@@ -1,28 +1,28 @@
-import type { Cell, ParsedWorkbook } from '../../types/ppdm'
+import type { Cell, RawWorkbook } from '../../types/ppdm'
 
 /** First data row of the single-row "System Information" sheet, if present. */
-function systemInfoRow(wb: ParsedWorkbook): Record<string, Cell> | undefined {
+function systemInfoRow(wb: RawWorkbook): Record<string, Cell> | undefined {
   return wb.sheets['System Information']?.rows[0]
 }
 
-function field(wb: ParsedWorkbook, key: string): string {
+function field(wb: RawWorkbook, key: string): string {
   const v = systemInfoRow(wb)?.[key]
   return v === null || v === undefined ? '' : String(v).trim()
 }
 
 /** PPDM appliance host name from System Information; '' when absent. */
-export function appHostName(wb: ParsedWorkbook): string {
+export function appHostName(wb: RawWorkbook): string {
   return field(wb, 'Host Name')
 }
 
 /** A System Information field with 'N/A' normalized to empty. */
-function ppdmField(wb: ParsedWorkbook, key: string): string {
+function ppdmField(wb: RawWorkbook, key: string): string {
   const v = field(wb, key)
   return v.toUpperCase() === 'N/A' ? '' : v
 }
 
 /** PPDM version from System Information; falls back through naming variants. '' when absent. */
-export function appVersion(wb: ParsedWorkbook): string {
+export function appVersion(wb: RawWorkbook): string {
   return (
     ppdmField(wb, 'PowerProtect Version') ||
     ppdmField(wb, 'Power Protect Version') ||
@@ -31,7 +31,7 @@ export function appVersion(wb: ParsedWorkbook): string {
 }
 
 /** A server's display label: appliance host name → Project Name → filename. */
-export function deriveLabel(wb: ParsedWorkbook, filename: string): string {
+export function deriveLabel(wb: RawWorkbook, filename: string): string {
   const host = appHostName(wb)
   if (host) return host
   const customer = wb.meta.customer.trim()

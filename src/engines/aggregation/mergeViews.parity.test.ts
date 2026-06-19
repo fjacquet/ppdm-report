@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { detailWorkbookBuffer } from '../../test-helpers/workbooks'
 import { mergeWorkbooks } from '../parser/mergeWorkbooks'
 import { normalizeWorkbook } from '../parser/normalizeWorkbook'
+import { buildPpdmView } from '../products/ppdm/buildPpdmView'
 import { mergeViews } from './mergeViews'
-import { buildReportView } from './reportView'
 
 /** Strip provenance, warnings, and normalize the float field that differs due to summation order. */
-function strip(v: ReturnType<typeof buildReportView>) {
+function strip(v: ReturnType<typeof buildPpdmView>) {
   const { provenance: _p, warnings: _w, ...rest } = v
   // Normalize gaps.totalCapacityGb to 0 so toEqual is not affected by this field.
   // IEEE-754 floating-point summation is non-associative: the legacy path sums all raw
@@ -23,11 +23,11 @@ describe('mergeViews parity with legacy sheet-level merge (detail estate)', () =
   it('produces identical metrics for a two-server detail estate', () => {
     const wb = normalizeWorkbook(detailWorkbookBuffer())
     const servers = [
-      { label: 'srv-a', workbook: wb },
-      { label: 'srv-b', workbook: wb },
+      { label: 'srv-a', product: 'ppdm' as const, workbook: wb },
+      { label: 'srv-b', product: 'ppdm' as const, workbook: wb },
     ]
-    const legacy = buildReportView(mergeWorkbooks(servers))
-    const next = mergeViews(servers.map((s) => buildReportView(s.workbook)))
+    const legacy = buildPpdmView(mergeWorkbooks(servers))
+    const next = mergeViews(servers.map((s) => buildPpdmView(s.workbook)))
 
     // IEEE-754 non-associativity: per-server subtotal summation differs from raw-row summation.
     // (With integer synthetic sizes the two paths coincide exactly; the tolerance still holds.)

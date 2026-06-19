@@ -1,17 +1,14 @@
-import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import type { RawWorkbook, SheetData } from '../../types/ppdm'
 import { LIVE_OPTICS_ROW_CAP } from '../../types/ppdm'
 import { captureMeta } from './captureMeta'
-import { classifyAgents } from './detectInUse'
 import { readWorkbook, toSheetData } from './readWorkbook'
 
-/** Parse a Live Optics PPDM .xlsx into a fully normalized, classified workbook. */
-export function normalizeWorkbook(buf: ArrayBuffer): ParsedWorkbook {
+/** Parse a Live Optics .xlsx into a product-neutral normalized workbook. */
+export function normalizeWorkbook(buf: ArrayBuffer): RawWorkbook {
   const wb = readWorkbook(buf)
   const sheetList = toSheetData(wb)
   const sheets: Record<string, SheetData> = {}
   for (const s of sheetList) sheets[s.name] = s
-
-  const { inUse, idleAgents } = classifyAgents(sheetList)
 
   const warnings: string[] = []
   for (const s of sheetList) {
@@ -22,5 +19,5 @@ export function normalizeWorkbook(buf: ArrayBuffer): ParsedWorkbook {
     }
   }
 
-  return { meta: captureMeta(wb), sheets, inUse, idleAgents, warnings }
+  return { meta: captureMeta(wb), sheets, warnings }
 }

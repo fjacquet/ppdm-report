@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import * as XLSX from 'xlsx'
 import type { Cell } from '../../types/ppdm'
+import { classifyAgents } from './detectInUse'
 import { normalizeWorkbook } from './normalizeWorkbook'
 
 function makeWorkbook(sheets: Record<string, Cell[][]>): ArrayBuffer {
@@ -12,7 +13,7 @@ function makeWorkbook(sheets: Record<string, Cell[][]>): ArrayBuffer {
 }
 
 describe('normalizeWorkbook', () => {
-  it('produces meta, sheets, in-use/idle classification, and cap warnings', () => {
+  it('produces meta, sheets, and cap warnings; classifyAgents reflects content', () => {
     const cappedRows: Cell[][] = [['Copy ID']]
     for (let i = 0; i < 10_000; i++) cappedRows.push([`c${i}`])
 
@@ -35,8 +36,9 @@ describe('normalizeWorkbook', () => {
     )
 
     expect(result.meta.customer).toBe('WHO')
-    expect(result.inUse).toContain('SQL Databases')
-    expect(result.idleAgents).toContain('Oracle Databases')
+    const { inUse, idleAgents } = classifyAgents(Object.values(result.sheets))
+    expect(inUse).toContain('SQL Databases')
+    expect(idleAgents).toContain('Oracle Databases')
     expect(result.sheets['SQL Databases']?.rows).toHaveLength(1)
     expect(result.warnings.some((w) => w.includes('Copies'))).toBe(true)
   })

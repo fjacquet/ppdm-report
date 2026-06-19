@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import type { RawWorkbook, SheetData } from '../../types/ppdm'
 import { summarizePolicies } from './policies'
 
-function wb(rows: Array<Record<string, string>>): ParsedWorkbook {
+function wb(rows: Array<Record<string, string>>): RawWorkbook {
   const sheet: SheetData = {
     name: 'Policies',
     headers: ['Name', 'Purpose', 'Number of Assets', 'Total Asset Protection Capacity (GB)'],
@@ -12,8 +12,6 @@ function wb(rows: Array<Record<string, string>>): ParsedWorkbook {
   return {
     meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
     sheets: { Policies: sheet },
-    inUse: [],
-    idleAgents: [],
     warnings: [],
   }
 }

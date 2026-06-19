@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import type { RawWorkbook, SheetData } from '../../types/ppdm'
 import { appHostName, appVersion, deriveLabel, withUniqueLabel } from './deriveLabel'
 
-function wbWithSysInfo(row: Record<string, string>): ParsedWorkbook {
+function wbWithSysInfo(row: Record<string, string>): RawWorkbook {
   return {
     meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
     sheets: {
@@ -13,13 +13,11 @@ function wbWithSysInfo(row: Record<string, string>): ParsedWorkbook {
         capped: false,
       },
     },
-    inUse: [],
-    idleAgents: [],
     warnings: [],
   }
 }
 
-function wbWith(sysRow: Record<string, string> | null, customer = ''): ParsedWorkbook {
+function wbWith(sysRow: Record<string, string> | null, customer = ''): RawWorkbook {
   const sheets: Record<string, SheetData> = {}
   if (sysRow) {
     sheets['System Information'] = {
@@ -32,8 +30,6 @@ function wbWith(sysRow: Record<string, string> | null, customer = ''): ParsedWor
   return {
     meta: { projectId: '', customer, collectorBuild: '', capturedAt: '', baseTen: true },
     sheets,
-    inUse: [],
-    idleAgents: [],
     warnings: [],
   }
 }

@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { mergeViews } from '../engines/aggregation/mergeViews'
-import { buildReportView } from '../engines/aggregation/reportView'
 import { appVersion } from '../engines/parser/deriveLabel'
 import { estateWarnings } from '../engines/parser/estateWarnings'
+import { buildPpdmView } from '../engines/products/ppdm/buildPpdmView'
 import { useReportStore } from '../store/reportStore'
 import type { EstateView } from '../types/reportView'
 
@@ -14,7 +14,7 @@ export function useReportView(): EstateView | null {
     const perServer = servers.map((s) => ({
       label: s.label,
       version: appVersion(s.workbook),
-      view: buildReportView(s.workbook),
+      view: buildPpdmView(s.workbook),
     }))
     return {
       combined: { ...mergeViews(perServer.map((p) => p.view)), warnings: estateWarnings(servers) },

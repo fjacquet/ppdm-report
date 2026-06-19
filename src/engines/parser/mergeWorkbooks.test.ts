@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { ParsedWorkbook, ServerWorkbook, SheetData } from '../../types/ppdm'
-import { buildReportView } from '../aggregation/reportView'
+import type { RawWorkbook, ServerWorkbook, SheetData } from '../../types/ppdm'
+import { buildPpdmView } from '../products/ppdm/buildPpdmView'
 import { mergeWorkbooks } from './mergeWorkbooks'
 
 function sheet(name: string, rows: Record<string, string | number>[], capped = false): SheetData {
@@ -8,7 +8,7 @@ function sheet(name: string, rows: Record<string, string | number>[], capped = f
   return { name, headers, rows, capped }
 }
 
-function wb(over: Partial<ParsedWorkbook> = {}): ParsedWorkbook {
+function wb(over: Partial<RawWorkbook> = {}): RawWorkbook {
   return {
     meta: {
       projectId: 'p1',
@@ -18,14 +18,16 @@ function wb(over: Partial<ParsedWorkbook> = {}): ParsedWorkbook {
       baseTen: true,
     },
     sheets: {},
-    inUse: [],
-    idleAgents: [],
     warnings: [],
     ...over,
   }
 }
 
-const srv = (label: string, workbook: ParsedWorkbook): ServerWorkbook => ({ label, workbook })
+const srv = (label: string, workbook: RawWorkbook): ServerWorkbook => ({
+  label,
+  product: 'ppdm',
+  workbook,
+})
 
 describe('mergeWorkbooks — edge cases', () => {
   it('throws on an empty server list', () => {
@@ -41,7 +43,7 @@ describe('mergeWorkbooks — single source', () => {
       },
     })
     const merged = mergeWorkbooks([srv('a', only)])
-    expect(buildReportView(merged)).toEqual(buildReportView(only))
+    expect(buildPpdmView(merged)).toEqual(buildPpdmView(only))
   })
 })
 
@@ -60,17 +62,6 @@ describe('mergeWorkbooks — multiple sources', () => {
     const b = wb({ sheets: { 'Storage Targets': sheet('Storage Targets', [{ Name: 'dd' }]) } })
     const merged = mergeWorkbooks([srv('a', a), srv('b', b)])
     expect(Object.keys(merged.sheets).sort()).toEqual(['Policies', 'Storage Targets'])
-  })
-
-  it('re-derives inUse: idle on A + in-use on B → in-use', () => {
-    const idle = sheet('Oracle Databases', [{ Name: 'N/A' }])
-    const live = sheet('Oracle Databases', [{ Name: 'realdb' }])
-    const merged = mergeWorkbooks([
-      srv('a', wb({ sheets: { 'Oracle Databases': idle } })),
-      srv('b', wb({ sheets: { 'Oracle Databases': live } })),
-    ])
-    expect(merged.inUse).toContain('Oracle Databases')
-    expect(merged.idleAgents).not.toContain('Oracle Databases')
   })
 
   it('folds meta: first customer, latest capturedAt, uniform baseTen', () => {

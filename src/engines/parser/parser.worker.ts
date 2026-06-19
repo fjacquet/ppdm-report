@@ -1,10 +1,10 @@
 import '../../privacy/fetchGuard'
-import type { ParsedWorkbook } from '../../types/ppdm'
+import type { RawWorkbook } from '../../types/ppdm'
 import { normalizeWorkbook } from './normalizeWorkbook'
 
 export type ParseRequest = { id: number; buffer: ArrayBuffer }
 export type ParseResponse =
-  | { id: number; ok: true; result: ParsedWorkbook }
+  | { id: number; ok: true; result: RawWorkbook }
   | { id: number; ok: false; error: string }
 
 self.onmessage = (e: MessageEvent<ParseRequest>) => {

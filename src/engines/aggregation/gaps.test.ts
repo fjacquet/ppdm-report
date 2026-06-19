@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import type { RawWorkbook, SheetData } from '../../types/ppdm'
 import { findGaps } from './gaps'
 
-function wb(rows: Array<Record<string, string>>): ParsedWorkbook {
+function wb(rows: Array<Record<string, string>>): RawWorkbook {
   const sheet: SheetData = {
     name: 'Unprotected Assets',
     headers: ['Name', 'Type', 'Size (GB)'],
@@ -12,8 +12,6 @@ function wb(rows: Array<Record<string, string>>): ParsedWorkbook {
   return {
     meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
     sheets: { 'Unprotected Assets': sheet },
-    inUse: [],
-    idleAgents: [],
     warnings: [],
   }
 }
@@ -39,8 +37,6 @@ describe('findGaps', () => {
     const g = findGaps({
       meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
       sheets: {},
-      inUse: [],
-      idleAgents: [],
       warnings: [],
     })
     expect(g.count).toBe(0)

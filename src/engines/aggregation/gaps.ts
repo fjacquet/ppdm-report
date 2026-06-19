@@ -1,10 +1,10 @@
-import { type ParsedWorkbook, TOP_N_DEFAULT } from '../../types/ppdm'
+import { type RawWorkbook, TOP_N_DEFAULT } from '../../types/ppdm'
 import type { Gaps, UnprotectedAsset } from '../../types/reportView'
 import { cellNum, cellStr } from './rows'
 import { topN } from './topN'
 
 /** Unprotected-asset gaps: count, total capacity, and the largest N by size. */
-export function findGaps(wb: ParsedWorkbook, n: number = TOP_N_DEFAULT): Gaps {
+export function findGaps(wb: RawWorkbook, n: number = TOP_N_DEFAULT): Gaps {
   const rows = wb.sheets['Unprotected Assets']?.rows ?? []
   const assets: UnprotectedAsset[] = []
   let totalCapacityGb = 0

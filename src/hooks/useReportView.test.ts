@@ -3,24 +3,26 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { normalizeWorkbook } from '../engines/parser/normalizeWorkbook'
 import { useReportStore } from '../store/reportStore'
 import { detailWorkbookBuffer, summaryWorkbookBuffer } from '../test-helpers/workbooks'
-import type { ParsedWorkbook, ServerWorkbook, SheetData } from '../types/ppdm'
+import type { RawWorkbook, ServerWorkbook, SheetData } from '../types/ppdm'
 import { useReportView } from './useReportView'
 
 function sheet(name: string, rows: Record<string, string | number>[]): SheetData {
   return { name, headers: rows[0] ? Object.keys(rows[0]) : [], rows, capped: false }
 }
-function wb(customer: string, sys?: Record<string, string>): ParsedWorkbook {
+function wb(customer: string, sys?: Record<string, string>): RawWorkbook {
   const sheets: Record<string, SheetData> = {}
   if (sys) sheets['System Information'] = sheet('System Information', [sys])
   return {
     meta: { projectId: '', customer, collectorBuild: '', capturedAt: '', baseTen: true },
     sheets,
-    inUse: [],
-    idleAgents: [],
     warnings: [],
   }
 }
-const srv = (label: string, workbook: ParsedWorkbook): ServerWorkbook => ({ label, workbook })
+const srv = (label: string, workbook: RawWorkbook): ServerWorkbook => ({
+  label,
+  product: 'ppdm',
+  workbook,
+})
 
 describe('useReportView', () => {
   beforeEach(() => useReportStore.getState().clear())

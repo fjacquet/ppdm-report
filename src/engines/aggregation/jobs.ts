@@ -1,9 +1,9 @@
-import type { ParsedWorkbook } from '../../types/ppdm'
+import type { RawWorkbook } from '../../types/ppdm'
 import type { Jobs } from '../../types/reportView'
 import { countBy } from './rows'
 
 /** Protection-job result mix and success rate over the (possibly capped) activity window. */
-export function computeJobs(wb: ParsedWorkbook): Jobs {
+export function computeJobs(wb: RawWorkbook): Jobs {
   const sheet = wb.sheets['Protection Job Activities']
   const rows = sheet?.rows ?? []
   const counts = countBy(rows, 'Result')

@@ -1,4 +1,4 @@
-import { AGENT_SHEETS, type ParsedWorkbook, type SheetData } from '../../types/ppdm'
+import { AGENT_SHEETS, type RawWorkbook, type SheetData } from '../../types/ppdm'
 import type { ReportView } from '../../types/reportView'
 import { emptyBand, finalizeBand } from './coverage'
 import { allUnavailable } from './provenance'
@@ -25,7 +25,7 @@ function fieldNum(sheet: SheetData | undefined, pred: (field: string) => boolean
 }
 
 /** Build a ReportView from an older summary-format workbook. Pure. */
-export function summaryView(wb: ParsedWorkbook): ReportView {
+export function summaryView(wb: RawWorkbook): ReportView {
   const sysCfg = wb.sheets['System Configuration']
   const protectedN = fieldNum(sysCfg, (f) => f === 'Number of Protected Assets')
   const unprotectedN = fieldNum(sysCfg, (f) => f === 'Number of UnProtected Assets')

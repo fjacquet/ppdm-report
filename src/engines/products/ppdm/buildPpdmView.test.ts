@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { summaryWorkbookBuffer } from '../../test-helpers/workbooks'
-import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
-import { normalizeWorkbook } from '../parser/normalizeWorkbook'
-import { allAvailable } from './provenance'
-import { buildReportView } from './reportView'
+import { summaryWorkbookBuffer } from '../../../test-helpers/workbooks'
+import type { RawWorkbook, SheetData } from '../../../types/ppdm'
+import { allAvailable } from '../../aggregation/provenance'
+import { normalizeWorkbook } from '../../parser/normalizeWorkbook'
+import { buildPpdmView } from './buildPpdmView'
 
 function sheet(name: string, rows: Array<Record<string, string>>): SheetData {
   return { name, headers: Object.keys(rows[0] ?? {}), rows, capped: false }
 }
 
-describe('buildReportView', () => {
+describe('buildPpdmView', () => {
   it('composes every engine result and passes through workbook metadata', () => {
-    const wb: ParsedWorkbook = {
+    const wb: RawWorkbook = {
       meta: {
         projectId: '1',
         customer: 'WHO',
@@ -31,14 +31,12 @@ describe('buildReportView', () => {
           { Name: 'p', Purpose: 'CENTRALIZED', 'Number of Assets': '1' },
         ]),
       },
-      inUse: ['SQL Databases'],
-      idleAgents: ['Oracle Databases'],
       warnings: ['capped: Copies'],
     }
-    const view = buildReportView(wb)
+    const view = buildPpdmView(wb)
     expect(view.meta.customer).toBe('WHO')
     expect(view.inUse).toEqual(['SQL Databases'])
-    expect(view.idleAgents).toEqual(['Oracle Databases'])
+    expect(view.idleAgents).toEqual([])
     expect(view.warnings).toEqual(['capped: Copies'])
     expect(view.coverage.overall.protected).toBe(1)
     expect(view.gaps.count).toBe(1)
@@ -50,7 +48,7 @@ describe('buildReportView', () => {
   })
 
   it('dispatches summary-format workbooks to the summary extractor', () => {
-    const view = buildReportView(normalizeWorkbook(summaryWorkbookBuffer()))
+    const view = buildPpdmView(normalizeWorkbook(summaryWorkbookBuffer()))
     expect(view.coverage.overall.protected).toBe(80)
     expect(view.provenance.compliance.available).toBe(false)
   })

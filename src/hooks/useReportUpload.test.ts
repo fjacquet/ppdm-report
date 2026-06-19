@@ -8,9 +8,8 @@ vi.mock('../engines/parser/parseInWorker')
 
 const minimalWorkbook = {
   meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
-  sheets: {},
-  inUse: [],
-  idleAgents: [],
+  // A PPDM-signature sheet so detectProduct admits this workbook (gating is real now).
+  sheets: { 'Storage Targets': { name: 'Storage Targets', headers: [], rows: [], capped: false } },
   warnings: [],
 }
 
