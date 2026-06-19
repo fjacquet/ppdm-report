@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import { allAvailable } from './provenance'
 import { buildReportView } from './reportView'
 
 function sheet(name: string, rows: Array<Record<string, string>>): SheetData {
@@ -43,5 +44,6 @@ describe('buildReportView', () => {
     expect(view.jobs.total).toBe(0) // no job sheet → safe zero
     expect(view.compliance.windowSize).toBe(0)
     expect(view.capacity.mtreeCount).toBe(0)
+    expect(view.provenance).toEqual(allAvailable(2))
   })
 })

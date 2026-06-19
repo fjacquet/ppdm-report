@@ -1,5 +1,17 @@
 import type { CaptureMeta } from './ppdm'
 
+export type MetricKey = 'coverageByType' | 'gapsList' | 'compliance' | 'storageTargets'
+
+/** Availability of a detail-only metric across the servers in scope. */
+export interface MetricProvenance {
+  available: boolean
+  serversCovered: number
+  serversTotal: number
+  /** Asset-level coverage for the compliance metric only; omitted elsewhere. */
+  assetsCovered?: number
+  assetsTotal?: number
+}
+
 /** Protection counts + both coverage figures for one scope (a type, or the whole estate). */
 export interface CoverageBand {
   protected: number
@@ -93,6 +105,7 @@ export interface ReportView {
   compliance: Compliance
   capacity: Capacity
   policies: Policies
+  provenance: Record<MetricKey, MetricProvenance>
 }
 
 /** One source server's report plus identity, for the per-server breakdown. */

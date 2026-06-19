@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { allAvailable } from '../../engines/aggregation/provenance'
 import i18n from '../../i18n'
 import type { ReportView, ServerView } from '../../types/reportView'
 import { PerServerSection } from './PerServerSection'
@@ -35,6 +36,7 @@ function view(pct: number, count: number): ReportView {
     },
     capacity: { targets: [], flagged: [], mtreeCount: 0 },
     policies: { count: 0, byPurpose: {}, perPolicy: [] },
+    provenance: allAvailable(0),
   }
 }
 const servers: ServerView[] = [

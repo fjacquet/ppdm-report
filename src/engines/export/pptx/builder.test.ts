@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import i18n from '../../../i18n'
 import type { ReportView } from '../../../types/reportView'
+import { allAvailable } from '../../aggregation/provenance'
 import { buildExportModel } from '../buildExportModel'
 import { buildPptx } from './builder'
 
@@ -64,6 +65,7 @@ const view: ReportView = {
     mtreeCount: 17,
   },
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
+  provenance: allAvailable(0),
 }
 
 describe('buildPptx (deck)', () => {
