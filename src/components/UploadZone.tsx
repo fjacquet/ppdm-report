@@ -8,18 +8,20 @@ export function UploadZone() {
   const { upload, busy, error } = useReportUpload()
   const [dragActive, setDragActive] = useState(false)
 
-  function handleFile(file: File | undefined) {
-    if (file?.name.toLowerCase().endsWith('.xlsx')) void upload(file)
+  function handleFiles(list: FileList | null | undefined) {
+    const xlsx = Array.from(list ?? []).filter((f) => f.name.toLowerCase().endsWith('.xlsx'))
+    if (xlsx.length > 0) void upload(xlsx)
   }
 
   function onChange(e: ChangeEvent<HTMLInputElement>) {
-    handleFile(e.target.files?.[0])
+    handleFiles(e.target.files)
+    e.target.value = ''
   }
 
   function onDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault()
     setDragActive(false)
-    handleFile(e.dataTransfer.files?.[0])
+    handleFiles(e.dataTransfer.files)
   }
 
   function onDragOver(e: DragEvent<HTMLDivElement>) {
@@ -49,7 +51,14 @@ export function UploadZone() {
       <p className="mb-3 font-semibold text-slate-700 dark:text-slate-200">{t('upload.drop')}</p>
       <label className="inline-block cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400">
         {t('upload.choose')}
-        <input type="file" accept=".xlsx" onChange={onChange} disabled={busy} className="hidden" />
+        <input
+          type="file"
+          accept=".xlsx"
+          multiple
+          onChange={onChange}
+          disabled={busy}
+          className="hidden"
+        />
       </label>
       {busy && (
         <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{t('upload.parsing')}</p>

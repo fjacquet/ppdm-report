@@ -4,6 +4,7 @@ import { ExportButtons } from './components/ExportButtons'
 import { FlavorToggle } from './components/FlavorToggle'
 import { LanguageToggle } from './components/LanguageToggle'
 import { PwaUpdater } from './components/PwaUpdater'
+import { ServerList } from './components/ServerList'
 import { ThemeToggle } from './components/ThemeToggle'
 import { UploadZone } from './components/UploadZone'
 import { useReportView } from './hooks/useReportView'
@@ -36,7 +37,8 @@ export default function App() {
       </header>
       <main className="space-y-6 p-6">
         <UploadZone />
-        {view && <Dashboard view={view} />}
+        <ServerList />
+        {view && <Dashboard view={view.combined} perServer={view.perServer} />}
       </main>
       <PwaUpdater />
     </div>

@@ -5,6 +5,14 @@
     "choose": "Scegli file",
     "parsing": "Analisi…"
   },
+  "servers": {
+    "title": "Server caricati",
+    "clearAll": "Cancella tutto",
+    "remove": "Rimuovi {{label}}"
+  },
+  "warnings": {
+    "title": "Avvertenze sui dati"
+  },
   "lang": {
     "label": "Lingua",
     "en": "English",

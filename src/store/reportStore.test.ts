@@ -1,38 +1,52 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import type { ParsedWorkbook } from '../types/ppdm'
+import type { ParsedWorkbook, ServerWorkbook } from '../types/ppdm'
 import { useReportStore } from './reportStore'
 
-const wb: ParsedWorkbook = {
-  meta: { projectId: '', customer: 'WHO', collectorBuild: '', capturedAt: '', baseTen: true },
-  sheets: {},
-  inUse: ['SQL Databases'],
-  idleAgents: ['Oracle Databases'],
-  warnings: [],
+function wb(customer: string): ParsedWorkbook {
+  return {
+    meta: { projectId: '', customer, collectorBuild: '', capturedAt: '', baseTen: true },
+    sheets: {},
+    inUse: [],
+    idleAgents: [],
+    warnings: [],
+  }
 }
+const srv = (label: string, customer = label): ServerWorkbook => ({ label, workbook: wb(customer) })
 
 describe('reportStore', () => {
   beforeEach(() => useReportStore.getState().clear())
 
   it('starts empty', () => {
-    expect(useReportStore.getState().workbook).toBeNull()
+    expect(useReportStore.getState().servers).toEqual([])
   })
 
-  it('stores and clears a parsed workbook', () => {
-    useReportStore.getState().setWorkbook(wb)
-    expect(useReportStore.getState().workbook?.meta.customer).toBe('WHO')
+  it('appends servers (does not replace)', () => {
+    useReportStore.getState().addServers([srv('a')])
+    useReportStore.getState().addServers([srv('b')])
+    expect(useReportStore.getState().servers.map((s) => s.label)).toEqual(['a', 'b'])
+  })
+
+  it('suffixes colliding labels on add', () => {
+    useReportStore.getState().addServers([srv('ppdm'), srv('ppdm')])
+    expect(useReportStore.getState().servers.map((s) => s.label)).toEqual(['ppdm', 'ppdm (2)'])
+  })
+
+  it('removes a server by label', () => {
+    useReportStore.getState().addServers([srv('a'), srv('b')])
+    useReportStore.getState().removeServer('a')
+    expect(useReportStore.getState().servers.map((s) => s.label)).toEqual(['b'])
+  })
+
+  it('clear empties the list', () => {
+    useReportStore.getState().addServers([srv('a')])
     useReportStore.getState().clear()
-    expect(useReportStore.getState().workbook).toBeNull()
+    expect(useReportStore.getState().servers).toEqual([])
   })
 
-  it('starts with assessment flavor', () => {
-    const { flavor } = useReportStore.getState()
-    expect(flavor).toBe('assessment')
-  })
-
-  it('setFlavor updates flavor', () => {
+  it('starts with assessment flavor and setFlavor updates it', () => {
+    expect(useReportStore.getState().flavor).toBe('assessment')
     useReportStore.getState().setFlavor('ops')
     expect(useReportStore.getState().flavor).toBe('ops')
-    // reset
     useReportStore.getState().setFlavor('assessment')
   })
 })

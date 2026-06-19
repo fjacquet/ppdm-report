@@ -104,3 +104,27 @@ describe('assembleHtml (deck)', () => {
     expect(html).toContain('&lt;img src=x')
   })
 })
+
+const baseModel: import('../types').ExportModel = {
+  title: 'PPDM Report',
+  customer: 'ACME',
+  subtitle: 'Assessment',
+  execTitle: 'Executive summary',
+  locale: 'en',
+  kpis: [],
+  sections: [],
+  footer: 'ACME',
+  warnings: ['blended window note'],
+}
+
+describe('assembleHtml warnings', () => {
+  it('renders the warnings block', () => {
+    const html = assembleHtml(baseModel, 'light')
+    expect(html).toContain('blended window note')
+  })
+
+  it('omits the warnings block when none', () => {
+    const html = assembleHtml({ ...baseModel, warnings: [] }, 'light')
+    expect(html).not.toContain('class="warnings"')
+  })
+})

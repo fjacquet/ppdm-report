@@ -90,6 +90,10 @@ export interface ExportModel {
   sections: ExportSection[]
   /** Footer note: base-10 units, collector build, capture date. */
   footer: string
+  /** Data caveats (capped windows, merge notes); rendered in both exports. */
+  warnings?: string[]
+  /** Localized heading for the warnings block (e.g. "Data caveats"). */
+  warningsTitle?: string
   /** PPTX-only exec protection-posture stacked bar. */
   posture?: DeckStack
 }

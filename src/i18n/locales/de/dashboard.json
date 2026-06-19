@@ -50,5 +50,9 @@
     "unprotected": "Ungeschützt",
     "jobSuccess": "Job-Erfolgsquote",
     "immutable": "Unveränderlich"
+  },
+  "perServer": {
+    "title": "Aufschlüsselung pro Server",
+    "col": { "server": "Server", "version": "Version", "captured": "Erfasst" }
   }
 }

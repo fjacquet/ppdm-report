@@ -1,6 +1,6 @@
 import type { Palette } from '../../theme/palette'
 import { DARK, LIGHT } from '../../theme/palette'
-import type { ReportView } from '../../types/reportView'
+import type { ReportView, ServerView } from '../../types/reportView'
 import {
   fmtInt,
   fmtPercent,
@@ -59,6 +59,7 @@ export function buildExportModel(
   theme: ExportTheme,
   t: TFn,
   locale: string,
+  perServer: ServerView[] = [],
 ): ExportModel {
   const pal = theme === 'dark' ? DARK : LIGHT
   const { coverage, gaps, jobs, compliance, capacity, policies, meta, idleAgents } = view
@@ -187,6 +188,46 @@ export function buildExportModel(
       ),
     },
   }
+
+  const perServerSection: ExportSection | null =
+    perServer.length > 1
+      ? {
+          id: 'perServer',
+          title: t('dashboard:perServer.title'),
+          table: {
+            columns: [
+              t('dashboard:perServer.col.server'),
+              t('dashboard:kpi.coverage'),
+              t('dashboard:gaps.assets'),
+              t('dashboard:jobs.success'),
+            ],
+            rows: perServer.map((s) => [
+              s.label,
+              fmtPercent(s.view.coverage.overall.pct, locale),
+              fmtInt(s.view.gaps.count, locale),
+              fmtPercent(s.view.jobs.successPct, locale),
+            ]),
+          },
+          deck: {
+            kpiChips: [
+              {
+                label: t('dashboard:perServer.title'),
+                value: fmtInt(perServer.length, locale),
+                tone: 'accent',
+              },
+            ],
+            bars: toBars(
+              perServer.map((s) => ({
+                label: s.label,
+                magnitude: s.view.coverage.overall.pct,
+                value: fmtPercent(s.view.coverage.overall.pct, locale),
+                tone: s.view.coverage.overall.pct < 0.5 ? ('warn' as const) : ('ok' as const),
+              })),
+              pal,
+            ),
+          },
+        }
+      : null
 
   const idleSection: ExportSection | null =
     idleAgents.length > 0
@@ -358,6 +399,7 @@ export function buildExportModel(
   }
 
   const byId: Record<SectionId, ExportSection | null> = {
+    perServer: perServerSection,
     coverage: coverageSection,
     gaps: gapsSection,
     idle: idleSection,
@@ -414,6 +456,8 @@ export function buildExportModel(
     kpis: execKpis,
     sections,
     footer: footerParts.join(' · '),
+    warnings: [...new Set(view.warnings)],
+    warningsTitle: t('common:warnings.title'),
     posture,
   }
 }

@@ -5,6 +5,14 @@
     "choose": "Choose file",
     "parsing": "Parsing…"
   },
+  "servers": {
+    "title": "Loaded servers",
+    "clearAll": "Clear all",
+    "remove": "Remove {{label}}"
+  },
+  "warnings": {
+    "title": "Data caveats"
+  },
   "lang": {
     "label": "Language",
     "en": "English",

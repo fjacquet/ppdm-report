@@ -34,6 +34,12 @@ export interface ParsedWorkbook {
   warnings: string[]
 }
 
+/** A parsed workbook tagged with a human-readable source-server label. */
+export interface ServerWorkbook {
+  label: string
+  workbook: ParsedWorkbook
+}
+
 /** Asset-type sheets — each corresponds to a PPDM application agent / plugin. */
 export const AGENT_SHEETS = [
   'File Systems',

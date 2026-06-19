@@ -4,7 +4,7 @@ import { buildExportModel } from '../engines/export/buildExportModel'
 import { assembleHtml } from '../engines/export/html/assembleHtml'
 import type { ExportKind } from '../engines/export/types'
 import { useReportStore } from '../store/reportStore'
-import type { ReportView } from '../types/reportView'
+import type { EstateView } from '../types/reportView'
 import { useTheme } from './useTheme'
 
 const PPTX_MIME = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
@@ -24,15 +24,15 @@ function download(data: ArrayBuffer | string, filename: string, mime: string): v
 }
 
 /**
- * Drives report export on the main thread: resolves the live ReportView, flavor,
+ * Drives report export on the main thread: resolves the live EstateView, flavor,
  * resolved theme and active locale into a render-ready model, generates the PPTX or
  * HTML, and triggers a download. (pptxgenjs is not Web-Worker-safe, and a ~10-slide
  * deck generates in well under a second, so a worker would add risk for no benefit.)
  *
- * Takes the already-derived ReportView as an argument so it is computed once at the
+ * Takes the already-derived EstateView as an argument so it is computed once at the
  * app root (App's memo) rather than re-derived per consumer.
  */
-export function useExport(view: ReportView | null) {
+export function useExport(estate: EstateView | null) {
   const flavor = useReportStore((s) => s.flavor)
   const { resolved } = useTheme()
   const { i18n } = useTranslation()
@@ -40,14 +40,21 @@ export function useExport(view: ReportView | null) {
   const [error, setError] = useState<string | null>(null)
 
   async function run(kind: ExportKind): Promise<void> {
-    if (!view) return
+    if (!estate) return
     setBusy(kind)
     setError(null)
     try {
       const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, o) as string
-      const model = buildExportModel(view, flavor, resolved, t, i18n.language)
+      const model = buildExportModel(
+        estate.combined,
+        flavor,
+        resolved,
+        t,
+        i18n.language,
+        estate.perServer,
+      )
       const stamp = new Date().toISOString().slice(0, 10)
-      const base = `ppdm-report_${sanitize(view.meta.customer)}_${stamp}`
+      const base = `ppdm-report_${sanitize(estate.combined.meta.customer)}_${stamp}`
       if (kind === 'pptx') {
         // Dynamically imported so pptxgenjs + jszip stay out of the main bundle.
         const { buildPptx } = await import('../engines/export/pptx/builder')

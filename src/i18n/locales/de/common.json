@@ -5,6 +5,14 @@
     "choose": "Datei auswählen",
     "parsing": "Wird verarbeitet…"
   },
+  "servers": {
+    "title": "Geladene Server",
+    "clearAll": "Alle entfernen",
+    "remove": "{{label}} entfernen"
+  },
+  "warnings": {
+    "title": "Datenhinweise"
+  },
   "lang": {
     "label": "Sprache",
     "en": "English",
