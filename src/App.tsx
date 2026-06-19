@@ -31,12 +31,12 @@ export default function App() {
           <FlavorToggle />
           <LanguageToggle />
           <ThemeToggle />
-          <ExportButtons view={view} />
+          <ExportButtons view={view?.combined ?? null} />
         </div>
       </header>
       <main className="space-y-6 p-6">
         <UploadZone />
-        {view && <Dashboard view={view} />}
+        {view && <Dashboard view={view.combined} />}
       </main>
       <PwaUpdater />
     </div>

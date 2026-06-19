@@ -91,3 +91,18 @@ export interface ReportView {
   capacity: Capacity
   policies: Policies
 }
+
+/** One source server's report plus identity, for the per-server breakdown. */
+export interface ServerView {
+  label: string
+  /** PowerProtect version from System Information; '' when absent. */
+  version: string
+  view: ReportView
+}
+
+/** The whole estate: combined headline + per-server breakdown. */
+export interface EstateView {
+  combined: ReportView
+  perServer: ServerView[]
+  multiSource: boolean
+}
