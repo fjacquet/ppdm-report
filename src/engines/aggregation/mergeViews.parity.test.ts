@@ -5,10 +5,18 @@ import { normalizeWorkbook } from '../parser/normalizeWorkbook'
 import { mergeViews } from './mergeViews'
 import { buildReportView } from './reportView'
 
-/** Strip the new provenance field; the legacy path can't produce per-server denominators. */
-function omitProvenance(v: ReturnType<typeof buildReportView>) {
+/** Strip provenance, warnings, and normalize the float field that differs due to summation order. */
+function strip(v: ReturnType<typeof buildReportView>) {
   const { provenance: _p, warnings: _w, ...rest } = v
-  return rest
+  // Normalize gaps.totalCapacityGb to 0 so toEqual is not affected by this field.
+  // IEEE-754 floating-point summation is non-associative: the legacy path sums all raw
+  // "Unprotected Assets" rows linearly, while the view-level path sums per-server subtotals.
+  // Per-server ReportViews carry only subtotals, so the exact row-order accumulation cannot
+  // be reproduced — this is the expected, correct architecture, not a logic bug.
+  return {
+    ...rest,
+    gaps: { ...rest.gaps, totalCapacityGb: 0 },
+  }
 }
 
 describe('mergeViews parity with legacy sheet-level merge (detail estate)', () => {
@@ -20,6 +28,12 @@ describe('mergeViews parity with legacy sheet-level merge (detail estate)', () =
     ]
     const legacy = buildReportView(mergeWorkbooks(servers))
     const next = mergeViews(servers.map((s) => buildReportView(s.workbook)))
-    expect(omitProvenance(next)).toEqual(omitProvenance(legacy))
+
+    // IEEE-754 non-associativity: per-server subtotal summation differs from raw-row summation
+    // by ~5.8e-10. Assert within 6 decimal places (far tighter than the actual delta).
+    expect(next.gaps.totalCapacityGb).toBeCloseTo(legacy.gaps.totalCapacityGb, 6)
+
+    // All other fields must match exactly (provenance and warnings are structurally excluded).
+    expect(strip(next)).toEqual(strip(legacy))
   })
 })
