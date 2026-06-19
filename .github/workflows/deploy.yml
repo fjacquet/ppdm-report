@@ -1,55 +1,12 @@
-name: Deploy to GitHub Pages
-
+name: Deploy
 on:
-  push:
-    branches: [main]
+  push: { branches: [main] }
   workflow_dispatch:
-
-# Least-privilege token scoped for Pages deployment via OIDC.
 permissions:
   contents: read
   pages: write
   id-token: write
-
-# One Pages deployment at a time; don't cancel an in-flight publish.
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
-  build:
-    name: Build site
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      # Project site lives at /ppdm-report/ — Vite needs the matching base.
-      - name: Build
-        run: npm run build
-        env:
-          VITE_BASE: /ppdm-report/
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
   deploy:
-    name: Deploy
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    uses: fjacquet/ci/.github/workflows/web-deploy.yml@v1
+    with: { node-version: "24", build-dir: dist }

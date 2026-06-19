@@ -1,0 +1,32 @@
+# OSV-Scanner ignore list.
+#
+# Both waived advisories are SheetJS (xlsx) issues whose GHSA-summary fix
+# ranges are BELOW the version we ship. We pin xlsx 0.20.3 via the SheetJS
+# CDN tarball (package.json), so we are PAST the documented fix in both
+# cases. The OSV.dev structured records carry {introduced: 0, no fixed
+# event} — because SheetJS is CDN-distributed and the GHSA was never updated
+# with a first_patched_version — which makes osv-scanner flag every xlsx
+# version. Mirrors the vsizer waiver (same dependency, same rationale).
+#
+# Re-check before the ignoreUntil expiry: confirm we still ship a tarball at
+# or above each GHSA-summary fix range; if SheetJS publishes a newer tarball,
+# bump xlsx and drop the waiver.
+
+[[IgnoredVulns]]
+id = "GHSA-4r6h-8v6p-xvw6"
+ignoreUntil = 2026-08-14
+reason = """
+SheetJS prototype pollution. GHSA-summary affected range is < 0.19.3; we
+ship xlsx 0.20.3 via the CDN tarball, so we are past the fix. OSV.dev range
+is {introduced: 0, no fixed event}, treating every xlsx version as
+vulnerable. Not actually vulnerable on 0.20.3.
+"""
+
+[[IgnoredVulns]]
+id = "GHSA-5pgg-2g8v-p4x9"
+ignoreUntil = 2026-08-14
+reason = """
+SheetJS ReDoS. GHSA-summary affected range is < 0.20.2; we ship xlsx 0.20.3
+via the CDN tarball. Same OSV structured-range gap (introduced=0, no fixed
+event). Not actually vulnerable on 0.20.3.
+"""
