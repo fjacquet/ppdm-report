@@ -47,6 +47,9 @@ export interface Compliance {
   appConsistentPct: number
   immutablePct: number
   replicatedPct: number
+  appConsistentCount: number
+  immutableCount: number
+  replicatedCount: number
   backupLevelMix: Record<string, number>
   windowSize: number
   capped: boolean
