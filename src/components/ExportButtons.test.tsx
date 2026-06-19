@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import i18n from '../i18n'
-import type { ReportView } from '../types/reportView'
+import type { EstateView } from '../types/reportView'
 
 const { runMock, exportState } = vi.hoisted(() => ({
   runMock: vi.fn(),
@@ -13,7 +13,11 @@ vi.mock('../hooks/useExport', () => ({
 
 import { ExportButtons } from './ExportButtons'
 
-const view = { meta: { customer: 'WHO' } } as unknown as ReportView
+const view = {
+  combined: { meta: { customer: 'WHO' } },
+  perServer: [],
+  multiSource: false,
+} as unknown as EstateView
 
 describe('ExportButtons', () => {
   beforeEach(async () => {
