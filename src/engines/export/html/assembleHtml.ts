@@ -124,9 +124,16 @@ export function assembleHtml(model: ExportModel, theme: ExportTheme): string {
     .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:8px} .tile{background:${p.surface};border:1px solid ${p.line};border-left:3px solid ${p.accent};border-radius:9px;padding:11px 15px;font-size:13px;font-weight:600}
     .cap{font-size:11px;color:${p.muted};margin-top:10px;font-style:italic}
     footer{margin-top:36px;font-size:11px;color:${p.muted};border-top:1px solid ${p.line};padding-top:10px}
+    .warnings{margin:20px 0;padding:14px 18px;border:1px solid ${p.line};border-left:4px solid ${p.bad};border-radius:10px;background:${p.surface}} .warnings h2{font-size:14px;margin:0 0 8px} .warnings ul{margin:0;padding-left:20px;font-size:12px;color:${p.muted}} .warnings li{margin:3px 0}
   `
   const kpis = model.kpis.map((k) => kpiCardHtml(k, p)).join('')
   const posture = model.posture ? postureHtml(model.posture) : ''
+  const warnings =
+    model.warnings && model.warnings.length > 0
+      ? `<section class="warnings"><h2>⚠ ${esc('Data caveats')}</h2><ul>${model.warnings
+          .map((w) => `<li>${esc(w)}</li>`)
+          .join('')}</ul></section>`
+      : ''
   const sections = model.sections.map((s) => sectionHtml(s, p)).join('')
   return `<!doctype html>
 <html lang="${esc(model.locale)}">
@@ -141,6 +148,7 @@ export function assembleHtml(model: ExportModel, theme: ExportTheme): string {
 <p class="sub">${esc(model.customer)} · ${esc(model.subtitle)}</p>
 <div class="kpis">${kpis}</div>
 ${posture}
+${warnings}
 ${sections}
 <footer>${esc(model.footer)}</footer>
 </body>

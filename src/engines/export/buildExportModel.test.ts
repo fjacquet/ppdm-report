@@ -234,6 +234,12 @@ describe('buildExportModel', () => {
     expect(model.sections[0]?.id).toBe('perServer')
   })
 
+  it('passes deduplicated warnings into the model', () => {
+    const dup: ReportView = { ...view, warnings: ['cap note', 'cap note', 'merge note'] }
+    const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
+    expect(model.warnings).toEqual(['cap note', 'merge note'])
+  })
+
   it('coverage deck bars are capped at 6 and sorted descending by pct', () => {
     const localView = {
       ...view,

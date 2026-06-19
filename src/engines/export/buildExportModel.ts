@@ -456,6 +456,7 @@ export function buildExportModel(
     kpis: execKpis,
     sections,
     footer: footerParts.join(' · '),
+    warnings: [...new Set(view.warnings)],
     posture,
   }
 }
