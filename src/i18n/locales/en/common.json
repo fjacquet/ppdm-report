@@ -5,6 +5,11 @@
     "choose": "Choose file",
     "parsing": "Parsing…"
   },
+  "servers": {
+    "title": "Loaded servers",
+    "clearAll": "Clear all",
+    "remove": "Remove {{label}}"
+  },
   "lang": {
     "label": "Language",
     "en": "English",

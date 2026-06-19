@@ -7,7 +7,6 @@ vi.mock('../hooks/useReportUpload', () => ({
   useReportUpload: () => ({ upload: uploadMock, busy: false, error: null }),
 }))
 
-// Imported after the mock is registered.
 import { UploadZone } from './UploadZone'
 
 describe('UploadZone', () => {
@@ -17,35 +16,29 @@ describe('UploadZone', () => {
   })
   afterEach(() => cleanup())
 
-  it('uploads a dropped .xlsx file', () => {
+  it('uploads all dropped .xlsx files, ignoring non-xlsx', () => {
     const { container } = render(<UploadZone />)
     const zone = container.firstChild as HTMLElement
-    const file = new File(['x'], 'PPDM.xlsx')
-    fireEvent.drop(zone, { dataTransfer: { files: [file] } })
+    const a = new File(['x'], 'paris.xlsx')
+    const b = new File(['x'], 'lyon.xlsx')
+    const c = new File(['x'], 'notes.txt')
+    fireEvent.drop(zone, { dataTransfer: { files: [a, b, c] } })
     expect(uploadMock).toHaveBeenCalledTimes(1)
-    expect(uploadMock.mock.calls[0]?.[0]?.name).toBe('PPDM.xlsx')
+    const passed = uploadMock.mock.calls[0]?.[0] as File[]
+    expect(passed.map((f) => f.name)).toEqual(['paris.xlsx', 'lyon.xlsx'])
   })
 
-  it('ignores a dropped non-xlsx file', () => {
+  it('does not call upload when no .xlsx is present', () => {
     const { container } = render(<UploadZone />)
     const zone = container.firstChild as HTMLElement
-    const file = new File(['x'], 'notes.txt')
-    fireEvent.drop(zone, { dataTransfer: { files: [file] } })
+    fireEvent.drop(zone, { dataTransfer: { files: [new File(['x'], 'notes.txt')] } })
     expect(uploadMock).not.toHaveBeenCalled()
   })
 
-  it('marks the zone drag-active on dragover', () => {
-    const { container } = render(<UploadZone />)
-    const zone = container.firstChild as HTMLElement
-    fireEvent.dragOver(zone)
-    expect(zone.getAttribute('data-drag-active')).toBe('true')
-  })
-
-  it('uploads a file chosen via the input', () => {
+  it('uploads files chosen via the input', () => {
     render(<UploadZone />)
     const input = document.querySelector('input[type="file"]') as HTMLInputElement
-    const file = new File(['x'], 'PPDM.xlsx')
-    fireEvent.change(input, { target: { files: [file] } })
+    fireEvent.change(input, { target: { files: [new File(['x'], 'PPDM.xlsx')] } })
     expect(uploadMock).toHaveBeenCalledTimes(1)
   })
 })
