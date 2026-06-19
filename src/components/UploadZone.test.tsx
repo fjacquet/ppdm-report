@@ -41,4 +41,11 @@ describe('UploadZone', () => {
     fireEvent.change(input, { target: { files: [new File(['x'], 'PPDM.xlsx')] } })
     expect(uploadMock).toHaveBeenCalledTimes(1)
   })
+
+  it('marks the zone drag-active on dragover', () => {
+    const { container } = render(<UploadZone />)
+    const zone = container.firstChild as HTMLElement
+    fireEvent.dragOver(zone)
+    expect(zone.getAttribute('data-drag-active')).toBe('true')
+  })
 })

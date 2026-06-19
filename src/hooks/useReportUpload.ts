@@ -14,17 +14,20 @@ export function useReportUpload() {
     setError(null)
     const ready: ServerWorkbook[] = []
     const failed: string[] = []
-    for (const file of files) {
-      try {
-        const workbook = await parseInWorker(file)
-        ready.push({ label: deriveLabel(workbook, file.name), workbook })
-      } catch {
-        failed.push(file.name)
+    try {
+      for (const file of files) {
+        try {
+          const workbook = await parseInWorker(file)
+          ready.push({ label: deriveLabel(workbook, file.name), workbook })
+        } catch {
+          failed.push(file.name)
+        }
       }
+      if (ready.length > 0) addServers(ready)
+      if (failed.length > 0) setError(`Could not parse: ${failed.join(', ')}`)
+    } finally {
+      setBusy(false)
     }
-    if (ready.length > 0) addServers(ready)
-    if (failed.length > 0) setError(`Could not parse: ${failed.join(', ')}`)
-    setBusy(false)
   }
 
   return { upload, busy, error }
