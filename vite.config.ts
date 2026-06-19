@@ -4,9 +4,10 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  // '/' for local dev/preview; the Pages deploy sets VITE_BASE=/ppdm-report/
-  // so built asset URLs resolve under the project-site subpath.
-  base: process.env.VITE_BASE || '/',
+  // Project Pages site lives at https://fjacquet.github.io/ppdm-report/, so the
+  // default build base is the subpath. VITE_BASE overrides it (e.g. '/' for
+  // container/root deploys); dev/preview honour the override too.
+  base: process.env.VITE_BASE || '/ppdm-report/',
   plugins: [
     react(),
     tailwindcss(),
