@@ -2,6 +2,23 @@ import { describe, expect, it } from 'vitest'
 import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
 import { appHostName, appVersion, deriveLabel, withUniqueLabel } from './deriveLabel'
 
+function wbWithSysInfo(row: Record<string, string>): ParsedWorkbook {
+  return {
+    meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
+    sheets: {
+      'System Information': {
+        name: 'System Information',
+        headers: Object.keys(row),
+        rows: [row],
+        capped: false,
+      },
+    },
+    inUse: [],
+    idleAgents: [],
+    warnings: [],
+  }
+}
+
 function wbWith(sysRow: Record<string, string> | null, customer = ''): ParsedWorkbook {
   const sheets: Record<string, SheetData> = {}
   if (sysRow) {
@@ -58,5 +75,23 @@ describe('deriveLabel helpers', () => {
     expect(withUniqueLabel([], 'ppdm')).toBe('ppdm')
     expect(withUniqueLabel(['ppdm'], 'ppdm')).toBe('ppdm (2)')
     expect(withUniqueLabel(['ppdm', 'ppdm (2)'], 'ppdm')).toBe('ppdm (3)')
+  })
+})
+
+describe('appVersion fallback', () => {
+  it('prefers PowerProtect Version when present', () => {
+    expect(appVersion(wbWithSysInfo({ 'PowerProtect Version': '19.19' }))).toBe('19.19')
+  })
+
+  it('falls back to Product Version when PowerProtect fields are N/A', () => {
+    expect(
+      appVersion(
+        wbWithSysInfo({ 'Power Protect Version': 'N/A', 'Product Version': '19.18.0-14' }),
+      ),
+    ).toBe('19.18.0-14')
+  })
+
+  it('returns empty string when nothing usable is present', () => {
+    expect(appVersion(wbWithSysInfo({ 'Power Protect Version': 'N/A' }))).toBe('')
   })
 })
