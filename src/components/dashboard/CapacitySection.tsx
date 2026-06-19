@@ -7,6 +7,7 @@ import { fmtInt, fmtPercentValue } from '../../utils/format'
 import { Chart } from '../Chart'
 import { Details } from '../Details'
 import { type BarDatum, horizontalBarOption } from './barOption'
+import { ProvenanceNote } from './ProvenanceNote'
 
 interface CapacitySectionProps {
   view: ReportView
@@ -94,6 +95,7 @@ export function CapacitySection({ view, dark }: CapacitySectionProps) {
           </Details>
         </>
       )}
+      <ProvenanceNote p={view.provenance.storageTargets} dark={dark} />
     </section>
   )
 }

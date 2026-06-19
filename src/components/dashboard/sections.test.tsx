@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { allAvailable } from '../../engines/aggregation/provenance'
+import { allAvailable, allUnavailable } from '../../engines/aggregation/provenance'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { CapacitySection } from './CapacitySection'
@@ -350,5 +350,60 @@ describe('PoliciesSection', () => {
     expect(screen.getByText('Show details')).toBeInTheDocument()
     expect(screen.getAllByText('CENTRALIZED').length).toBeGreaterThan(0)
     expect(screen.getByText('SQL - Prod')).toBeInTheDocument()
+  })
+})
+
+// ── Provenance notes (summary-format) ────────────────────────────────────────
+
+const makeView = (overrides: Partial<ReportView>): ReportView => ({ ...fixture, ...overrides })
+
+describe('ProvenanceNote integration — summary-format provenance', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('CapacitySection shows the unavailable note for summary provenance', () => {
+    const view = makeView({ provenance: allUnavailable(100) })
+    render(<CapacitySection view={view} dark={false} />)
+    expect(screen.getByText(/not available/i)).toBeInTheDocument()
+  })
+
+  it('JobsComplianceSection shows the unavailable note for summary provenance', () => {
+    const view = makeView({ provenance: allUnavailable(100) })
+    render(<JobsComplianceSection view={view} dark={false} />)
+    expect(screen.getByText(/not available/i)).toBeInTheDocument()
+  })
+
+  it('CoverageSection shows the unavailable note for summary provenance', () => {
+    const view = makeView({ provenance: allUnavailable(100) })
+    render(<CoverageSection view={view} dark={false} />)
+    expect(screen.getByText(/not available/i)).toBeInTheDocument()
+  })
+
+  it('GapsSection shows the unavailable note for summary provenance', () => {
+    const view = makeView({ provenance: allUnavailable(100) })
+    render(<GapsSection view={view} dark={false} />)
+    expect(screen.getByText(/not available/i)).toBeInTheDocument()
+  })
+
+  it('CapacitySection shows NO provenance note when fully available', () => {
+    render(<CapacitySection view={capacityFixture} dark={false} />)
+    expect(screen.queryByText(/not available/i)).toBeNull()
+  })
+
+  it('JobsComplianceSection shows NO provenance note when fully available', () => {
+    render(<JobsComplianceSection view={jobsComplianceFixture} dark={false} />)
+    expect(screen.queryByText(/not available/i)).toBeNull()
+  })
+
+  it('CoverageSection shows NO provenance note when fully available', () => {
+    render(<CoverageSection view={fixture} dark={false} />)
+    expect(screen.queryByText(/not available/i)).toBeNull()
+  })
+
+  it('GapsSection shows NO provenance note when fully available', () => {
+    render(<GapsSection view={gapsFixture} dark={false} />)
+    expect(screen.queryByText(/not available/i)).toBeNull()
   })
 })

@@ -5,6 +5,7 @@ import { DARK, LIGHT } from '../../theme/palette'
 import type { ReportView } from '../../types/reportView'
 import { fmtInt, fmtPercent } from '../../utils/format'
 import { Chart } from '../Chart'
+import { ProvenanceNote } from './ProvenanceNote'
 
 interface CoverageSectionProps {
   view: ReportView
@@ -145,6 +146,7 @@ export function CoverageSection({ view, dark }: CoverageSectionProps) {
           />
         )}
       </div>
+      <ProvenanceNote p={view.provenance.coverageByType} dark={dark} />
     </section>
   )
 }
