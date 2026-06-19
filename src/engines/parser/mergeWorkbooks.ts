@@ -4,8 +4,8 @@ import { classifyAgents } from './detectInUse'
 /** Fold N parsed PPDM workbooks into one estate workbook. Pure.
  * Single source returns that workbook unchanged (identity). */
 export function mergeWorkbooks(servers: ServerWorkbook[]): ParsedWorkbook {
-  const [first, ...rest] = servers
-  if (!first) return { meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true }, sheets: {}, inUse: [], idleAgents: [], warnings: [] }
+  if (servers.length === 0) throw new Error('mergeWorkbooks requires at least one server')
+  const [first, ...rest] = servers as [ServerWorkbook, ...ServerWorkbook[]]
   if (rest.length === 0) return first.workbook
 
   const workbooks = servers.map((s) => s.workbook)

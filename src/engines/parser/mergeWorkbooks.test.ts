@@ -27,6 +27,12 @@ function wb(over: Partial<ParsedWorkbook> = {}): ParsedWorkbook {
 
 const srv = (label: string, workbook: ParsedWorkbook): ServerWorkbook => ({ label, workbook })
 
+describe('mergeWorkbooks — edge cases', () => {
+  it('throws on an empty server list', () => {
+    expect(() => mergeWorkbooks([])).toThrow('requires at least one server')
+  })
+})
+
 describe('mergeWorkbooks — single source', () => {
   it('is an identity for one server (view is unchanged)', () => {
     const only = wb({
@@ -90,5 +96,12 @@ describe('mergeWorkbooks — multiple sources', () => {
     expect(merged.meta.customer).toBe('ACME')
     expect(merged.meta.capturedAt).toBe('2026-03-09')
     expect(merged.meta.baseTen).toBe(true)
+  })
+
+  it('meta.baseTen falls back to the first server when sources disagree', () => {
+    const a = wb({ meta: { ...wb().meta, baseTen: false } })
+    const b = wb({ meta: { ...wb().meta, baseTen: true } })
+    const merged = mergeWorkbooks([srv('a', a), srv('b', b)])
+    expect(merged.meta.baseTen).toBe(false)
   })
 })
