@@ -65,4 +65,14 @@ describe('captureMeta — summary tolerances', () => {
     const meta = captureMeta(wbWithDetails([['Date', 'not a date']]))
     expect(meta.capturedAt).toBe('')
   })
+
+  it('rejects out-of-range dates like 32/13/2025', () => {
+    const meta = captureMeta(wbWithDetails([['Date', '32/13/2025 00:00:00']]))
+    expect(meta.capturedAt).toBe('')
+  })
+
+  it('rejects dates with trailing garbage like 18/02/2025 03:54:24-x', () => {
+    const meta = captureMeta(wbWithDetails([['Date', '18/02/2025 03:54:24-x']]))
+    expect(meta.capturedAt).toBe('')
+  })
 })

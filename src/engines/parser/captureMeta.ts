@@ -13,7 +13,7 @@ const CaptureMetaSchema = z.object({
 
 /** Parse a "DD/MM/YYYY HH:mm:ss" string as UTC ISO-8601; '' when unparseable. */
 function parseTextDate(s: string): string {
-  const m = /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})/.exec(s.trim())
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/.exec(s.trim())
   if (!m) return ''
   const dd = m[1] as string
   const mm = m[2] as string
@@ -22,7 +22,17 @@ function parseTextDate(s: string): string {
   const mi = m[5] as string
   const ss = m[6] as string
   const d = new Date(Date.UTC(+yyyy, +mm - 1, +dd, +hh, +mi, +ss))
-  return Number.isNaN(d.getTime()) ? '' : d.toISOString()
+  if (
+    Number.isNaN(d.getTime()) ||
+    d.getUTCFullYear() !== +yyyy ||
+    d.getUTCMonth() !== +mm - 1 ||
+    d.getUTCDate() !== +dd ||
+    d.getUTCHours() !== +hh ||
+    d.getUTCMinutes() !== +mi ||
+    d.getUTCSeconds() !== +ss
+  )
+    return ''
+  return d.toISOString()
 }
 
 /** Read the key/value Details sheet into validated CaptureMeta. */
