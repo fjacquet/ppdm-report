@@ -39,5 +39,9 @@
     "base10": "base-10 units"
   },
   "docs": "Docs",
-  "showDetails": "Show details"
+  "showDetails": "Show details",
+  "update": {
+    "available": "New version available",
+    "reload": "Reload"
+  }
 }
