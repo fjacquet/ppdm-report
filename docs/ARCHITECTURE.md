@@ -96,7 +96,7 @@ src/engines/products/estateDocument.ts  (buildEstateDocument — document root)
 ```
 
 Key invariant: **`RawWorkbook` (tagged as `ServerWorkbook`) enters the store; `EstateDocument` never does.**
-`useReportView` is the only bridge; rebuilds from scratch on every server list or flavor change.
+`useReportView` is the only bridge; rebuilds from scratch on every server list change (it memos on `[servers]` only — `flavor` flows separately to `Dashboard` and `useExport` via the store).
 
 ### Product-adapter registry (`src/engines/products/index.ts`)
 
@@ -222,7 +222,7 @@ the i18next `LanguageDetector`.
 | `useReportUpload` | Calls `parseInWorker(file)`, runs `detectProduct`, rejects unsupported products, writes `ServerWorkbook` to store via `addServers`; exposes `{ upload, busy, error }` |
 | `useReportView` | **The single `useMemo`**: `buildEstateDocument(servers)` keyed on `servers`; returns `EstateDocument \| null` |
 | `useTheme` | Three-state preference (`auto/light/dark`) backed by `localStorage['ppdm-report-theme']`; toggles `.dark` on `<html>`; returns `{ theme, resolved, setTheme }` |
-| `useExport` | Resolves `ReportView`, `flavor`, `resolved` theme, and active locale; calls `buildExportModel` then either `buildPptx` (dynamic import) or `assembleHtml`; triggers browser download |
+| `useExport` | Takes the `EstateDocument`; resolves the (phase-1 single) product's `ReportView` via `products[0].estate.combined`, plus `flavor`, `resolved` theme, and active locale; calls `buildExportModel` then either `buildPptx` (dynamic import) or `assembleHtml`; triggers browser download |
 
 **`useReportView` is the only place `buildEstateDocument` is called from the UI side.** `App.tsx`
 receives `EstateDocument` and renders one `<ProductSection>` per product; no cross-product totals.
@@ -416,7 +416,7 @@ Coverage settings:
   (browser/worker glue verified end-to-end)
 - **Thresholds**: lines / functions / branches / statements all ≥ **75%**
 
-Current test count: **139 tests, 0 failures, 0 skipped**.
+Current test count: **253 tests, 0 failures, 0 skipped**.
 
 ### Biome
 
