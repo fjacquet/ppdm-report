@@ -1,6 +1,9 @@
 /** A single spreadsheet cell value after SheetJS parsing. */
 export type Cell = string | number | boolean | null
 
+/** The backup product a workbook came from. */
+export type ProductId = 'ppdm' | 'avamar' | 'networker' | 'unknown'
+
 export type ProtectionStatus = 'PROTECTED' | 'UNPROTECTED' | 'EXCLUDED'
 
 /** One worksheet, rows keyed by header. */
@@ -23,21 +26,19 @@ export interface CaptureMeta {
   baseTen: boolean
 }
 
-export interface ParsedWorkbook {
+/** Product-neutral parsed workbook: raw sheets + capture metadata + data caveats. */
+export interface RawWorkbook {
   meta: CaptureMeta
   sheets: Record<string, SheetData>
-  /** Agent/asset-type sheets with at least one real (non-placeholder) row. */
-  inUse: string[]
-  /** Agent/asset-type sheets present in the export but holding only N/A placeholders. */
-  idleAgents: string[]
   /** Human-readable data caveats (e.g. capped sheets). Never empty silently. */
   warnings: string[]
 }
 
-/** A parsed workbook tagged with a human-readable source-server label. */
+/** A parsed workbook tagged with its product and a human-readable source label. */
 export interface ServerWorkbook {
   label: string
-  workbook: ParsedWorkbook
+  product: ProductId
+  workbook: RawWorkbook
 }
 
 /** Asset-type sheets — each corresponds to a PPDM application agent / plugin. */

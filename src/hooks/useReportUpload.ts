@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { deriveLabel } from '../engines/parser/deriveLabel'
+import { detectProduct } from '../engines/parser/detectProduct'
 import { parseInWorker } from '../engines/parser/parseInWorker'
+import { isSupportedProduct } from '../engines/products'
 import { useReportStore } from '../store/reportStore'
 import type { ServerWorkbook } from '../types/ppdm'
 
@@ -17,17 +19,30 @@ export function useReportUpload() {
     setError(null)
     const ready: ServerWorkbook[] = []
     const failed: string[] = []
+    const unsupported: string[] = []
     try {
       for (const file of files) {
         try {
           const workbook = await parseInWorker(file)
-          ready.push({ label: deriveLabel(workbook, file.name), workbook })
+          const product = detectProduct(workbook)
+          if (!isSupportedProduct(product)) {
+            unsupported.push(file.name)
+            continue
+          }
+          ready.push({ label: deriveLabel(workbook, file.name), product, workbook })
         } catch {
           failed.push(file.name)
         }
       }
       if (ready.length > 0) addServers(ready)
-      if (failed.length > 0) setError(`Could not parse: ${failed.join(', ')}`)
+      const problems: string[] = []
+      if (failed.length > 0) problems.push(`Could not parse: ${failed.join(', ')}`)
+      if (unsupported.length > 0) {
+        problems.push(
+          `Unrecognized or unsupported export (expected PPDM): ${unsupported.join(', ')}`,
+        )
+      }
+      if (problems.length > 0) setError(problems.join(' · '))
     } finally {
       inFlight.current = false
       setBusy(false)

@@ -1,17 +1,19 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import type { ParsedWorkbook, ServerWorkbook } from '../types/ppdm'
+import type { RawWorkbook, ServerWorkbook } from '../types/ppdm'
 import { useReportStore } from './reportStore'
 
-function wb(customer: string): ParsedWorkbook {
+function wb(customer: string): RawWorkbook {
   return {
     meta: { projectId: '', customer, collectorBuild: '', capturedAt: '', baseTen: true },
     sheets: {},
-    inUse: [],
-    idleAgents: [],
     warnings: [],
   }
 }
-const srv = (label: string, customer = label): ServerWorkbook => ({ label, workbook: wb(customer) })
+const srv = (label: string, customer = label): ServerWorkbook => ({
+  label,
+  product: 'ppdm',
+  workbook: wb(customer),
+})
 
 describe('reportStore', () => {
   beforeEach(() => useReportStore.getState().clear())

@@ -55,6 +55,7 @@
     "title": "Per-server breakdown",
     "col": { "server": "Server", "version": "Version", "captured": "Captured" }
   },
+  "product": { "badge": "Source product" },
   "provenance": {
     "unavailable": "Not available for summary-format reports",
     "partial": "Covers {{covered}} of {{total}} servers",

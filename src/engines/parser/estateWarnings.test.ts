@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { ParsedWorkbook, ServerWorkbook } from '../../types/ppdm'
+import type { RawWorkbook, ServerWorkbook } from '../../types/ppdm'
 import { estateWarnings } from './estateWarnings'
 
-function wb(over: Partial<ParsedWorkbook> = {}): ParsedWorkbook {
+function wb(over: Partial<RawWorkbook> = {}): RawWorkbook {
   return {
     meta: {
       projectId: 'p',
@@ -12,13 +12,15 @@ function wb(over: Partial<ParsedWorkbook> = {}): ParsedWorkbook {
       baseTen: true,
     },
     sheets: {},
-    inUse: [],
-    idleAgents: [],
     warnings: [],
     ...over,
   }
 }
-const srv = (label: string, workbook: ParsedWorkbook): ServerWorkbook => ({ label, workbook })
+const srv = (label: string, workbook: RawWorkbook): ServerWorkbook => ({
+  label,
+  product: 'ppdm',
+  workbook,
+})
 
 describe('estateWarnings', () => {
   it("returns a single source's warnings unchanged (no attribution prefix)", () => {

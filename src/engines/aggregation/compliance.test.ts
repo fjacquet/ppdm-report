@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import type { RawWorkbook, SheetData } from '../../types/ppdm'
 import { computeCompliance } from './compliance'
 
-function wb(rows: Array<Record<string, string>>, capped = false): ParsedWorkbook {
+function wb(rows: Array<Record<string, string>>, capped = false): RawWorkbook {
   const sheet: SheetData = {
     name: 'Copies',
     headers: ['Data Consistency', 'Lock Status', 'Replica', 'Backup Level'],
@@ -12,8 +12,6 @@ function wb(rows: Array<Record<string, string>>, capped = false): ParsedWorkbook
   return {
     meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
     sheets: { Copies: sheet },
-    inUse: [],
-    idleAgents: [],
     warnings: [],
   }
 }
@@ -66,8 +64,6 @@ describe('computeCompliance', () => {
     const c = computeCompliance({
       meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
       sheets: {},
-      inUse: [],
-      idleAgents: [],
       warnings: [],
     })
     expect(c.windowSize).toBe(0)
@@ -98,8 +94,6 @@ describe('computeCompliance', () => {
           capped: false,
         },
       },
-      inUse: [],
-      idleAgents: [],
       warnings: [],
     }
     const c = computeCompliance(wb)

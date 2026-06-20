@@ -1,4 +1,4 @@
-import type { ParsedWorkbook } from '../../types/ppdm'
+import type { RawWorkbook } from '../../types/ppdm'
 import type { ParseRequest, ParseResponse } from './parser.worker'
 
 let worker: Worker | null = null
@@ -12,11 +12,11 @@ function getWorker(): Worker {
 }
 
 /** Parse a dropped File in the worker; resolves with the normalized workbook. */
-export async function parseInWorker(file: File): Promise<ParsedWorkbook> {
+export async function parseInWorker(file: File): Promise<RawWorkbook> {
   const buffer = await file.arrayBuffer()
   const w = getWorker()
   const id = nextId++
-  return new Promise<ParsedWorkbook>((resolve, reject) => {
+  return new Promise<RawWorkbook>((resolve, reject) => {
     const onMessage = (e: MessageEvent<ParseResponse>) => {
       if (e.data.id !== id) return
       w.removeEventListener('message', onMessage)

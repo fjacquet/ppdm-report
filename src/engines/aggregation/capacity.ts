@@ -1,10 +1,10 @@
-import { FLAG_THRESHOLD_PCT, type ParsedWorkbook } from '../../types/ppdm'
+import { FLAG_THRESHOLD_PCT, type RawWorkbook } from '../../types/ppdm'
 import type { Capacity, StorageTarget } from '../../types/reportView'
 import { cellNum, cellStr } from './rows'
 
 /** Storage-target utilization with capacity-risk flags, plus Data Domain mtree count. */
 export function computeCapacity(
-  wb: ParsedWorkbook,
+  wb: RawWorkbook,
   flagThresholdPct: number = FLAG_THRESHOLD_PCT,
 ): Capacity {
   const rows = wb.sheets['Storage Targets']?.rows ?? []

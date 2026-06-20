@@ -1,14 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import type { RawWorkbook, SheetData } from '../../types/ppdm'
 import { computeJobs } from './jobs'
 
-function wb(rows: Array<Record<string, string>>, capped: boolean): ParsedWorkbook {
+function wb(rows: Array<Record<string, string>>, capped: boolean): RawWorkbook {
   const sheet: SheetData = { name: 'Protection Job Activities', headers: ['Result'], rows, capped }
   return {
     meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
     sheets: { 'Protection Job Activities': sheet },
-    inUse: [],
-    idleAgents: [],
     warnings: [],
   }
 }
@@ -37,8 +35,6 @@ describe('computeJobs', () => {
     const j = computeJobs({
       meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
       sheets: {},
-      inUse: [],
-      idleAgents: [],
       warnings: [],
     })
     expect(j.total).toBe(0)

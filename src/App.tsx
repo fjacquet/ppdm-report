@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Dashboard } from './components/dashboard/Dashboard'
+import { ProductSection } from './components/dashboard/ProductSection'
 import { ExportButtons } from './components/ExportButtons'
 import { FlavorToggle } from './components/FlavorToggle'
 import { LanguageToggle } from './components/LanguageToggle'
@@ -11,7 +11,7 @@ import { useReportView } from './hooks/useReportView'
 
 export default function App() {
   const { t } = useTranslation('common')
-  const view = useReportView()
+  const report = useReportView()
 
   return (
     <div
@@ -32,13 +32,15 @@ export default function App() {
           <FlavorToggle />
           <LanguageToggle />
           <ThemeToggle />
-          <ExportButtons view={view} />
+          <ExportButtons document={report} />
         </div>
       </header>
       <main className="space-y-6 p-6">
         <UploadZone />
         <ServerList />
-        {view && <Dashboard view={view.combined} perServer={view.perServer} />}
+        {report?.products.map((pe) => (
+          <ProductSection key={pe.product} product={pe.product} estate={pe.estate} />
+        ))}
       </main>
       <PwaUpdater />
     </div>

@@ -1,17 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import type { ParsedWorkbook, SheetData } from '../../types/ppdm'
+import type { RawWorkbook, SheetData } from '../../types/ppdm'
 import { computeCapacity } from './capacity'
 
 function sheet(name: string, headers: string[], rows: Array<Record<string, string>>): SheetData {
   return { name, headers, rows, capped: false }
 }
 
-function wb(sheets: Record<string, SheetData>): ParsedWorkbook {
+function wb(sheets: Record<string, SheetData>): RawWorkbook {
   return {
     meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
     sheets,
-    inUse: [],
-    idleAgents: [],
     warnings: [],
   }
 }

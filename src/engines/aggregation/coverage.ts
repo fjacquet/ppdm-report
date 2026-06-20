@@ -1,5 +1,6 @@
-import type { ParsedWorkbook } from '../../types/ppdm'
+import type { RawWorkbook } from '../../types/ppdm'
 import type { Coverage, CoverageBand } from '../../types/reportView'
+import { classifyAgents } from '../parser/detectInUse'
 import { cellStr } from './rows'
 
 export function emptyBand(): CoverageBand {
@@ -17,11 +18,12 @@ export function finalizeBand(b: CoverageBand): CoverageBand {
 }
 
 /** Protection coverage per in-use asset type and overall. */
-export function computeCoverage(wb: ParsedWorkbook): Coverage {
+export function computeCoverage(wb: RawWorkbook): Coverage {
   const byType: Record<string, CoverageBand> = {}
   const overall = emptyBand()
 
-  for (const name of wb.inUse) {
+  const { inUse } = classifyAgents(Object.values(wb.sheets))
+  for (const name of inUse) {
     const sheet = wb.sheets[name]
     if (!sheet) continue
     const band = emptyBand()

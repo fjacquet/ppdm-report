@@ -1,11 +1,11 @@
-import type { ParsedWorkbook, ServerWorkbook, SheetData } from '../../types/ppdm'
-import { classifyAgents } from './detectInUse'
+import type { RawWorkbook, ServerWorkbook, SheetData } from '../../types/ppdm'
 import { estateWarnings } from './estateWarnings'
 import { foldMeta } from './foldMeta'
 
+// Test-only: legacy sheet-level fold retained as the parity oracle for mergeViews (see mergeViews.parity.test.ts). Not used in production.
 /** Fold N parsed PPDM workbooks into one estate workbook. Pure.
  * Single source returns that workbook unchanged (identity). */
-export function mergeWorkbooks(servers: ServerWorkbook[]): ParsedWorkbook {
+export function mergeWorkbooks(servers: ServerWorkbook[]): RawWorkbook {
   if (servers.length === 0) throw new Error('mergeWorkbooks requires at least one server')
   const [first, ...rest] = servers as [ServerWorkbook, ...ServerWorkbook[]]
   if (rest.length === 0) return first.workbook
@@ -36,9 +36,7 @@ export function mergeWorkbooks(servers: ServerWorkbook[]): ParsedWorkbook {
     }
   }
 
-  const { inUse, idleAgents } = classifyAgents(Object.values(sheets))
-
   const meta = foldMeta(workbooks.map((w) => w.meta))
 
-  return { meta, sheets, inUse, idleAgents, warnings: estateWarnings(servers) }
+  return { meta, sheets, warnings: estateWarnings(servers) }
 }

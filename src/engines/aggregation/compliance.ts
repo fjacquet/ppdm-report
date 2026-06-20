@@ -1,9 +1,9 @@
-import type { ParsedWorkbook } from '../../types/ppdm'
+import type { RawWorkbook } from '../../types/ppdm'
 import type { Compliance } from '../../types/reportView'
 import { cellStr } from './rows'
 
 /** Copy-level compliance posture over the (possibly capped) copy window. */
-export function computeCompliance(wb: ParsedWorkbook): Compliance {
+export function computeCompliance(wb: RawWorkbook): Compliance {
   const sheet = wb.sheets.Copies
   const rows = sheet?.rows ?? []
   const n = rows.length

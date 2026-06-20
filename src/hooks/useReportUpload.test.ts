@@ -8,9 +8,8 @@ vi.mock('../engines/parser/parseInWorker')
 
 const minimalWorkbook = {
   meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
-  sheets: {},
-  inUse: [],
-  idleAgents: [],
+  // A PPDM-signature sheet so detectProduct admits this workbook (gating is real now).
+  sheets: { 'Storage Targets': { name: 'Storage Targets', headers: [], rows: [], capped: false } },
   warnings: [],
 }
 
@@ -37,6 +36,37 @@ describe('useReportUpload', () => {
     expect(servers[0]?.label).toBe('good')
     expect(result.current.error).not.toBeNull()
     expect(result.current.error).toContain('bad.xlsx')
+    expect(result.current.busy).toBe(false)
+  })
+
+  it('rejects unsupported files while accepting supported ones in the same batch', async () => {
+    const unknownWorkbook = {
+      meta: { projectId: '', customer: '', collectorBuild: '', capturedAt: '', baseTen: true },
+      // No PPDM-signature sheet → detectProduct returns 'unknown'
+      sheets: { Sheet1: { name: 'Sheet1', headers: [], rows: [], capped: false } },
+      warnings: [],
+    }
+
+    vi.mocked(parseInWorker).mockImplementation((file: File) => {
+      if (file.name === 'unsupported.xlsx') return Promise.resolve(unknownWorkbook)
+      return Promise.resolve(minimalWorkbook)
+    })
+
+    const { result } = renderHook(() => useReportUpload())
+
+    await act(async () => {
+      await result.current.upload([
+        new File(['x'], 'unsupported.xlsx'),
+        new File(['x'], 'good.xlsx'),
+      ])
+    })
+
+    const servers = useReportStore.getState().servers
+    expect(servers).toHaveLength(1)
+    expect(servers[0]?.label).toBe('good')
+    expect(result.current.error).not.toBeNull()
+    expect(result.current.error).toContain('unsupported.xlsx')
+    expect(result.current.error).toContain('Unrecognized or unsupported')
     expect(result.current.busy).toBe(false)
   })
 })

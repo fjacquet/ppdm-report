@@ -1,6 +1,6 @@
 # ARCHITECTURE — ppdm-report
 
-**Status:** Current (2026-06-18)
+**Status:** Current (2026-06-19)
 **Design spec:** [`docs/superpowers/specs/2026-06-18-ppdm-report-design.md`](superpowers/specs/2026-06-18-ppdm-report-design.md)
 **README:** [`README.md`](../README.md)
 
@@ -28,11 +28,12 @@ Violated once and the tier boundary collapses.
 ### Data-flow diagram
 
 ```
-PPDM.xlsx drop (browser File API)
+File drop (browser File API)
   │
   ▼
 src/hooks/useReportUpload.ts  ← calls parseInWorker(file)
   │  reads File → ArrayBuffer on main thread; transfers buffer to worker
+  │  rejects unsupported products per-file (isSupportedProduct check)
   │
   ▼  [Web Worker boundary — ArrayBuffer transferred, not copied]
 src/engines/parser/parser.worker.ts
@@ -40,34 +41,52 @@ src/engines/parser/parser.worker.ts
   │  fetchGuard installed as FIRST import (same-origin invariant in worker too)
   ├─ readWorkbook(buf)        → XLSX.WorkBook
   ├─ toSheetData(wb)          → SheetData[]  (headers + keyed rows + capped flag)
-  ├─ classifyAgents(sheets)   → { inUse: string[], idleAgents: string[] }
   ├─ captureMeta(wb)          → CaptureMeta  (Zod-validated at this boundary)
-  └─ normalizeWorkbook(buf)   → ParsedWorkbook  (composition of the above)
+  └─ normalizeWorkbook(buf)   → RawWorkbook  (product-neutral: { meta, sheets, warnings })
   │
-  │  posts ParsedWorkbook back to main thread
+  │  posts RawWorkbook back to main thread; detectProduct tags it with ProductId
+  ▼
+src/engines/parser/detectProduct.ts  (classifies by sheet-name signature)
+  │  'ppdm'      → has 'System Configuration' | 'Data Domain Mtrees' | 'Storage Targets'
+  │  'avamar'    → has 'Avamar DPN Summary', or 'Backup Completion Summary'+'Backup Plugins'
+  │  'networker' → has 'Storage Nodes' + 'Dedup Jobs'
+  │  'unknown'   → none of the above; rejected by useReportUpload
+  │
   ▼
 src/store/reportStore.ts  (Zustand)
-  │  stores: workbook: ParsedWorkbook | null, flavor: 'assessment' | 'ops'
+  │  stores: servers: ServerWorkbook[]  (each tagged { label, product, workbook: RawWorkbook })
+  │          flavor: 'assessment' | 'ops'
   │  ONLY inputs — no derived metrics ever enter the store
   │
   ▼
 src/hooks/useReportView.ts
-  │  THE single useMemo:
-  │    useMemo(() => workbook ? buildReportView(workbook) : null, [workbook])
+  │  THE single useMemo: buildEstateDocument(servers) keyed on servers array
   │
   ▼
-src/engines/aggregation/reportView.ts  (buildReportView — composition root)
-  ├─ computeCoverage(wb)   → Coverage
-  ├─ findGaps(wb)          → Gaps
-  ├─ computeJobs(wb)       → Jobs
-  ├─ computeCompliance(wb) → Compliance
-  ├─ computeCapacity(wb)   → Capacity
-  └─ summarizePolicies(wb) → Policies
+src/engines/products/estateDocument.ts  (buildEstateDocument — document root)
+  │  groups servers by product; for each product group:
+  │    getViewBuilder(product)         → ViewBuilder from the product-adapter registry
+  │    build(wb: RawWorkbook)          → ReportView   (one per server)
+  │    mergeViews(perServer views)     → combined EstateView
+  │  returns EstateDocument { products: ProductEstate[], multiProduct }
+  │  No cross-product totals; phase 1 supports PPDM only.
   │
-  │  returns ReportView  (pure value, no store write)
+  │  Per-product adapter (phase 1: PPDM):
+  └─ src/engines/products/ppdm/buildPpdmView.ts  (buildPpdmView — PPDM composition root)
+      │  branches on detectFormat(wb): summary path → summaryView; detail path → full pipeline
+      ├─ classifyAgents(sheets)  → { inUse, idleAgents }  (PPDM-specific; moved out of parser)
+      ├─ computeCoverage(wb)   → Coverage
+      ├─ findGaps(wb)          → Gaps
+      ├─ computeJobs(wb)       → Jobs
+      ├─ computeCompliance(wb) → Compliance
+      ├─ computeCapacity(wb)   → Capacity
+      └─ summarizePolicies(wb) → Policies
   │
-  ├──▶ src/components/dashboard/Dashboard.tsx  (one scrollable view)
-  │     └─ ordered sections per flavor (assessment or ops)
+  │  returns EstateDocument  (pure value, no store write)
+  │
+  ├──▶ src/App.tsx  → one <ProductSection> per product (no cross-product totals)
+  │     └─ <Dashboard view={estate.combined}> per product
+  │         └─ ordered sections per flavor (assessment or ops)
   │
   └──▶ src/hooks/useExport.ts
         │  MAIN THREAD — pptxgenjs is not Web-Worker-safe
@@ -76,8 +95,15 @@ src/engines/aggregation/reportView.ts  (buildReportView — composition root)
         └─ assembleHtml(model, theme) → string       (static import)
 ```
 
-Key invariant: **`ParsedWorkbook` enters the store; `ReportView` never does.**
-`useReportView` is the only bridge; rebuilds from scratch on every workbook or flavor change.
+Key invariant: **`RawWorkbook` (tagged as `ServerWorkbook`) enters the store; `EstateDocument` never does.**
+`useReportView` is the only bridge; rebuilds from scratch on every server list change (it memos on `[servers]` only — `flavor` flows separately to `Dashboard` and `useExport` via the store).
+
+### Product-adapter registry (`src/engines/products/index.ts`)
+
+`getViewBuilder(product)` returns the registered `ViewBuilder` for a `ProductId`, or `undefined`
+when unsupported. `isSupportedProduct(product)` is the boolean shorthand. Phase 1 registers one
+adapter: `ppdm → buildPpdmView`. Avamar and NetWorker detection (`detectProduct`) is implemented
+but their view-builders are not yet registered — they are phase 2 work.
 
 ---
 
@@ -93,8 +119,9 @@ worker entry point.
 | `parser.worker.ts` | Web Worker entry; installs `fetchGuard` first; delegates to `normalizeWorkbook`; posts `ParseResponse` |
 | `parseInWorker.ts` | Main-thread glue; lazily constructs the worker; multiplexes requests by ID via `ParseRequest` / `ParseResponse` message pairs; transfers `ArrayBuffer` (zero-copy) |
 | `readWorkbook.ts` | `readWorkbook(buf)` — `XLSX.read`; `toSheetData(wb)` — all sheets to `SheetData[]`; `parseXlsx(buf)` — convenience combinator; sets `capped: true` when `dataRows.length >= LIVE_OPTICS_ROW_CAP` (10,000) |
-| `normalizeWorkbook.ts` | Composition root: calls `readWorkbook`, `toSheetData`, `classifyAgents`, `captureMeta`; emits capped-sheet warnings into `ParsedWorkbook.warnings` (never silent) |
-| `detectInUse.ts` | `sheetIsInUse(sheet)` — a row is real when at least one cell is non-null and not `"N/A"`; `classifyAgents(sheets)` — partitions the 18 known `AGENT_SHEETS` into `inUse` / `idleAgents` |
+| `normalizeWorkbook.ts` | Composition root: calls `readWorkbook`, `toSheetData`, `captureMeta`; emits capped-sheet warnings into `RawWorkbook.warnings` (never silent) |
+| `detectProduct.ts` | `detectProduct(wb)` — classifies a `RawWorkbook` by sheet-name signature → `ProductId`; called by `useReportUpload` immediately after `normalizeWorkbook` |
+| `detectInUse.ts` | `sheetIsInUse(sheet)` — a row is real when at least one cell is non-null and not `"N/A"`; `classifyAgents(sheets)` — partitions the 18 known `AGENT_SHEETS` into `inUse` / `idleAgents`; called inside `buildPpdmView`, not at parse time |
 | `captureMeta.ts` | Reads the `Details` sheet as a key/value map; applies `CaptureMetaSchema` (Zod); converts serial dates via `serialToIso` |
 | `serialToIso.ts` | Excel serial date → ISO-8601 UTC: offset `25569` days from 1899-12-30 to Unix epoch |
 
@@ -110,7 +137,7 @@ upfront — this avoids Zod schema drift as PPDM sheet layouts vary between coll
 
 `LIVE_OPTICS_ROW_CAP = 10_000` is declared in `src/types/ppdm.ts`. `readWorkbook.ts` sets
 `SheetData.capped = dataRows.length >= LIVE_OPTICS_ROW_CAP`. `normalizeWorkbook.ts` collects one
-warning per capped sheet into `ParsedWorkbook.warnings`. The two sheets that routinely hit the cap
+warning per capped sheet into `RawWorkbook.warnings`. The two sheets that routinely hit the cap
 are `Copies` and `Protection Job Activities`; metrics derived from them (`computeCompliance`,
 `computeJobs`) return `capped: boolean` and `windowSize: number` so the UI and exports can print the
 caveat in-place.
@@ -123,6 +150,10 @@ A sheet is **in use** when `sheetIsInUse` returns `true`: at least one row has a
 receive no coverage computation and no per-type export section (requirements #6 and #7 of the
 design spec share a single mechanism).
 
+`classifyAgents` is PPDM-specific and is called inside `buildPpdmView` (not at parse time). The
+parse layer (`normalizeWorkbook`) emits a product-neutral `RawWorkbook`; agent classification is a
+product concern that belongs to the PPDM adapter.
+
 ---
 
 ## 3. Metric engines
@@ -132,20 +163,22 @@ imports React, Zustand, or DOM APIs.
 
 ### Composition root
 
-`src/engines/aggregation/reportView.ts` exports one function:
+`src/engines/products/ppdm/buildPpdmView.ts` exports the PPDM adapter:
 
 ```ts
-function buildReportView(wb: ParsedWorkbook): ReportView
+function buildPpdmView(wb: RawWorkbook): ReportView
 ```
 
-It calls each domain engine once and composes the results into `ReportView`. This is the only call
-site for any aggregation function. `useReportView` memoises the result on `workbook` identity.
+It branches on `detectFormat(wb)`: summary workbooks are handled by `summaryView`; detail workbooks
+go through the full aggregation pipeline. `classifyAgents` is called here (PPDM-specific concern).
+This function is registered in the product-adapter registry as the `ViewBuilder` for `'ppdm'`.
+`buildEstateDocument` calls it once per server; `mergeViews` combines the per-server results.
 
 ### Domain engines
 
 | Module | Input | Output type | Notes |
 |---|---|---|---|
-| `coverage.ts` | `wb.inUse` sheet names + their rows | `Coverage` | Iterates `Protection Status` ∈ `PROTECTED/UNPROTECTED/EXCLUDED`; `pct = PROTECTED/(PROTECTED+UNPROTECTED)` (headline); `pctInclExcluded = PROTECTED/(P+U+EXCLUDED)` (secondary); per-type `byType` + `overall` |
+| `coverage.ts` | `inUse` sheet names (from `classifyAgents`) + `RawWorkbook.sheets` | `Coverage` | Iterates `Protection Status` ∈ `PROTECTED/UNPROTECTED/EXCLUDED`; `pct = PROTECTED/(PROTECTED+UNPROTECTED)` (headline); `pctInclExcluded = PROTECTED/(P+U+EXCLUDED)` (secondary); per-type `byType` + `overall` |
 | `gaps.ts` | `wb.sheets['Unprotected Assets']` | `Gaps` | `count`, `totalCapacityGb`, `top` (top-N ranked by `sizeGb` via `topN` helper) |
 | `jobs.ts` | `wb.sheets['Protection Job Activities']` | `Jobs` | `countBy(rows, 'Result')`, `successPct`, `capped`, `windowSize` |
 | `compliance.ts` | `wb.sheets.Copies` | `Compliance` | `appConsistentPct` (`APPLICATION_CONSISTENT`); `immutablePct` (any non-`ALL_COPIES_UNLOCKED` Lock Status); `replicatedPct` (`Replica === 'TRUE'`); `backupLevelMix`; `capped`, `windowSize` |
@@ -173,10 +206,10 @@ Zustand store with two pieces of input state and their setters:
 
 | Field | Type | Purpose |
 |---|---|---|
-| `workbook` | `ParsedWorkbook \| null` | Raw parsed workbook posted back from the worker |
+| `servers` | `ServerWorkbook[]` | Tagged array: each entry is `{ label, product: ProductId, workbook: RawWorkbook }` |
 | `flavor` | `'assessment' \| 'ops'` | Active report flavor (default: `'assessment'`) |
 
-No derived metrics are stored. The store exposes `setWorkbook`, `setFlavor`, and `clear`.
+No derived metrics are stored. The store exposes `addServers`, `removeServer`, `setFlavor`, and `clear`.
 
 Language preference and theme preference are **not** in the Zustand store; they live in
 `localStorage` (`ppdm-report-lang`, `ppdm-report-theme`) and are read on mount by `useTheme` and
@@ -186,13 +219,13 @@ the i18next `LanguageDetector`.
 
 | Hook | What it does |
 |---|---|
-| `useReportUpload` | Calls `parseInWorker(file)`, writes result to store via `setWorkbook`; exposes `{ upload, busy, error }` |
-| `useReportView` | **The single `useMemo`**: `buildReportView(workbook)` keyed on `workbook`; returns `ReportView \| null` |
+| `useReportUpload` | Calls `parseInWorker(file)`, runs `detectProduct`, rejects unsupported products, writes `ServerWorkbook` to store via `addServers`; exposes `{ upload, busy, error }` |
+| `useReportView` | **The single `useMemo`**: `buildEstateDocument(servers)` keyed on `servers`; returns `EstateDocument \| null` |
 | `useTheme` | Three-state preference (`auto/light/dark`) backed by `localStorage['ppdm-report-theme']`; toggles `.dark` on `<html>`; returns `{ theme, resolved, setTheme }` |
-| `useExport` | Resolves `ReportView`, `flavor`, `resolved` theme, and active locale; calls `buildExportModel` then either `buildPptx` (dynamic import) or `assembleHtml`; triggers browser download |
+| `useExport` | Takes the `EstateDocument`; resolves the (phase-1 single) product's `ReportView` via `products[0].estate.combined`, plus `flavor`, `resolved` theme, and active locale; calls `buildExportModel` then either `buildPptx` (dynamic import) or `assembleHtml`; triggers browser download |
 
-**`useReportView` is the only place `buildReportView` is called from the UI side.** Components
-that need metric data receive `ReportView` as a prop from `App.tsx`.
+**`useReportView` is the only place `buildEstateDocument` is called from the UI side.** `App.tsx`
+receives `EstateDocument` and renders one `<ProductSection>` per product; no cross-product totals.
 
 ---
 
@@ -201,8 +234,8 @@ that need metric data receive `ReportView` as a prop from `App.tsx`.
 ### App shell (`src/App.tsx`)
 
 Sticky header with title and five controls (`FlavorToggle`, `LanguageToggle`, `ThemeToggle`,
-`ExportButtons`, `UploadZone`). Below the header: `<UploadZone />` then `{view && <Dashboard view={view} />}`.
-No routing; single-page.
+`ExportButtons`, `UploadZone`). Below the header: `<UploadZone />` then one `<ProductSection>` per
+product in the `EstateDocument`. No routing; single-page.
 
 ### Dashboard (`src/components/dashboard/Dashboard.tsx`)
 
@@ -383,7 +416,7 @@ Coverage settings:
   (browser/worker glue verified end-to-end)
 - **Thresholds**: lines / functions / branches / statements all ≥ **75%**
 
-Current test count: **139 tests, 0 failures, 0 skipped**.
+Current test count: **253 tests, 0 failures, 0 skipped**.
 
 ### Biome
 

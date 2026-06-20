@@ -2,10 +2,10 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import i18n from '../i18n'
 import { useReportStore } from '../store/reportStore'
-import type { ParsedWorkbook } from '../types/ppdm'
+import type { RawWorkbook } from '../types/ppdm'
 import { ServerList } from './ServerList'
 
-const wb: ParsedWorkbook = {
+const wb: RawWorkbook = {
   meta: {
     projectId: '',
     customer: 'ACME',
@@ -14,8 +14,6 @@ const wb: ParsedWorkbook = {
     baseTen: true,
   },
   sheets: {},
-  inUse: [],
-  idleAgents: [],
   warnings: [],
 }
 
@@ -32,13 +30,13 @@ describe('ServerList', () => {
   })
 
   it('lists loaded server labels', () => {
-    useReportStore.getState().addServers([{ label: 'ppdm-paris', workbook: wb }])
+    useReportStore.getState().addServers([{ label: 'ppdm-paris', product: 'ppdm', workbook: wb }])
     render(<ServerList />)
     expect(screen.getByText('ppdm-paris')).toBeInTheDocument()
   })
 
   it('removes a server when its remove button is clicked', () => {
-    useReportStore.getState().addServers([{ label: 'ppdm-paris', workbook: wb }])
+    useReportStore.getState().addServers([{ label: 'ppdm-paris', product: 'ppdm', workbook: wb }])
     render(<ServerList />)
     fireEvent.click(screen.getByRole('button', { name: 'Remove ppdm-paris' }))
     expect(useReportStore.getState().servers).toHaveLength(0)
@@ -46,8 +44,8 @@ describe('ServerList', () => {
 
   it('clears all servers', () => {
     useReportStore.getState().addServers([
-      { label: 'a', workbook: wb },
-      { label: 'b', workbook: wb },
+      { label: 'a', product: 'ppdm', workbook: wb },
+      { label: 'b', product: 'ppdm', workbook: wb },
     ])
     render(<ServerList />)
     fireEvent.click(screen.getByRole('button', { name: 'Clear all' }))
