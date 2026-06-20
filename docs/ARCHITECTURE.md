@@ -69,11 +69,12 @@ src/engines/products/estateDocument.ts  (buildEstateDocument — document root)
   │    build(wb: RawWorkbook)          → ReportView   (one per server)
   │    mergeViews(perServer views)     → combined EstateView
   │  returns EstateDocument { products: ProductEstate[], multiProduct }
-  │  No cross-product totals; phase 2 supports PPDM and Avamar.
+  │  No cross-product totals; supports PPDM, Avamar, and NetWorker.
   │
-  │  Per-product adapters (phase 2: PPDM + Avamar — see §3 for details):
-  ├─ src/engines/products/ppdm/buildPpdmView.ts    (PPDM: branches on format, classifyAgents, full pipeline)
-  └─ src/engines/products/avamar/buildAvamarView.ts (Avamar: count-based coverage, node utilization, no compliance)
+  │  Per-product adapters (see §3 for details):
+  ├─ src/engines/products/ppdm/buildPpdmView.ts       (PPDM: branches on format, classifyAgents, full pipeline)
+  ├─ src/engines/products/avamar/buildAvamarView.ts    (Avamar: count-based coverage, node utilization, no compliance)
+  └─ src/engines/products/networker/buildNetworkerView.ts (NetWorker: scheduled-backup coverage, DD utilization, computed compliance)
   │  returns EstateDocument  (pure value, no store write)
   │
   ├──▶ src/App.tsx  → one <ProductSection> per product (no cross-product totals)
@@ -93,9 +94,10 @@ Key invariant: **`RawWorkbook` (tagged as `ServerWorkbook`) enters the store; `E
 ### Product-adapter registry (`src/engines/products/index.ts`)
 
 `getViewBuilder(product)` returns the registered `ViewBuilder` for a `ProductId`, or `undefined`
-when unsupported. `isSupportedProduct(product)` is the boolean shorthand. Phase 2 registers two
-adapters: `ppdm → buildPpdmView` and `avamar → buildAvamarView`. NetWorker detection
-(`detectProduct`) is implemented but its view-builder is not yet registered — that is phase 3.
+when unsupported. `isSupportedProduct(product)` is the boolean shorthand. Three adapters are
+registered: `ppdm → buildPpdmView`, `avamar → buildAvamarView`, and
+`networker → buildNetworkerView`. All three detected products have builders; no product remains
+"phase N pending".
 
 ---
 
@@ -191,11 +193,36 @@ Avamar-specific mapping (all pure, no format branching needed for MVP):
 Provenance (`avamarProvenance()`): `coverageByType` and `compliance` → `unavailable`; `gapsList`
 and `storageTargets` → `available`.
 
+### NetWorker composition root
+
+`src/engines/products/networker/buildNetworkerView.ts` exports the NetWorker MVP adapter:
+
+```ts
+function buildNetworkerView(wb: RawWorkbook): ReportView
+```
+
+NetWorker-specific mapping (all pure, no format branching for MVP):
+
+| Metric | Source | Notes |
+|---|---|---|
+| **meta** | `Details` sheet (generic) | `baseTen: true` — NetWorker reports base-10 byte values (same as PPDM). `captureMeta` was extended to recognise `Disclaimer #1`/`#2`-style numbered keys so NetWorker's numbered disclaimer drives the `baseTen` flag. |
+| **coverage** | `Clients` sheet `Scheduled Backup` flag | Count-based only (`True` = protected); no per-type breakdown (`byType: {}`) |
+| **jobs** | `Jobs` sheet `Completion Status` | NetWorker-native bucket `Succeeded`; `successPct` = Succeeded / total |
+| **gaps** | `Clients` sheet (no scheduled backup) | Client list only — **no per-asset size** (`sizeGb: undefined`, `totalCapacityGb: undefined`); renders as "size unknown" |
+| **capacity** | `Data Domains` Used/Total | Real Data Domain utilization; flagged at ≥ 80%. Distinct-mtree count from `Dedup Jobs`. |
+| **workload types** (inUse) | `Front End Capacity by Workload` | Workload types where capacity > 0 — mirrors PPDM agent in-use/idle split |
+| **idle list** (idleAgents) | `Front End Capacity by Workload` | Workload types where capacity = 0 |
+| **policies** | `Policies` sheet | Distinct protection-policy count; no `byPurpose` or `perPolicy` rows |
+| **compliance** | Computed | **Immutability** from `Devices Detailed` `DD Retention Lock Mode` (≠ None); **replication** from `Backups` `Clone Status`; **backup-level mix** from `Backups`; **app-consistency is N/A → renders 0%** |
+
+Provenance (`networkerProvenance()`): `coverageByType` → `unavailable`; `gapsList`, `compliance`,
+and `storageTargets` → `available`.
+
 #### Gaps size-optional contract
 
 `UnprotectedAsset.sizeGb?: number` and `Gaps.totalCapacityGb?: number` are optional across all
-products. When absent (as in Avamar), the UI and exports call `formatGbOrUnknown` and render "size
-unknown" rather than a misleading zero. PPDM gaps carry sizes and are unaffected.
+products. When absent (as in Avamar and NetWorker), the UI and exports call `formatGbOrUnknown` and
+render "size unknown" rather than a misleading zero. PPDM gaps carry sizes and are unaffected.
 
 ### Domain engines
 
