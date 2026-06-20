@@ -49,7 +49,8 @@ export function captureMeta(wb: XLSX.WorkBook): CaptureMeta {
     for (const row of aoa) {
       const key = String(row[0] ?? '').trim()
       if (!key) continue
-      if (key === 'Disclaimer') disclaimers.push(String(row[1] ?? ''))
+      if (key === 'Disclaimer' || key.startsWith('Disclaimer '))
+        disclaimers.push(String(row[1] ?? ''))
       else kv.set(key, row[1] ?? null)
     }
   }

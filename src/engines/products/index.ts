@@ -1,6 +1,7 @@
 import type { ProductId, RawWorkbook } from '../../types/ppdm'
 import type { ReportView } from '../../types/reportView'
 import { buildAvamarView } from './avamar/buildAvamarView'
+import { buildNetworkerView } from './networker/buildNetworkerView'
 import { buildPpdmView } from './ppdm/buildPpdmView'
 
 export type ViewBuilder = (wb: RawWorkbook) => ReportView
@@ -8,6 +9,7 @@ export type ViewBuilder = (wb: RawWorkbook) => ReportView
 const BUILDERS: Partial<Record<ProductId, ViewBuilder>> = {
   ppdm: buildPpdmView,
   avamar: buildAvamarView,
+  networker: buildNetworkerView,
 }
 
 /** The view-builder for a product, or undefined when unsupported. */
