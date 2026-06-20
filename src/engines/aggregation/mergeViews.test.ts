@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { avamarWorkbookBuffer } from '../../test-helpers/workbooks'
 import type { ReportView } from '../../types/reportView'
+import { normalizeWorkbook } from '../parser/normalizeWorkbook'
+import { buildAvamarView } from '../products/avamar/buildAvamarView'
 import { mergeViews } from './mergeViews'
 import { allAvailable, allUnavailable } from './provenance'
 
@@ -95,5 +98,25 @@ describe('mergeViews', () => {
       assetsCovered: 370,
       assetsTotal: 370 + 3516 * 3,
     })
+  })
+
+  it('multi-Avamar merge preserves plugin inUse and disabled-group idleAgents', () => {
+    const v = buildAvamarView(normalizeWorkbook(avamarWorkbookBuffer()))
+    const m = mergeViews([v, v])
+    // inUse must contain Avamar plugin names (not silently erased by AGENT_SHEETS filter)
+    expect(m.inUse).toContain('Linux VMware Image')
+    // idleAgents must contain disabled-group names (not empty)
+    expect(m.idleAgents).toContain('Default Group')
+    expect(m.idleAgents).toContain('Default Virtual Machine Group (/dc1)')
+    // idleAgents must NOT include anything that is in inUse
+    for (const name of m.inUse) {
+      expect(m.idleAgents).not.toContain(name)
+    }
+    // gaps.totalCapacityGb stays undefined for Avamar (no per-asset sizes)
+    expect(m.gaps.totalCapacityGb).toBeUndefined()
+    // gaps.count sums (2 + 2 = 4 from merging the view with itself)
+    expect(m.gaps.count).toBe(v.gaps.count * 2)
+    // coverage.overall.protected sums
+    expect(m.coverage.overall.protected).toBe(v.coverage.overall.protected * 2)
   })
 })

@@ -24,7 +24,8 @@ function nodeTargets(wb: RawWorkbook): StorageTarget[] {
   for (const r of rows) {
     const node = cellStr(r, 'Node')
     const date = cellNum(r, 'Date')
-    const util = cellNum(r, 'Max Utilization (%)')
+    // Raw column is a 0..1 ratio (e.g. 0.92 = 92%); multiply by 100 to get pct scale.
+    const util = cellNum(r, 'Max Utilization (%)') * 100
     const prev = latest.get(node)
     if (!prev || date >= prev.date) latest.set(node, { date, util })
   }

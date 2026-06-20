@@ -147,10 +147,18 @@ describe('buildExportModel', () => {
     expect((headline.match(/%/g) ?? []).length).toBe(1)
   })
 
-  it('includes customer and base-10 note in the footer', () => {
+  it('includes customer and base-10 note in the footer when meta.baseTen is true', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en')
     expect(model.footer).toContain('WHO')
     expect(model.footer).toContain('base-10')
+    expect(model.footer).not.toContain('base-2')
+  })
+
+  it('uses base-2 note in the footer when meta.baseTen is false', () => {
+    const base2View: ReportView = { ...view, meta: { ...view.meta, baseTen: false } }
+    const model = buildExportModel(base2View, 'assessment', 'light', t, 'en')
+    expect(model.footer).toContain('base-2')
+    expect(model.footer).not.toContain('base-10')
   })
 
   it('builds a deck for every section + a posture stack', () => {

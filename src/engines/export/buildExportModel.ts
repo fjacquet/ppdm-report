@@ -455,7 +455,7 @@ export function buildExportModel(
     meta.customer,
     meta.collectorBuild,
     captured,
-    t('common:units.base10'),
+    meta.baseTen ? t('common:units.base10') : t('common:units.base2'),
   ].filter(Boolean)
 
   const posture: DeckStack = ((): DeckStack => {

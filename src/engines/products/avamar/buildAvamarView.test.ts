@@ -40,13 +40,18 @@ describe('buildAvamarView', () => {
     ])
   })
 
-  it('capacity: latest-date node utilization, mtreeCount 0', () => {
+  it('capacity: latest-date node utilization ×100, flagged at >= 80, mtreeCount 0', () => {
     const cap = view().capacity
+    // Node 0: latest row has 0.8 → ×100 = 80, flagged: true (80 >= FLAG_THRESHOLD_PCT 80)
+    // Node 1: only row has 0.5 → ×100 = 50, flagged: false
     expect(cap.targets).toEqual([
-      { name: 'Avamar node 0', type: 'Avamar grid node', utilizationPct: 0.8, flagged: false },
+      { name: 'Avamar node 0', type: 'Avamar grid node', utilizationPct: 80, flagged: true },
+      { name: 'Avamar node 1', type: 'Avamar grid node', utilizationPct: 50, flagged: false },
     ])
     expect(cap.mtreeCount).toBe(0)
-    expect(cap.flagged).toEqual([])
+    expect(cap.flagged).toEqual([
+      { name: 'Avamar node 0', type: 'Avamar grid node', utilizationPct: 80, flagged: true },
+    ])
   })
 
   it('inUse = plugins with count>0; idleAgents = disabled groups (domain-disambiguated)', () => {

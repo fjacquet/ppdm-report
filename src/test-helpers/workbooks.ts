@@ -164,6 +164,7 @@ export function avamarWorkbookBuffer(): ArrayBuffer {
       ['Date', 'Node', 'Max Utilization (%)'],
       [45000, 0, 0.5],
       [45001, 0, 0.8],
+      [45001, 1, 0.5],
     ],
     'Disabled Groups': [
       ['Domain', 'Name', 'Read Only'],
