@@ -31,3 +31,20 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
     storageTargets: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
+
+/** Provenance for a single Avamar server: count-based coverage + node capacity available;
+ *  per-type coverage and copy compliance are not in Avamar exports. */
+export function avamarProvenance(): Record<MetricKey, MetricProvenance> {
+  return {
+    coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
+    gapsList: { available: true, serversCovered: 1, serversTotal: 1 },
+    compliance: {
+      available: false,
+      serversCovered: 0,
+      serversTotal: 1,
+      assetsCovered: 0,
+      assetsTotal: 0,
+    },
+    storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
+  }
+}

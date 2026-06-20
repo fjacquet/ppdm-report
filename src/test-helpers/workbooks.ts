@@ -115,3 +115,66 @@ export function detailWorkbookBuffer(): ArrayBuffer {
     'Protection Job Activities': [['Result'], ['SUCCESS'], ['SUCCESS'], ['FAILED']],
   })
 }
+
+/**
+ * Synthetic AVAMAR workbook (Backup Completion Summary, NonRetired/Retired
+ * client counts, Clients No Backups, Backup Plugins, Node Utilization, Disabled
+ * Groups, Group Summary), mirroring a Dell Avamar Live Optics export.
+ */
+export function avamarWorkbookBuffer(): ArrayBuffer {
+  return makeWorkbook({
+    Details: [
+      ['Project Name', 'AVA-test'],
+      ['Date', 45000],
+      ['Disclaimer', 'All measurements ... Base 2 units of Measurement.'],
+    ],
+    'Host Info': [
+      ['Hostname', 'Serial'],
+      ['ava-host', 'SN1'],
+    ],
+    'Avamar DPN Summary': [
+      ['Server', 'Host', 'Status'],
+      ['ava-host', 'h1', 'Activity completed successfully.'],
+    ],
+    'Backup Completion Summary': [
+      ['Total', 'Successful', 'Exception', 'Failed'],
+      [10, 7, 1, 2],
+    ],
+    'NonRetired Clients With Backups': [
+      ['Has Backups', 'Total'],
+      ['False', 4],
+      ['True', 6],
+    ],
+    'Retired Clients With Backups': [
+      ['Has Backups', 'Total'],
+      ['False', 2],
+      ['True', 1],
+    ],
+    'Clients No Backups': [
+      ['Full Domain', 'Client Type', 'Completed Time'],
+      ['/clients/a', 'REGULAR', 25569],
+      ['/clients/b', 'VREGULAR', 25569],
+    ],
+    'Backup Plugins': [
+      ['Plugin Name', 'Count'],
+      ['Linux VMware Image', 5],
+      ['No Plug-in', 0],
+    ],
+    'Node Utilization': [
+      ['Date', 'Node', 'Max Utilization (%)'],
+      [45000, 0, 0.5],
+      [45001, 0, 0.8],
+    ],
+    'Disabled Groups': [
+      ['Domain', 'Name', 'Read Only'],
+      ['/', 'Default Group', 'False'],
+      ['/dc1', 'Default Virtual Machine Group', 'False'],
+    ],
+    'Group Summary': [
+      ['Group Name', 'Total', 'Successful', 'Exception', 'Failed'],
+      ['G1', 2, 2, 0, 0],
+      ['G1', 2, 2, 0, 0],
+      ['G2', 1, 1, 0, 0],
+    ],
+  })
+}
