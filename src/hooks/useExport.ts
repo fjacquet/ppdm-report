@@ -36,7 +36,7 @@ function download(data: ArrayBuffer | string, filename: string, mime: string): v
  * one product. We operate on products[0] throughout. Multi-product export composition
  * is deferred to a later phase — no silent truncation occurs here.
  */
-export function useExport(document: EstateDocument | null) {
+export function useExport(doc: EstateDocument | null) {
   const flavor = useReportStore((s) => s.flavor)
   const { resolved } = useTheme()
   const { i18n } = useTranslation()
@@ -45,7 +45,7 @@ export function useExport(document: EstateDocument | null) {
 
   async function run(kind: ExportKind): Promise<void> {
     // Phase-1: products[0] is always the sole PPDM section.
-    const estate = document?.products[0]?.estate
+    const estate = doc?.products[0]?.estate
     if (!estate) return
     setBusy(kind)
     setError(null)

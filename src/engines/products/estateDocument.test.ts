@@ -28,7 +28,7 @@ describe('buildEstateDocument', () => {
     expect(doc.products[0]?.estate.perServer.map((p) => p.label)).toEqual(['a', 'b'])
   })
 
-  it('keeps distinct products in separate sections in first-seen order', () => {
+  it('skips a recognized-but-unbuilt product without crashing the document', () => {
     // Simulate a second product by hand-tagging (no avamar builder yet → skipped),
     // so a recognized-but-unbuilt product does not crash the document.
     const doc = buildEstateDocument([

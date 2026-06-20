@@ -9,7 +9,7 @@ const BTN =
 export function ExportButtons({ document }: { document: EstateDocument | null }) {
   const { t } = useTranslation('common')
   const { run, busy, error } = useExport(document)
-  if (!document) return null
+  if (!document || document.products.length === 0) return null
 
   return (
     <div

@@ -2,6 +2,7 @@ import type { RawWorkbook, ServerWorkbook, SheetData } from '../../types/ppdm'
 import { estateWarnings } from './estateWarnings'
 import { foldMeta } from './foldMeta'
 
+// Test-only: legacy sheet-level fold retained as the parity oracle for mergeViews (see mergeViews.parity.test.ts). Not used in production.
 /** Fold N parsed PPDM workbooks into one estate workbook. Pure.
  * Single source returns that workbook unchanged (identity). */
 export function mergeWorkbooks(servers: ServerWorkbook[]): RawWorkbook {
