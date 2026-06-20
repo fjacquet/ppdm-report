@@ -3,9 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "bin": {
+    "ppdm-report-pptx": "src/cli/pptx.ts"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "pptx": "tsx src/cli/pptx.ts",
     "prebuild": "node scripts/check-supply-chain.mjs",
     "check:supply-chain": "node scripts/check-supply-chain.mjs",
     "preview": "vite preview",
@@ -34,6 +38,7 @@
     "@testing-library/jest-dom": "^6.4.0",
     "@testing-library/react": "^16.0.0",
     "@types/node": "^25.9.3",
+    "tsx": "^4.19.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vite-pwa/assets-generator": "^1.0.2",

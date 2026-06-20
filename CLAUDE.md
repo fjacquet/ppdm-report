@@ -18,6 +18,7 @@ npm run test             # vitest watch
 npm run test:run         # vitest single run
 npm run test:coverage    # single run + v8 coverage gate (≥75% on engines/utils/privacy)
 npm run check:supply-chain   # the supply-chain gate, standalone
+npm run pptx -- <file.xlsx>  # headless CLI — generate PPTX locally without the browser
 ```
 
 Run a single test file or test by name:
@@ -28,6 +29,25 @@ npx vitest run -t "coverage"        # filter by test name substring
 ```
 
 CI (`.github/workflows/ci.yml`) runs, in order: typecheck → lint → test:run → build (build triggers the supply-chain gate via `prebuild`). Match that sequence before claiming work is done.
+
+## Headless CLI
+
+`npm run pptx -- <file.xlsx>` (or `ppdm-report-pptx <file>` via the bin) generates the same PPTX deck as the browser export without opening a browser.
+
+Flags: `--out <path>`, `--lang <code>`, `--theme light|dark`, `--flavor assessment|ops`, `--quiet`.
+Defaults: theme `light`, flavor `assessment`, language `en`. Output: `<basename>_ppdm-report.pptx` beside the input.
+
+Engine pipeline (identical to the app's export path):
+
+1. `ingestReport` (`src/engines/ingestReport.ts`) — parses the workbook into an `EstateDocument`; the CLI reads `doc.products[0].estate`.
+2. `buildExportModel` — builds the theme- and flavor-aware `ExportModel`.
+3. `buildPptx(model, theme)` — assembles the deck.
+
+Run via `tsx`; the CLI entry point is excluded from the Vite app bundle and type-checked via `tsconfig.node.json`.
+
+**No-network invariant:** the CLI makes zero network calls and upholds the repo's in-browser / no-exfiltration guarantee. All processing is local.
+
+---
 
 ## Architecture: the one data flow
 
