@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { networkerWorkbookBuffer } from '../../../test-helpers/workbooks'
+import { makeWorkbook, networkerWorkbookBuffer } from '../../../test-helpers/workbooks'
 import { normalizeWorkbook } from '../../parser/normalizeWorkbook'
 import { buildNetworkerView } from './buildNetworkerView'
 
@@ -77,5 +77,13 @@ describe('buildNetworkerView', () => {
     expect(p.compliance.available).toBe(true)
     expect(p.compliance.assetsTotal).toBe(3)
     expect(p.storageTargets.available).toBe(true)
+  })
+
+  it('handles an empty workbook without crashing', () => {
+    const v = buildNetworkerView(normalizeWorkbook(makeWorkbook({ Details: [] })))
+    expect(v.coverage.overall.protected).toBe(0)
+    expect(v.jobs.total).toBe(0)
+    expect(v.capacity.targets).toEqual([])
+    expect(v.inUse).toEqual([])
   })
 })

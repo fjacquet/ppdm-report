@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { avamarWorkbookBuffer } from '../../test-helpers/workbooks'
+import { avamarWorkbookBuffer, networkerWorkbookBuffer } from '../../test-helpers/workbooks'
 import type { ReportView } from '../../types/reportView'
 import { normalizeWorkbook } from '../parser/normalizeWorkbook'
 import { buildAvamarView } from '../products/avamar/buildAvamarView'
+import { buildNetworkerView } from '../products/networker/buildNetworkerView'
 import { mergeViews } from './mergeViews'
 import { allAvailable, allUnavailable } from './provenance'
 
@@ -118,5 +119,25 @@ describe('mergeViews', () => {
     expect(m.gaps.count).toBe(v.gaps.count * 2)
     // coverage.overall.protected sums
     expect(m.coverage.overall.protected).toBe(v.coverage.overall.protected * 2)
+  })
+
+  it('multi-NetWorker merge: successPct is non-zero and workload names survive', () => {
+    const v = buildNetworkerView(normalizeWorkbook(networkerWorkbookBuffer()))
+    const m = mergeViews([v, v])
+    // successPct must be the same non-zero rate as the single view (3/4 = 0.75)
+    // This fails without Fix 1 because NetWorker uses 'Succeeded' not 'SUCCESS'
+    expect(m.jobs.successPct).toBeCloseTo(0.75, 6)
+    // inUse workload names from NetWorker must survive the merge
+    expect(m.inUse).toContain('Filesystem')
+    expect(m.inUse).toContain('Oracle RMAN')
+    // idleAgents workload names must survive the merge
+    expect(m.idleAgents).toContain('SQL')
+    expect(m.idleAgents).toContain('VMware')
+    // capacity: 2 DDs × 2 views = 4 targets; mtreeCount sums (2 + 2 = 4)
+    expect(m.capacity.targets).toHaveLength(4)
+    expect(m.capacity.mtreeCount).toBe(4)
+    // gaps: totalCapacityGb stays undefined (size-less); count sums (1 + 1 = 2)
+    expect(m.gaps.totalCapacityGb).toBeUndefined()
+    expect(m.gaps.count).toBe(2)
   })
 })

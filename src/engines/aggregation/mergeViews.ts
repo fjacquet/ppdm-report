@@ -57,6 +57,7 @@ export function mergeViews(views: ReportView[]): ReportView {
   // jobs
   const jobCounts = mergeCounts(views.map((v) => v.jobs.counts))
   const jobsTotal = sum(views.map((v) => v.jobs.total))
+  const successCount = sum(views.map((v) => Math.round(v.jobs.successPct * v.jobs.total)))
 
   // compliance
   const appC = sum(views.map((v) => v.compliance.appConsistentCount))
@@ -98,7 +99,7 @@ export function mergeViews(views: ReportView[]): ReportView {
     jobs: {
       counts: jobCounts,
       total: jobsTotal,
-      successPct: jobsTotal > 0 ? (jobCounts.SUCCESS ?? 0) / jobsTotal : 0,
+      successPct: jobsTotal > 0 ? successCount / jobsTotal : 0,
       capped: views.some((v) => v.jobs.capped),
       windowSize: jobsTotal,
     },
