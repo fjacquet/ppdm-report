@@ -57,7 +57,7 @@
   },
   "product": { "badge": "Produit source" },
   "provenance": {
-    "unavailable": "Non disponible pour les rapports au format synthétique",
+    "unavailable": "Non disponible pour ce type de rapport",
     "partial": "Couvre {{covered}} serveurs sur {{total}}",
     "partialAssets": "Couvre {{covered}} serveurs sur {{total}} ({{assetsCovered}} ressources sur {{assetsTotal}})"
   }

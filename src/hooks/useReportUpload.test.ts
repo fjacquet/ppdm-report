@@ -1,7 +1,9 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { normalizeWorkbook } from '../engines/parser/normalizeWorkbook'
 import { parseInWorker } from '../engines/parser/parseInWorker'
 import { useReportStore } from '../store/reportStore'
+import { avamarWorkbookBuffer } from '../test-helpers/workbooks'
 import { useReportUpload } from './useReportUpload'
 
 vi.mock('../engines/parser/parseInWorker')
@@ -68,5 +70,17 @@ describe('useReportUpload', () => {
     expect(result.current.error).toContain('unsupported.xlsx')
     expect(result.current.error).toContain('Unrecognized or unsupported')
     expect(result.current.busy).toBe(false)
+  })
+
+  it('admits an Avamar workbook (now a supported product)', async () => {
+    const ava = normalizeWorkbook(avamarWorkbookBuffer())
+    vi.mocked(parseInWorker).mockResolvedValueOnce(ava)
+    const { result } = renderHook(() => useReportUpload())
+    await act(async () => {
+      await result.current.upload([new File(['x'], 'ava.xlsx')])
+    })
+    expect(useReportStore.getState().servers).toHaveLength(1)
+    expect(useReportStore.getState().servers[0]?.product).toBe('avamar')
+    expect(result.current.error).toBeNull()
   })
 })

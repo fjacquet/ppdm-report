@@ -66,23 +66,33 @@ export function mergeViews(views: ReportView[]): ReportView {
 
   // gaps (per-server top-N lists suffice for the global top-N)
   const gapItems = views.flatMap((v) => v.gaps.top.items)
-  const gapTop = topN(gapItems, TOP_N_DEFAULT, (a) => a.sizeGb)
+  const gapTop = topN(gapItems, TOP_N_DEFAULT, (a) => a.sizeGb ?? 0)
   const gapsCount = sum(views.map((v) => v.gaps.count))
 
   // capacity
   const targets = views.flatMap((v) => v.capacity.targets)
 
+  // Merge inUse/idleAgents product-neutrally: PPDM names (in AGENT_SHEETS) keep
+  // their canonical order; non-AGENT_SHEETS names (e.g. Avamar plugins/groups)
+  // are appended in first-seen order so multi-Avamar merges don't drop them.
+  const allInUse = new Set(views.flatMap((v) => v.inUse))
+  const allIdle = new Set(views.flatMap((v) => v.idleAgents))
+  const knownFirst = (names: Set<string>) => [
+    ...AGENT_SHEETS.filter((a) => names.has(a)),
+    ...[...names].filter((n) => !(AGENT_SHEETS as readonly string[]).includes(n)),
+  ]
+
   return {
     meta: foldMeta(views.map((v) => v.meta)),
-    inUse: AGENT_SHEETS.filter((a) => views.some((v) => v.inUse.includes(a))),
-    idleAgents: AGENT_SHEETS.filter(
-      (a) => !views.some((v) => v.inUse.includes(a)) && views.some((v) => v.idleAgents.includes(a)),
-    ),
+    inUse: knownFirst(allInUse),
+    idleAgents: knownFirst(allIdle).filter((a) => !allInUse.has(a)),
     warnings: [], // estate warnings are applied by the derivation layer (estateWarnings)
     coverage: { byType, overall: finalizeBand(overall) },
     gaps: {
       count: gapsCount,
-      totalCapacityGb: sum(views.map((v) => v.gaps.totalCapacityGb)),
+      totalCapacityGb: views.every((v) => v.gaps.totalCapacityGb === undefined)
+        ? undefined
+        : sum(views.map((v) => v.gaps.totalCapacityGb ?? 0)),
       top: { ...gapTop, total: gapsCount },
     },
     jobs: {

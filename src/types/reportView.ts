@@ -38,12 +38,12 @@ export interface TopList<T> {
 export interface UnprotectedAsset {
   name: string
   type: string
-  sizeGb: number
+  sizeGb?: number
 }
 
 export interface Gaps {
   count: number
-  totalCapacityGb: number
+  totalCapacityGb?: number
   top: TopList<UnprotectedAsset>
 }
 

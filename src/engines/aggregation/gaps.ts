@@ -15,7 +15,7 @@ export function findGaps(wb: RawWorkbook, n: number = TOP_N_DEFAULT): Gaps {
       sizeGb: cellNum(r, 'Size (GB)'),
     }
     assets.push(asset)
-    totalCapacityGb += asset.sizeGb
+    totalCapacityGb += asset.sizeGb ?? 0
   }
-  return { count: assets.length, totalCapacityGb, top: topN(assets, n, (a) => a.sizeGb) }
+  return { count: assets.length, totalCapacityGb, top: topN(assets, n, (a) => a.sizeGb ?? 0) }
 }

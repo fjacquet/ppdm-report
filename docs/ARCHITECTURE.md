@@ -69,19 +69,11 @@ src/engines/products/estateDocument.ts  (buildEstateDocument — document root)
   │    build(wb: RawWorkbook)          → ReportView   (one per server)
   │    mergeViews(perServer views)     → combined EstateView
   │  returns EstateDocument { products: ProductEstate[], multiProduct }
-  │  No cross-product totals; phase 1 supports PPDM only.
+  │  No cross-product totals; phase 2 supports PPDM and Avamar.
   │
-  │  Per-product adapter (phase 1: PPDM):
-  └─ src/engines/products/ppdm/buildPpdmView.ts  (buildPpdmView — PPDM composition root)
-      │  branches on detectFormat(wb): summary path → summaryView; detail path → full pipeline
-      ├─ classifyAgents(sheets)  → { inUse, idleAgents }  (PPDM-specific; moved out of parser)
-      ├─ computeCoverage(wb)   → Coverage
-      ├─ findGaps(wb)          → Gaps
-      ├─ computeJobs(wb)       → Jobs
-      ├─ computeCompliance(wb) → Compliance
-      ├─ computeCapacity(wb)   → Capacity
-      └─ summarizePolicies(wb) → Policies
-  │
+  │  Per-product adapters (phase 2: PPDM + Avamar — see §3 for details):
+  ├─ src/engines/products/ppdm/buildPpdmView.ts    (PPDM: branches on format, classifyAgents, full pipeline)
+  └─ src/engines/products/avamar/buildAvamarView.ts (Avamar: count-based coverage, node utilization, no compliance)
   │  returns EstateDocument  (pure value, no store write)
   │
   ├──▶ src/App.tsx  → one <ProductSection> per product (no cross-product totals)
@@ -101,9 +93,9 @@ Key invariant: **`RawWorkbook` (tagged as `ServerWorkbook`) enters the store; `E
 ### Product-adapter registry (`src/engines/products/index.ts`)
 
 `getViewBuilder(product)` returns the registered `ViewBuilder` for a `ProductId`, or `undefined`
-when unsupported. `isSupportedProduct(product)` is the boolean shorthand. Phase 1 registers one
-adapter: `ppdm → buildPpdmView`. Avamar and NetWorker detection (`detectProduct`) is implemented
-but their view-builders are not yet registered — they are phase 2 work.
+when unsupported. `isSupportedProduct(product)` is the boolean shorthand. Phase 2 registers two
+adapters: `ppdm → buildPpdmView` and `avamar → buildAvamarView`. NetWorker detection
+(`detectProduct`) is implemented but its view-builder is not yet registered — that is phase 3.
 
 ---
 
@@ -161,7 +153,7 @@ product concern that belongs to the PPDM adapter.
 All aggregation modules live under `src/engines/aggregation/`. Every export is a pure function; none
 imports React, Zustand, or DOM APIs.
 
-### Composition root
+### PPDM composition root
 
 `src/engines/products/ppdm/buildPpdmView.ts` exports the PPDM adapter:
 
@@ -173,6 +165,37 @@ It branches on `detectFormat(wb)`: summary workbooks are handled by `summaryView
 go through the full aggregation pipeline. `classifyAgents` is called here (PPDM-specific concern).
 This function is registered in the product-adapter registry as the `ViewBuilder` for `'ppdm'`.
 `buildEstateDocument` calls it once per server; `mergeViews` combines the per-server results.
+
+### Avamar composition root
+
+`src/engines/products/avamar/buildAvamarView.ts` exports the Avamar MVP adapter:
+
+```ts
+function buildAvamarView(wb: RawWorkbook): ReportView
+```
+
+Avamar-specific mapping (all pure, no format branching needed for MVP):
+
+| Metric | Source | Notes |
+|---|---|---|
+| **meta** | `Details` sheet (generic) | `baseTen: false` — Avamar reports base-2 byte values |
+| **coverage** | `NonRetired Clients With Backups` + `Retired Clients With Backups` | Count-based only; retired clients → excluded band; no per-type breakdown (`byType: {}`) |
+| **jobs** | `Backup Completion Summary` (single summary row) | Avamar-native buckets: SUCCESS / EXCEPTION / FAILED; `successPct` excludes exception + failed |
+| **gaps** | `Clients No Backups` | Client list only — **no per-asset size** (`sizeGb: undefined`, `totalCapacityGb: undefined`); renders as "size unknown" |
+| **capacity** | `Node Utilization` | Per-node max utilisation (latest date reading); no Data Domain mtrees (`mtreeCount: 0`) |
+| **workload types** (inUse) | `Backup Plugins` | Plugins with a positive count |
+| **idle list** (idleAgents) | `Disabled Groups` | Group names, disambiguated by domain when not root `/` |
+| **policies** | `Group Summary` | Distinct protection-group count; no `byPurpose` or `perPolicy` rows |
+| **compliance** | — | N/A (not in Avamar exports); fields zeroed; provenance marks it unavailable |
+
+Provenance (`avamarProvenance()`): `coverageByType` and `compliance` → `unavailable`; `gapsList`
+and `storageTargets` → `available`.
+
+#### Gaps size-optional contract
+
+`UnprotectedAsset.sizeGb?: number` and `Gaps.totalCapacityGb?: number` are optional across all
+products. When absent (as in Avamar), the UI and exports call `formatGbOrUnknown` and render "size
+unknown" rather than a misleading zero. PPDM gaps carry sizes and are unaffected.
 
 ### Domain engines
 

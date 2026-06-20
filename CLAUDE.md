@@ -34,7 +34,7 @@ CI (`.github/workflows/ci.yml`) runs, in order: typecheck → lint → test:run 
 ```
 File → worker → RawWorkbook → detectProduct → ServerWorkbook (tagged) → Zustand store (inputs only)
   → useReportView (single useMemo) → buildEstateDocument
-      → getViewBuilder(product) per group → buildPpdmView → ReportView
+      → getViewBuilder(product) per group → ViewBuilder (buildPpdmView | buildAvamarView) → ReportView
       → mergeViews (per product group) → EstateDocument → ProductSection UI + exports
 ```
 
@@ -43,7 +43,9 @@ Hard rules that the whole design depends on — do not violate them:
 - **`engines/` are pure.** No React, no DOM, no store imports, no `Date.now()`-style nondeterminism. Parser (`xlsx → RawWorkbook`, Zod boundary), product adapters (`engines/products/`), aggregation (coverage/gaps/jobs/compliance/capacity/policies), and export (PPTX/HTML) all take data in and return data out. They are the only place with unit-test coverage requirements.
 - **The store holds inputs only** (`src/store/reportStore.ts`): the array of `ServerWorkbook` (each tagged with `product: ProductId` and containing a `RawWorkbook`) and the `flavor`. No derived metric is ever stored. Theme and language live outside the store (`useTheme` + i18next, persisted to `localStorage`).
 - **One derivation point** (`src/hooks/useReportView.ts`): a single `useMemo` turns stored servers into an `EstateDocument` via `buildEstateDocument`. Everything the UI and exports render flows from here. Add new PPDM metrics to `buildPpdmView` (`src/engines/products/ppdm/buildPpdmView.ts`), not into components or the store.
-- **Product-adapter registry** (`src/engines/products/index.ts`): `getViewBuilder(product)` returns the `ViewBuilder` for a `ProductId`; `isSupportedProduct` is the boolean shorthand. Phase 1 registers PPDM only. Avamar and NetWorker are detected by `detectProduct` but not yet built — they are phase 2.
+- **Product-adapter registry** (`src/engines/products/index.ts`): `getViewBuilder(product)` returns the `ViewBuilder` for a `ProductId`; `isSupportedProduct` is the boolean shorthand. Phase 2 registers two builders: `ppdm → buildPpdmView` and `avamar → buildAvamarView`. NetWorker is detected by `detectProduct` but its view-builder is not yet registered — that is phase 3.
+  - **Avamar MVP shape**: meta from the generic `Details` sheet (`baseTen: false` — base-2 byte values); coverage is count-based (clients with/without backups; retired clients → excluded band), no per-type breakdown; jobs use Avamar-native buckets (SUCCESS / EXCEPTION / FAILED), success rate excludes exception + failed; gaps = unprotected-client list with **no per-asset size** (`UnprotectedAsset.sizeGb` is `undefined`); capacity = Avamar grid node utilization (latest reading per node), no Data Domain mtrees; workload types = Backup Plugins with a positive count; idle list = disabled groups; policies = distinct protection-group count; compliance = N/A (not in Avamar exports). Provenance flags `coverageByType` and `compliance` as unavailable; `gapsList` and `storageTargets` as available.
+- **Gaps size-optional contract**: `UnprotectedAsset.sizeGb?: number` and `Gaps.totalCapacityGb?: number` are optional. When absent (as in Avamar), the UI and exports render "size unknown" via `formatGbOrUnknown`. Other products that carry sizes are unaffected.
 - **Parse output is product-neutral.** `normalizeWorkbook` emits `RawWorkbook = { meta, sheets, warnings }`. PPDM-specific logic (agent classification via `classifyAgents`) lives in `buildPpdmView`, not in the parser.
 - **Two report flavors** (`assessment` / `ops`) share one metric engine; only slide order and KPI emphasis differ. Never fork the engine per flavor.
 

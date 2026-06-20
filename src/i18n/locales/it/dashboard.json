@@ -57,7 +57,7 @@
   },
   "product": { "badge": "Prodotto di origine" },
   "provenance": {
-    "unavailable": "Non disponibile per i report in formato riepilogativo",
+    "unavailable": "Non disponibile per questo tipo di report",
     "partial": "Copre {{covered}} server su {{total}}",
     "partialAssets": "Copre {{covered}} server su {{total}} ({{assetsCovered}} asset su {{assetsTotal}})"
   }

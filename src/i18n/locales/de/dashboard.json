@@ -57,7 +57,7 @@
   },
   "product": { "badge": "Quellprodukt" },
   "provenance": {
-    "unavailable": "Für Berichte im Summenformat nicht verfügbar",
+    "unavailable": "Für diesen Berichtstyp nicht verfügbar",
     "partial": "Deckt {{covered}} von {{total}} Servern ab",
     "partialAssets": "Deckt {{covered}} von {{total}} Servern ab ({{assetsCovered}} von {{assetsTotal}} Assets)"
   }

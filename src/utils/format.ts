@@ -111,3 +111,8 @@ export const formatDate = fmtDate
 
 /** Convert gigabytes (base-10) to bytes. */
 export const gbToBytes = (gb: number): number => gb * 1e9
+
+/** Bytes for a GB value, or the supplied "unknown" label when the size is absent. */
+export function formatGbOrUnknown(gb: number | undefined, locale: string, unknown: string): string {
+  return gb === undefined ? unknown : formatBytes(gbToBytes(gb), locale)
+}

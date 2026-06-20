@@ -7,6 +7,7 @@ import {
   fmtPercentValue,
   fmtPercentWhole,
   formatBytes,
+  formatGbOrUnknown,
   gbToBytes,
 } from '../../utils/format'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
@@ -103,7 +104,7 @@ export function buildExportModel(
     },
     {
       label: t('dashboard:kpi.unprotected'),
-      value: formatBytes(gbToBytes(gaps.totalCapacityGb), locale),
+      value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
       tone: 'warn' as const,
     },
     {
@@ -190,7 +191,7 @@ export function buildExportModel(
   const gapsKpis: ExportKpi[] = [
     {
       label: t('dashboard:gaps.unprotectedTb'),
-      value: formatBytes(gbToBytes(gaps.totalCapacityGb), locale),
+      value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
       tone: 'bad',
     },
     { label: t('dashboard:gaps.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
@@ -201,19 +202,26 @@ export function buildExportModel(
     kpis: gapsKpis,
     table: {
       columns: [t('common:col.name'), t('common:col.type'), t('common:col.size')],
-      rows: gaps.top.items.map((a) => [a.name, a.type, formatBytes(gbToBytes(a.sizeGb), locale)]),
+      rows: gaps.top.items.map((a) => [
+        a.name,
+        a.type,
+        formatGbOrUnknown(a.sizeGb, locale, t('common:sizeUnknown')),
+      ]),
       caption: t('common:topOf', { shown: gaps.top.shown, total: gaps.top.total }),
     },
     deck: {
       kpiChips: gapsKpis,
       caveat: `${t('common:topOf', { shown: Math.min(10, gaps.top.items.length), total: gaps.top.total })} · ${t('common:fullListInExcel')}`,
       bars: toBars(
-        gaps.top.items.slice(0, 10).map((a) => ({
-          label: a.name,
-          magnitude: a.sizeGb,
-          value: formatBytes(gbToBytes(a.sizeGb), locale),
-          tone: 'bad' as const,
-        })),
+        gaps.top.items
+          .filter((a) => a.sizeGb !== undefined)
+          .slice(0, 10)
+          .map((a) => ({
+            label: a.name,
+            magnitude: a.sizeGb as number,
+            value: formatBytes(gbToBytes(a.sizeGb as number), locale),
+            tone: 'bad' as const,
+          })),
         pal,
       ),
     },
@@ -447,7 +455,7 @@ export function buildExportModel(
     meta.customer,
     meta.collectorBuild,
     captured,
-    t('common:units.base10'),
+    meta.baseTen ? t('common:units.base10') : t('common:units.base2'),
   ].filter(Boolean)
 
   const posture: DeckStack = ((): DeckStack => {

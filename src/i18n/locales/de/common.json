@@ -44,9 +44,11 @@
   "topOf": "Top {{shown}} von {{total}}",
   "fullListInExcel": "Vollständige Liste im Excel-Export",
   "units": {
-    "base10": "Base-10-Einheiten"
+    "base10": "Base-10-Einheiten",
+    "base2": "Base-2-Einheiten"
   },
   "docs": "Docs",
+  "sizeUnknown": "Größe unbekannt",
   "showDetails": "Details anzeigen",
   "update": {
     "available": "Neue Version verfügbar",
