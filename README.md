@@ -66,9 +66,48 @@ npm run test:run     # Vitest single run
 npm run typecheck    # tsc --noEmit (app + test configs)
 npm run lint         # Biome check
 npm run lint:fix     # Biome check --write
+npm run pptx -- <file.xlsx>   # headless CLI — generate a PPTX without the browser
 ```
 
 Open `http://localhost:5173`, drop a Live Optics PPDM `.xlsx` export onto the upload zone, and use the flavor / language / theme toggles before exporting.
+
+---
+
+## CLI (`ppdm-report-pptx`)
+
+The headless CLI generates the same slide deck as the browser export without opening a browser.
+
+### Usage
+
+```bash
+npm run pptx -- <file.xlsx> [options]
+# or, if installed globally / via npx:
+ppdm-report-pptx <file.xlsx> [options]
+```
+
+### Options
+
+| Flag | Values | Default | Description |
+|---|---|---|---|
+| `--out <path>` | any file path | `<basename>_ppdm-report.pptx` beside the input | Output PPTX path |
+| `--lang <code>` | `en` `fr` `de` `it` | `en` | Report language |
+| `--theme <name>` | `light` `dark` | `light` | Slide colour theme |
+| `--flavor <name>` | `assessment` `ops` | `assessment` | Report flavor |
+| `--quiet` | — | off | Suppress progress output |
+
+### How it works
+
+The CLI reuses the app's engine pipeline without modification:
+
+1. `ingestReport` (`src/engines/ingestReport.ts`) — parses the workbook and builds `EstateDocument`; the CLI uses `doc.products[0].estate`.
+2. `buildExportModel` — maps the estate view into a theme- and flavor-aware `ExportModel`.
+3. `buildPptx(model, theme)` — assembles the PPTX; the deck is byte-for-byte identical to the browser export.
+
+The CLI is run via `tsx` and is excluded from the Vite app bundle (`tsconfig.node.json` covers it separately).
+
+### Local-only guarantee
+
+The CLI makes **no network calls**. It upholds the same no-exfiltration invariant as the browser app: all processing happens on the local machine and the source file is never transmitted anywhere.
 
 ---
 
