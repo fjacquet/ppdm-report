@@ -57,7 +57,7 @@
   },
   "product": { "badge": "Source product" },
   "provenance": {
-    "unavailable": "Not available for summary-format reports",
+    "unavailable": "Not available for this report type",
     "partial": "Covers {{covered}} of {{total}} servers",
     "partialAssets": "Covers {{covered}} of {{total}} servers ({{assetsCovered}} of {{assetsTotal}} assets)"
   }

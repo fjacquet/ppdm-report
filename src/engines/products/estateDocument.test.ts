@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { detailWorkbookBuffer } from '../../test-helpers/workbooks'
+import { avamarWorkbookBuffer, detailWorkbookBuffer } from '../../test-helpers/workbooks'
 import type { ServerWorkbook } from '../../types/ppdm'
 import { normalizeWorkbook } from '../parser/normalizeWorkbook'
 import { buildEstateDocument } from './estateDocument'
@@ -29,12 +29,19 @@ describe('buildEstateDocument', () => {
   })
 
   it('skips a recognized-but-unbuilt product without crashing the document', () => {
-    // Simulate a second product by hand-tagging (no avamar builder yet → skipped),
-    // so a recognized-but-unbuilt product does not crash the document.
+    // 'networker' has no registered builder → skipped; document must not crash.
     const doc = buildEstateDocument([
       ppdmServer('a'),
-      { label: 'x', product: 'avamar', workbook: normalizeWorkbook(detailWorkbookBuffer()) },
+      { label: 'x', product: 'networker', workbook: normalizeWorkbook(detailWorkbookBuffer()) },
     ])
     expect(doc.products.map((p) => p.product)).toEqual(['ppdm'])
+  })
+
+  it('builds an Avamar server into its own product section', () => {
+    const doc = buildEstateDocument([
+      { label: 'ava', product: 'avamar', workbook: normalizeWorkbook(avamarWorkbookBuffer()) },
+    ])
+    expect(doc.products.map((p) => p.product)).toEqual(['avamar'])
+    expect(doc.products[0]?.estate.combined.coverage.overall.protected).toBe(6)
   })
 })
