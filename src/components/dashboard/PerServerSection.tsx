@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DARK, LIGHT } from '../../theme/palette'
 import type { ServerView } from '../../types/reportView'
-import { fmtDate, fmtInt, fmtPercent, formatBytes, gbToBytes } from '../../utils/format'
+import { fmtDate, fmtInt, fmtPercent, formatGbOrUnknown } from '../../utils/format'
 import { Chart } from '../Chart'
 import { type BarDatum, horizontalBarOption } from './barOption'
 
@@ -69,7 +69,7 @@ export function PerServerSection({ servers, dark }: PerServerSectionProps) {
                 <td className="py-1.5 pr-4">{fmtPercent(s.view.coverage.overall.pct, locale)}</td>
                 <td className="py-1.5 pr-4">{fmtInt(s.view.gaps.count, locale)}</td>
                 <td className="py-1.5 pr-4">
-                  {formatBytes(gbToBytes(s.view.gaps.totalCapacityGb), locale)}
+                  {formatGbOrUnknown(s.view.gaps.totalCapacityGb, locale, t('common:sizeUnknown'))}
                 </td>
                 <td className="py-1.5 pr-4">{fmtPercent(s.view.jobs.successPct, locale)}</td>
                 <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">

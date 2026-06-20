@@ -8,7 +8,9 @@ import {
   fmtRatio,
   formatBytes,
   formatDate,
+  formatGbOrUnknown,
   formatNumber,
+  gbToBytes,
 } from './format'
 
 describe('fmtInt / formatNumber', () => {
@@ -83,6 +85,15 @@ describe('formatBytes — base-10 tiers (PPDM base-10 units)', () => {
   })
   it('em-dash for non-finite', () => {
     expect(formatBytes(Number.NaN)).toBe('—')
+  })
+})
+
+describe('formatGbOrUnknown', () => {
+  it('formats a number as bytes', () => {
+    expect(formatGbOrUnknown(1, 'en', 'Size unknown')).toBe(formatBytes(gbToBytes(1), 'en'))
+  })
+  it('returns the unknown label when undefined', () => {
+    expect(formatGbOrUnknown(undefined, 'en', 'Size unknown')).toBe('Size unknown')
   })
 })
 

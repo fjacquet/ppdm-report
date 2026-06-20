@@ -66,7 +66,7 @@ export function mergeViews(views: ReportView[]): ReportView {
 
   // gaps (per-server top-N lists suffice for the global top-N)
   const gapItems = views.flatMap((v) => v.gaps.top.items)
-  const gapTop = topN(gapItems, TOP_N_DEFAULT, (a) => a.sizeGb)
+  const gapTop = topN(gapItems, TOP_N_DEFAULT, (a) => a.sizeGb ?? 0)
   const gapsCount = sum(views.map((v) => v.gaps.count))
 
   // capacity
@@ -82,7 +82,9 @@ export function mergeViews(views: ReportView[]): ReportView {
     coverage: { byType, overall: finalizeBand(overall) },
     gaps: {
       count: gapsCount,
-      totalCapacityGb: sum(views.map((v) => v.gaps.totalCapacityGb)),
+      totalCapacityGb: views.every((v) => v.gaps.totalCapacityGb === undefined)
+        ? undefined
+        : sum(views.map((v) => v.gaps.totalCapacityGb ?? 0)),
       top: { ...gapTop, total: gapsCount },
     },
     jobs: {

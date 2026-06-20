@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { immutableTone } from '../../engines/export/tone'
 import type { ReportView } from '../../types/reportView'
-import { fmtPercent, formatBytes, gbToBytes } from '../../utils/format'
+import { fmtPercent, formatGbOrUnknown } from '../../utils/format'
 import { KpiCard } from '../KpiCard'
 
 interface ExecutiveKpisProps {
@@ -9,11 +9,15 @@ interface ExecutiveKpisProps {
 }
 
 export function ExecutiveKpis({ view }: ExecutiveKpisProps) {
-  const { t, i18n } = useTranslation('dashboard')
+  const { t, i18n } = useTranslation(['dashboard', 'common'])
   const locale = i18n.language
 
   const coverageValue = fmtPercent(view.coverage.overall.pct, locale)
-  const unprotectedValue = formatBytes(gbToBytes(view.gaps.totalCapacityGb), locale)
+  const unprotectedValue = formatGbOrUnknown(
+    view.gaps.totalCapacityGb,
+    locale,
+    t('common:sizeUnknown'),
+  )
   const jobSuccessValue = fmtPercent(view.jobs.successPct, locale)
   const complianceAvailable = view.provenance.compliance.available
 

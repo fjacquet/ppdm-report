@@ -47,6 +47,7 @@
     "base10": "unità base-10"
   },
   "docs": "Docs",
+  "sizeUnknown": "Dimensione sconosciuta",
   "showDetails": "Mostra dettagli",
   "update": {
     "available": "Nuova versione disponibile",

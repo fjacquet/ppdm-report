@@ -31,7 +31,7 @@ describe('mergeViews parity with legacy sheet-level merge (detail estate)', () =
 
     // IEEE-754 non-associativity: per-server subtotal summation differs from raw-row summation.
     // (With integer synthetic sizes the two paths coincide exactly; the tolerance still holds.)
-    expect(next.gaps.totalCapacityGb).toBeCloseTo(legacy.gaps.totalCapacityGb, 6)
+    expect(next.gaps.totalCapacityGb ?? 0).toBeCloseTo(legacy.gaps.totalCapacityGb ?? 0, 6)
 
     // All other fields must match exactly (provenance and warnings are structurally excluded).
     expect(strip(next)).toEqual(strip(legacy))
