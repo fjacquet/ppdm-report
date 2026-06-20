@@ -34,7 +34,7 @@ CI (`.github/workflows/ci.yml`) runs, in order: typecheck → lint → test:run 
 ```
 File → worker → RawWorkbook → detectProduct → ServerWorkbook (tagged) → Zustand store (inputs only)
   → useReportView (single useMemo) → buildEstateDocument
-      → getViewBuilder(product) per group → buildPpdmView → ReportView
+      → getViewBuilder(product) per group → ViewBuilder (buildPpdmView | buildAvamarView) → ReportView
       → mergeViews (per product group) → EstateDocument → ProductSection UI + exports
 ```
 
