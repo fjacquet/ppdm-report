@@ -48,3 +48,20 @@ export function avamarProvenance(): Record<MetricKey, MetricProvenance> {
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
   }
 }
+
+/** Provenance for a single NetWorker server: count-based coverage (no per-type),
+ *  but gaps, compliance (immutable/replication computed), and DD capacity are available. */
+export function networkerProvenance(assetsTotal: number): Record<MetricKey, MetricProvenance> {
+  return {
+    coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
+    gapsList: { available: true, serversCovered: 1, serversTotal: 1 },
+    compliance: {
+      available: true,
+      serversCovered: 1,
+      serversTotal: 1,
+      assetsCovered: assetsTotal,
+      assetsTotal,
+    },
+    storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
+  }
+}

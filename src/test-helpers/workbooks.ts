@@ -117,6 +117,65 @@ export function detailWorkbookBuffer(): ArrayBuffer {
 }
 
 /**
+ * Synthetic NETWORKER workbook (System Info, Clients, Jobs, Data Domains, Front
+ * End Capacity by Workload, Policies, Devices Detailed, Backups, Dedup Jobs +
+ * the Storage Nodes/Dedup Jobs detection signature), mirroring a Dell NetWorker
+ * Live Optics export.
+ */
+export function networkerWorkbookBuffer(): ArrayBuffer {
+  return makeWorkbook({
+    Details: [
+      ['Project Name', 'NW-test'],
+      ['Date', 45000],
+      ['Disclaimer #1', 'All measurements on the report are Base 10 calculations'],
+    ],
+    'System Info': [
+      ['Metric', 'Value'],
+      ['NetWorker Version', 'NetWorker 19.13.0.2'],
+      ['Server Hostname', 'nw-host'],
+    ],
+    'Storage Nodes': [['Name'], ['nw-host']],
+    'Dedup Jobs': [
+      ['Hostname', 'Mtree Name'],
+      ['nw-host', 'Index'],
+      ['nw-host', 'Filesystem'],
+      ['nw-host', 'Index'],
+    ],
+    Clients: [
+      ['Hostname', 'Scheduled Backup', 'Backup Type'],
+      ['c1', 'True', 'Filesystem'],
+      ['c2', 'True', 'Oracle'],
+      ['c3', 'False', 'Filesystem'],
+    ],
+    Jobs: [['Completion Status'], ['Succeeded'], ['Succeeded'], ['Succeeded'], ['Failed']],
+    'Data Domains': [
+      ['Name', 'Model', 'Used Capacity (GB)', 'Total Capacity (GB)'],
+      ['dd1', 'DD6400', 73000, 164000],
+      ['dd2', 'DD9400', 90, 100],
+    ],
+    'Front End Capacity by Workload': [
+      ['Workload Type', 'Front End Capacity (GB)'],
+      ['Filesystem', 410],
+      ['Oracle RMAN', 30598],
+      ['SQL', 0],
+      ['VMware', 0],
+    ],
+    Policies: [['Policy Name'], ['Bronze'], ['Bronze'], ['Silver']],
+    'Devices Detailed': [
+      ['Dev Name', 'DD Retention Lock Mode'],
+      ['d1', 'None'],
+      ['d2', 'Compliance'],
+    ],
+    Backups: [
+      ['Backup Type', 'Backup Level', 'Clone Status'],
+      ['Filesystem', 'Incr', 'N/A'],
+      ['Oracle', 'Full', 'Cloned'],
+      ['Filesystem', 'Full', 'N/A'],
+    ],
+  })
+}
+
+/**
  * Synthetic AVAMAR workbook (Backup Completion Summary, NonRetired/Retired
  * client counts, Clients No Backups, Backup Plugins, Node Utilization, Disabled
  * Groups, Group Summary), mirroring a Dell Avamar Live Optics export.
