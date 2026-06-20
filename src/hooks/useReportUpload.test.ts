@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { normalizeWorkbook } from '../engines/parser/normalizeWorkbook'
 import { parseInWorker } from '../engines/parser/parseInWorker'
 import { useReportStore } from '../store/reportStore'
-import { avamarWorkbookBuffer } from '../test-helpers/workbooks'
+import { avamarWorkbookBuffer, networkerWorkbookBuffer } from '../test-helpers/workbooks'
 import { useReportUpload } from './useReportUpload'
 
 vi.mock('../engines/parser/parseInWorker')
@@ -81,6 +81,18 @@ describe('useReportUpload', () => {
     })
     expect(useReportStore.getState().servers).toHaveLength(1)
     expect(useReportStore.getState().servers[0]?.product).toBe('avamar')
+    expect(result.current.error).toBeNull()
+  })
+
+  it('admits a NetWorker workbook (now a supported product)', async () => {
+    const nw = normalizeWorkbook(networkerWorkbookBuffer())
+    vi.mocked(parseInWorker).mockResolvedValueOnce(nw)
+    const { result } = renderHook(() => useReportUpload())
+    await act(async () => {
+      await result.current.upload([new File(['x'], 'nw.xlsx')])
+    })
+    expect(useReportStore.getState().servers).toHaveLength(1)
+    expect(useReportStore.getState().servers[0]?.product).toBe('networker')
     expect(result.current.error).toBeNull()
   })
 })
