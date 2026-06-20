@@ -80,11 +80,10 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
 
   // compliance — computed from the signals NetWorker exposes (app-consistency is N/A).
   const deviceRows = rowsOf(wb, 'Devices Detailed')
-  const immutableCount = deviceRows.filter(
-    (r) =>
-      isPresent(cellStr(r, 'DD Retention Lock Mode')) &&
-      cellStr(r, 'DD Retention Lock Mode').toUpperCase() !== 'NONE',
-  ).length
+  const immutableCount = deviceRows.filter((r) => {
+    const lock = cellStr(r, 'DD Retention Lock Mode')
+    return isPresent(lock) && lock.toUpperCase() !== 'NONE'
+  }).length
   const backupRows = rowsOf(wb, 'Backups')
   const replicatedCount = backupRows.filter((r) => isPresent(cellStr(r, 'Clone Status'))).length
   const windowSize = backupRows.length
