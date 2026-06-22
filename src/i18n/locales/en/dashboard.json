@@ -6,12 +6,14 @@
     "unprotected": "Unprotected",
     "excluded": "Excluded",
     "headline": "{{pct}} of assets protected",
-    "inclExcluded": "Including excluded assets"
+    "inclExcluded": "Including excluded assets",
+    "takeaway": "{{pct}} of assets have a protection policy"
   },
   "exposure": {
     "title": "Recovery exposure",
     "unprotectedTb": "Unprotected data (TB)",
-    "assets": "Unprotected assets"
+    "assets": "Unprotected assets",
+    "takeaway": "{{count}} assets are completely unprotected"
   },
   "idle": {
     "title": "Idle agents",
@@ -20,19 +22,22 @@
   "jobs": {
     "title": "Job Activity",
     "success": "Successful jobs",
-    "total": "Total jobs"
+    "total": "Total jobs",
+    "takeaway": "{{pct}} of recent backup jobs succeeded"
   },
   "resilience": {
     "title": "Cyber-resilience",
     "appConsistent": "App-consistent backups",
     "immutable": "Immutable copies",
-    "replicated": "Replicated copies"
+    "replicated": "Replicated copies",
+    "takeaway": "Ransomware resilience: {{pct}} of copies are immutable"
   },
   "capacity": {
     "title": "Capacity",
     "utilization": "Storage utilization",
     "mtrees": "{{count}} mtrees",
-    "flagged": "{{count}} near capacity"
+    "flagged": "{{count}} near capacity",
+    "takeaway": "{{count}} storage target(s) are near capacity"
   },
   "policies": {
     "title": "Policies",
@@ -43,13 +48,17 @@
       "assets": "Assets",
       "capacity": "Capacity",
       "count": "Count"
-    }
+    },
+    "takeaway": "{{count}} protection policies in force"
   },
   "kpi": {
     "coverage": "Coverage",
     "unprotected": "Unprotected",
     "jobSuccess": "Job success rate",
-    "immutable": "Immutable"
+    "immutable": "Immutable",
+    "unprotectedDetail": "Data with no protection policy",
+    "jobSuccessDetail": "Across the recent job window",
+    "immutableDetail": "Copies that cannot be altered or deleted"
   },
   "perServer": {
     "title": "Per-server breakdown",

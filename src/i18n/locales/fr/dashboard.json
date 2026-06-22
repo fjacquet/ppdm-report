@@ -6,12 +6,14 @@
     "unprotected": "Non protégé",
     "excluded": "Exclu",
     "headline": "{{pct}} des ressources protégées",
-    "inclExcluded": "Y compris les ressources exclues"
+    "inclExcluded": "Y compris les ressources exclues",
+    "takeaway": "{{pct}} des ressources ont une politique de protection"
   },
   "exposure": {
     "title": "Exposition de récupération",
     "unprotectedTb": "Données non protégées (To)",
-    "assets": "Ressources non protégées"
+    "assets": "Ressources non protégées",
+    "takeaway": "{{count}} ressources sont totalement non protégées"
   },
   "idle": {
     "title": "Agents inactifs",
@@ -20,19 +22,22 @@
   "jobs": {
     "title": "Activité des jobs",
     "success": "Jobs réussis",
-    "total": "Total des jobs"
+    "total": "Total des jobs",
+    "takeaway": "{{pct}} des jobs de sauvegarde récents ont réussi"
   },
   "resilience": {
     "title": "Cyber-résilience",
     "appConsistent": "Sauvegardes cohérentes applicativement",
     "immutable": "Copies immuables",
-    "replicated": "Copies répliquées"
+    "replicated": "Copies répliquées",
+    "takeaway": "Résilience face aux rançongiciels : {{pct}} des copies sont immuables"
   },
   "capacity": {
     "title": "Capacité",
     "utilization": "Utilisation du stockage",
     "mtrees": "{{count}} mtrees",
-    "flagged": "{{count}} proche de la saturation"
+    "flagged": "{{count}} proche de la saturation",
+    "takeaway": "{{count}} cible(s) de stockage proche(s) de la saturation"
   },
   "policies": {
     "title": "Politiques",
@@ -43,13 +48,17 @@
       "assets": "Ressources",
       "capacity": "Capacité",
       "count": "Nombre"
-    }
+    },
+    "takeaway": "{{count}} politiques de protection actives"
   },
   "kpi": {
     "coverage": "Couverture",
     "unprotected": "Non protégé",
     "jobSuccess": "Taux de réussite des jobs",
-    "immutable": "Immuable"
+    "immutable": "Immuable",
+    "unprotectedDetail": "Données sans politique de protection",
+    "jobSuccessDetail": "Sur la fenêtre de jobs récente",
+    "immutableDetail": "Copies qui ne peuvent être ni modifiées ni supprimées"
   },
   "perServer": {
     "title": "Détail par serveur",

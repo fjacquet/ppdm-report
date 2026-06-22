@@ -309,6 +309,16 @@ describe('buildExportModel', () => {
     expect(caveatOrNotes).toMatch(/370 of 3886 assets/)
   })
 
+  it('gives each section a plain-language takeaway subtitle', () => {
+    const m = buildExportModel(view, 'assessment', 'light', t, 'en')
+    const byId = Object.fromEntries(m.sections.map((s) => [s.id, s]))
+    expect(byId.jobs?.deck?.subtitle).toBe('93% of recent backup jobs succeeded')
+    expect(byId.capacity?.deck?.subtitle).toMatch(/near capacity/)
+    expect(byId.policies?.deck?.subtitle).toBe('32 protection policies in force')
+    const unprotected = m.kpis.find((k) => k.label === t('dashboard:kpi.unprotected'))
+    expect(unprotected?.detail).toBe('Data with no protection policy')
+  })
+
   it('does not add a caveat when provenance is fully available (byte-identical detail export)', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en', [])
     const compliance = model.sections.find((s) => s.id === 'resilience')

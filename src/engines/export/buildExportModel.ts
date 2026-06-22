@@ -106,16 +106,19 @@ export function buildExportModel(
     {
       label: t('dashboard:kpi.unprotected'),
       value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
+      detail: t('dashboard:kpi.unprotectedDetail'),
       tone: 'warn' as const,
     },
     {
       label: t('dashboard:kpi.jobSuccess'),
       value: fmtPercent(jobs.successPct, locale),
+      detail: t('dashboard:kpi.jobSuccessDetail'),
       tone: jobSuccessTone(jobs.successPct),
     },
     {
       label: t('dashboard:kpi.immutable'),
       value: fmtPercent(compliance.immutablePct, locale),
+      detail: t('dashboard:kpi.immutableDetail'),
       tone: immutableTone(compliance.immutablePct),
     },
   ]
@@ -211,6 +214,7 @@ export function buildExportModel(
       caption: t('common:topOf', { shown: gaps.top.shown, total: gaps.top.total }),
     },
     deck: {
+      subtitle: t('dashboard:exposure.takeaway', { count: fmtInt(gaps.count, locale) }),
       kpiChips: gapsKpis,
       caveat: `${t('common:topOf', { shown: Math.min(10, gaps.top.items.length), total: gaps.top.total })} · ${t('common:fullListInExcel')}`,
       bars: toBars(
@@ -298,6 +302,7 @@ export function buildExportModel(
       ...(jobs.capped ? [t('common:capped', { n: fmtInt(jobs.windowSize, locale) })] : []),
     ],
     deck: {
+      subtitle: t('dashboard:jobs.takeaway', { pct: fmtPercent(jobs.successPct, locale) }),
       kpiChips: jobsKpis,
       caveat: jobs.capped ? t('common:capped', { n: fmtInt(jobs.windowSize, locale) }) : undefined,
       bars: toBars(
@@ -336,6 +341,7 @@ export function buildExportModel(
       ? [t('common:capped', { n: fmtInt(compliance.windowSize, locale) })]
       : [],
     deck: {
+      subtitle: t('dashboard:resilience.takeaway', { pct: fmtPercent(compliance.immutablePct, locale) }),
       caveat: compliance.capped
         ? t('common:capped', { n: fmtInt(compliance.windowSize, locale) })
         : undefined,
@@ -378,6 +384,7 @@ export function buildExportModel(
     },
     notes: [t('dashboard:capacity.mtrees', { count: fmtInt(capacity.mtreeCount, locale) })],
     deck: {
+      subtitle: t('dashboard:capacity.takeaway', { count: fmtInt(capacity.flagged.length, locale) }),
       kpiChips: [
         {
           label: t('dashboard:capacity.mtrees', { count: '' }).trim(),
@@ -424,6 +431,7 @@ export function buildExportModel(
       rows: Object.entries(policies.byPurpose).map(([purpose, n]) => [purpose, fmtInt(n, locale)]),
     },
     deck: {
+      subtitle: t('dashboard:policies.takeaway', { count: fmtInt(policies.count, locale) }),
       kpiChips: policiesKpis,
       bars: toBars(
         Object.entries(policies.byPurpose).map(([purpose, n], i) => ({
