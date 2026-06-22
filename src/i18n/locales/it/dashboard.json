@@ -30,7 +30,10 @@
     "appConsistent": "Backup coerenti con l'applicazione",
     "immutable": "Copie immutabili",
     "replicated": "Copie replicate",
-    "takeaway": "Resilienza ai ransomware: {{pct}} delle copie è immutabile"
+    "takeaway": "Resilienza ai ransomware: {{pct}} delle copie è immutabile",
+    "backupLevel": "Distribuzione dei livelli di backup",
+    "level": "Livello di backup",
+    "count": "Copie"
   },
   "capacity": {
     "title": "Capacità",

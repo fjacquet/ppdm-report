@@ -337,6 +337,16 @@ export function buildExportModel(
         tone: replicatedTone(compliance.replicatedPct),
       },
     ],
+    table:
+      Object.keys(compliance.backupLevelMix).length > 0
+        ? {
+            columns: [t('dashboard:resilience.level'), t('dashboard:resilience.count')],
+            rows: Object.entries(compliance.backupLevelMix).map(([lvl, n]) => [
+              lvl,
+              fmtInt(n, locale),
+            ]),
+          }
+        : undefined,
     notes: compliance.capped
       ? [t('common:capped', { n: fmtInt(compliance.windowSize, locale) })]
       : [],

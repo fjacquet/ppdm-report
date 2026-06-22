@@ -338,6 +338,18 @@ describe('buildExportModel', () => {
     expect(policies?.table?.rows[0]?.[2]).toBe('6')
   })
 
+  it('renders the backup-level mix as the resilience detail table', () => {
+    const v: ReportView = {
+      ...view,
+      compliance: { ...view.compliance, backupLevelMix: { FULL: 150, INCR: 2000 } },
+    }
+    const res = buildExportModel(v, 'assessment', 'light', t, 'en').sections.find(
+      (s) => s.id === 'resilience',
+    )
+    expect(res?.table?.columns).toEqual(['Backup level', 'Copies'])
+    expect(res?.table?.rows).toEqual([['FULL', '150'], ['INCR', '2,000']])
+  })
+
   it('does not add a caveat when provenance is fully available (byte-identical detail export)', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en', [])
     const compliance = model.sections.find((s) => s.id === 'resilience')

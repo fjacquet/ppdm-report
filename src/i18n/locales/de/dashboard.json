@@ -30,7 +30,10 @@
     "appConsistent": "Anwendungskonsistente Sicherungen",
     "immutable": "Unveränderliche Kopien",
     "replicated": "Replizierte Kopien",
-    "takeaway": "Ransomware-Resilienz: {{pct}} der Kopien sind unveränderlich"
+    "takeaway": "Ransomware-Resilienz: {{pct}} der Kopien sind unveränderlich",
+    "backupLevel": "Verteilung der Sicherungsebenen",
+    "level": "Sicherungsebene",
+    "count": "Kopien"
   },
   "capacity": {
     "title": "Kapazität",

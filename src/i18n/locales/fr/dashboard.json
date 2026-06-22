@@ -30,7 +30,10 @@
     "appConsistent": "Sauvegardes cohérentes applicativement",
     "immutable": "Copies immuables",
     "replicated": "Copies répliquées",
-    "takeaway": "Résilience face aux rançongiciels : {{pct}} des copies sont immuables"
+    "takeaway": "Résilience face aux rançongiciels : {{pct}} des copies sont immuables",
+    "backupLevel": "Répartition des niveaux de sauvegarde",
+    "level": "Niveau de sauvegarde",
+    "count": "Copies"
   },
   "capacity": {
     "title": "Capacité",
