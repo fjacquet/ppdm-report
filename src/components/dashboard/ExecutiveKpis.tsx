@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { immutableTone } from '../../engines/export/tone'
+import { immutableTone } from '../../engines/export/thresholds'
 import type { ReportView } from '../../types/reportView'
 import { fmtPercent, formatGbOrUnknown } from '../../utils/format'
 import { KpiCard } from '../KpiCard'

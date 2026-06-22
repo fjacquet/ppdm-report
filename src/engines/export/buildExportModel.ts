@@ -11,7 +11,8 @@ import {
   gbToBytes,
 } from '../../utils/format'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
-import { immutableTone, toneHex } from './tone'
+import { appConsistentTone, coverageTone, immutableTone, jobSuccessTone, replicatedTone, utilizationTone } from './thresholds'
+import { toneHex } from './tone'
 import type {
   DeckBar,
   DeckStack,
@@ -100,7 +101,7 @@ export function buildExportModel(
       label: t('dashboard:kpi.coverage'),
       value: fmtPercent(coverage.overall.pct, locale),
       detail: t('dashboard:coverage.inclExcluded'),
-      tone: 'ok' as const,
+      tone: coverageTone(coverage.overall.pct),
     },
     {
       label: t('dashboard:kpi.unprotected'),
@@ -110,7 +111,7 @@ export function buildExportModel(
     {
       label: t('dashboard:kpi.jobSuccess'),
       value: fmtPercent(jobs.successPct, locale),
-      tone: 'ok' as const,
+      tone: jobSuccessTone(jobs.successPct),
     },
     {
       label: t('dashboard:kpi.immutable'),
@@ -181,7 +182,7 @@ export function buildExportModel(
             label: type,
             magnitude: b.pct,
             value: fmtPercent(b.pct, locale),
-            tone: b.pct < 0.5 ? ('warn' as const) : ('ok' as const),
+            tone: coverageTone(b.pct),
           })),
         pal,
       ),
@@ -318,7 +319,7 @@ export function buildExportModel(
       {
         label: t('dashboard:resilience.appConsistent'),
         value: fmtPercent(compliance.appConsistentPct, locale),
-        tone: 'ok',
+        tone: appConsistentTone(compliance.appConsistentPct),
       },
       {
         label: t('dashboard:resilience.immutable'),
@@ -328,7 +329,7 @@ export function buildExportModel(
       {
         label: t('dashboard:resilience.replicated'),
         value: fmtPercent(compliance.replicatedPct, locale),
-        tone: 'accent',
+        tone: replicatedTone(compliance.replicatedPct),
       },
     ],
     notes: compliance.capped
@@ -344,13 +345,13 @@ export function buildExportModel(
             label: t('dashboard:resilience.appConsistent'),
             magnitude: compliance.appConsistentPct,
             value: fmtPercent(compliance.appConsistentPct, locale),
-            tone: 'ok' as const,
+            tone: appConsistentTone(compliance.appConsistentPct),
           },
           {
             label: t('dashboard:resilience.replicated'),
             magnitude: compliance.replicatedPct,
             value: fmtPercent(compliance.replicatedPct, locale),
-            tone: 'accent' as const,
+            tone: replicatedTone(compliance.replicatedPct),
           },
           {
             label: t('dashboard:resilience.immutable'),
@@ -400,7 +401,7 @@ export function buildExportModel(
             // (89.6% → 89.6% of the track), not relative to the busiest target.
             magnitude: tg.utilizationPct / 100,
             value: fmtPercentValue(tg.utilizationPct, locale),
-            tone: tg.flagged ? ('warn' as const) : ('accent' as const),
+            tone: utilizationTone(tg.utilizationPct),
           })),
         pal,
       ),

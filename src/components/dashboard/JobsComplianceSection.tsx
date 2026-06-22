@@ -1,7 +1,7 @@
 import type { EChartsOption } from 'echarts/types/dist/shared'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { immutableTone } from '../../engines/export/tone'
+import { immutableTone } from '../../engines/export/thresholds'
 import { DARK, LIGHT } from '../../theme/palette'
 import type { ReportView } from '../../types/reportView'
 import { fmtInt, fmtPercent } from '../../utils/format'

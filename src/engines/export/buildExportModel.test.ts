@@ -185,8 +185,8 @@ describe('buildExportModel', () => {
     const immut = byId.resilience?.deck?.bars?.find((b) => b.value === '0%')
     expect(immut?.color).toBe('#dc2626')
 
-    // capacity: flagged target colored warn + a flagged KPI chip
-    expect(byId.capacity?.deck?.bars?.[0]).toMatchObject({ label: 'dd1', color: '#d97706' })
+    // capacity: 87.6% ≥ 85 → bad (#dc2626) per utilizationTone thresholds
+    expect(byId.capacity?.deck?.bars?.[0]).toMatchObject({ label: 'dd1', color: '#dc2626' })
     // utilization bars scale absolutely (87.6% → 0.876 of the track), not to the local max
     expect(byId.capacity?.deck?.bars?.[0]?.ratio).toBeCloseTo(0.876, 3)
     expect(byId.capacity?.deck?.kpiChips?.some((k) => /near capacity/.test(k.label))).toBe(true)
