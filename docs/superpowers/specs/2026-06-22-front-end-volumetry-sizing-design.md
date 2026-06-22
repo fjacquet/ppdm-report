@@ -47,11 +47,9 @@ plus the matching HTML block. It is a sizing *input*, not a sizing *calculator*.
 
 ```ts
 /** Front-end volume for one workload type (or the estate total), split by protection status.
- * Size fields are optional: undefined = "no usable figure" (renders "size unknown"), never a fake 0. */
+ * Size fields are tri-state: a number ≥ 0 = measured; undefined = "no figure" (renders "–"). */
 export interface FrontEndTypeRow {
   type: string
-  protectedCount: number
-  unprotectedCount: number
   protectedDiscoveredGb?: number
   protectedFetbGb?: number
   unprotectedDiscoveredGb?: number
@@ -60,28 +58,41 @@ export interface FrontEndTypeRow {
 
 export interface FrontEnd {
   byType: FrontEndTypeRow[]
-  /** Estate totals; `type` carries the localized "TOTAL" marker at render time, not here. */
-  totals: FrontEndTypeRow
   /** EXCLUDED assets across in-use types — reported as a footnote, never in totals. */
   excludedCount: number
 }
 ```
 
+Totals are **not stored** — they are derived from `byType` at render (consistent with the repo's
+"no derived metric is ever stored" rule). Per total column: sum the defined cells; render `–` if none
+are defined, exact sum if all are, and `≥ sum` (a floor) if some are. A single generic caption note
+explains `≥` ("some workloads report no figure for that column; the total is a floor") rather than
+listing types — the `–` cells already show which.
+
 Added to `ReportView` as `frontEnd: FrontEnd`. Optional size fields reuse the existing
-size-optional contract (`UnprotectedAsset.sizeGb?`, `Gaps.totalCapacityGb?`).
+size-optional contract (`UnprotectedAsset.sizeGb?`, `Gaps.totalCapacityGb?`). Per-type asset *counts*
+are intentionally not stored — they are not displayed and not needed once the tri-state size encodes
+"measured vs no-figure".
 
-### Cell / unknown rule (honest "–")
+### Cell / unknown rule (honest "–", tri-state)
 
-For a given (type, protection state, metric), the size is `undefined` → rendered as
-`formatGbOrUnknown(..., t('common:sizeUnknown'))` ("–") when **the bucket has ≥1 asset but the
-source column is absent or sums to 0** (unreported). Otherwise it is the summed GB. This is what
-makes SQL's discovered size show `–`: in `ref/PPDM.xlsx` the SQL sheet's `Asset Total Size (GB)` is
-present but uniformly 0, while its FETB (`Protection Capacity (GB)`) is populated. A genuinely empty
-bucket (count 0) yields 0 and renders as a formatted "0".
+The aggregator resolves each (type, protection state, metric) to one of three states, so the renderer
+needs no extra context:
+
+- **A number ≥ 0** — measured. A genuinely empty bucket (no assets of that type/state) is `0` and
+  renders as a formatted `"0 B"`. Does **not** trigger `≥` in the total.
+- **`undefined`** — "no figure": the bucket has ≥1 asset but the source column is **absent** or
+  **sums to 0** (unreported). Renders `"–"` via `formatGbOrUnknown(..., t('common:sizeUnknown'))`.
+  **Triggers `≥` + footnote** in that column's total.
+
+This is what makes SQL's discovered size show `–`: in `ref/PPDM.xlsx` the SQL sheet's
+`Asset Total Size (GB)` is present but uniformly 0 across its assets, while its FETB
+(`Protection Capacity (GB)`) is populated. Distinguishing "no figure" from a real 0 requires knowing
+whether the bucket had assets — tracked transiently during the sheet scan, not stored on the row.
 
 > Heuristic to validate against more exports: treating a populated-but-uniformly-zero column as
-> "unreported" assumes a real workload with protected assets never legitimately totals 0 front-end
-> GB. Holds for the sampled data; noted as a review point during implementation.
+> "no figure" assumes a real workload with protected assets never legitimately totals 0 front-end GB.
+> Holds for the sampled data; noted as a review point during implementation.
 
 ## 2. Aggregation engine (`src/engines/aggregation/frontEnd.ts`, new, pure)
 
@@ -108,37 +119,41 @@ the "add new PPDM metrics in the view builder" rule (not in components or the st
 | Product | `frontEnd` source | Fidelity |
 |---|---|---|
 | **PPDM detail** | per-asset agent sheets (size columns above) | Full — both metrics, both states, EXCLUDED footnote. |
-| **PPDM summary** | `… Count And Cap` / `… Assets & Cap` per-type capacity fields | Protected/unprotected **capacity** only — fills FETB columns, discovered `undefined`; caveat. |
+| **PPDM summary** | `… Count And Cap` / `… Assets & Cap` per-type `Capacity Protected/Unprotected Assets (GB)` | These are **provisioned/discovered** capacity (estate-wide FETB lives separately on `Assets Capacity General`), so they fill the **discovered** columns; FETB columns `undefined`; caveat. `frontEnd` provenance set available (overriding the `allUnavailable` default for this one key). |
 | **NetWorker** | `Front End Capacity by Workload` (`Front End Capacity (GB)`, today discarded) | Maps to **`protectedFetbGb`** (front-end capacity = the managed/protected front-end); discovered + unprotected columns `undefined` ("–"); caveat notes the no-split limitation. |
 | **Avamar** | none | Unavailable → section **auto-suppressed** by the existing `isRenderable` drop; folded into data-caveats. |
 
-A new **`MetricKey 'frontEnd'`** is threaded through `src/engines/aggregation/provenance.ts` and all
-four helpers (`allAvailable`, `allUnavailable`, `networkerProvenance`, `avamarProvenance`). The
-section is wrapped with the existing `withCaveat(section, 'frontEnd', view, t)` so partial/unavailable
-provenance becomes a note + deck caveat automatically.
+A new **`MetricKey 'frontEnd'`** is threaded through `src/engines/aggregation/provenance.ts`, all four
+helpers (`allAvailable`, `allUnavailable`, `networkerProvenance`, `avamarProvenance`), and the
+`mergeProvenance` key list. The provenance caveat is composed into `table.caption` (see §5), not via
+`withCaveat` (whose output the table slide ignores). Avamar's `frontEnd: { available: false }` plus an
+empty `byType` means the section emits nothing renderable and is suppressed.
 
 ## 4. Merge layer (`src/engines/aggregation/mergeViews.ts`)
 
 Fold `frontEnd` across servers: union of types, per-field summation (treating `undefined` as absent —
 a field stays `undefined` only if every server is `undefined` for it; once any server reports a
-number, the merged field is the sum of the reporters), `excludedCount` summed, totals recomputed.
-**Single-server input is an identity** (one server → its `frontEnd` unchanged) — the standard merge
-invariant; covered by a test.
+number, the merged field is the sum of the reporters), `excludedCount` summed. No totals to merge
+(derived at render). **Single-server input is an identity** (one server → its `frontEnd` unchanged) —
+the standard merge invariant; covered by a test.
 
 ## 5. Export model (`src/engines/export/buildExportModel.ts`)
 
 New `volumetrySection: ExportSection` (`id: 'volumetry'`):
 
 - `title`: `t('dashboard:volumetry.title')`.
-- `table.columns`: `[type, Prot. discovered, Prot. FETB, Unprot. discovered, Unprot. FETB]` (localized;
-  reuse `common:col.type`). `table.rows`: one per `byType` entry + a final **TOTAL** row built from
-  `frontEnd.totals`, each size via `formatGbOrUnknown(formatBytes∘gbToBytes)`; `≥`-prefixed when the
-  total column has an unreported contributor.
-- `kpis`: Total protected FETB, Total unprotected discovered — surfaced in the **HTML** header
-  (PPTX shows them via the TOTAL row).
-- `notes`: EXCLUDED footnote (`excludedCount`), the `≥` footnote naming unmeasured types, the
-  base-front-end-only sizing caveat, and any capped-window note.
-- Wrapped with `withCaveat(..., 'frontEnd', ...)`.
+- `table.columns`: `[type, Prot. discovered, Prot. FETB, Unprot. discovered, Unprot. FETB]` (localized).
+  `table.rows`: one per `byType` entry (each size via `formatGbOrUnknown(formatBytes∘gbToBytes)`,
+  `undefined → "–"`) + a final **TOTAL** row derived from `byType` per the per-column rule in §3
+  (`–` / exact / `≥ sum`).
+- **All caveats go in `table.caption`** — the only channel `drawTableSlide` renders besides the table,
+  so they appear on the PPTX slide *and* in HTML. Caption = EXCLUDED footnote (`excludedCount`) · the
+  `≥` footnote naming no-figure types · the front-end-only sizing note · the provenance caveat
+  (composed in-module via the existing `provenanceCaveat(view.provenance.frontEnd, t)`; **not**
+  `withCaveat`, whose output only reaches `notes`/`deck.caveat`, which the table slide ignores).
+- `deck.subtitle` + `deck.kpiChips` (Total protected FETB, Total unprotected discovered) — rendered by
+  **HTML** (`sectionHtml` reads `deck`, not `kpis`); ignored by the PPTX table slide, where the
+  **TOTAL row** carries the totals. No `deck.bars` (table-first).
 - Numbers use **base-10** byte formatting via `formatBytes(gbToBytes(gb), locale)` (auto GB/TB) —
   honoring the Live-Optics base-10 convention.
 
