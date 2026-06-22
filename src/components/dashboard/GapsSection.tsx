@@ -41,9 +41,9 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
   const barHeight = Math.max(120, barData.length * 34)
 
   return (
-    <section aria-label={t('dashboard:gaps.title')}>
+    <section aria-label={t('dashboard:exposure.title')}>
       <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-        {t('dashboard:gaps.title')}
+        {t('dashboard:exposure.title')}
       </h2>
 
       {/* KPI row */}
@@ -53,12 +53,12 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
             {formatGbOrUnknown(view.gaps.totalCapacityGb, locale, t('common:sizeUnknown'))}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t('dashboard:gaps.unprotectedTb')}
+            {t('dashboard:exposure.unprotectedTb')}
           </p>
         </div>
         <div>
           <p className="text-3xl font-bold text-red-500">{fmtInt(count, locale)}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard:gaps.assets')}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard:exposure.assets')}</p>
         </div>
       </div>
 

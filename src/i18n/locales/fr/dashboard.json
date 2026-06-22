@@ -8,8 +8,8 @@
     "headline": "{{pct}} des ressources protégées",
     "inclExcluded": "Y compris les ressources exclues"
   },
-  "gaps": {
-    "title": "Lacunes de protection",
+  "exposure": {
+    "title": "Exposition de récupération",
     "unprotectedTb": "Données non protégées (To)",
     "assets": "Ressources non protégées"
   },
@@ -22,8 +22,8 @@
     "success": "Jobs réussis",
     "total": "Total des jobs"
   },
-  "compliance": {
-    "title": "Conformité",
+  "resilience": {
+    "title": "Cyber-résilience",
     "appConsistent": "Sauvegardes cohérentes applicativement",
     "immutable": "Copies immuables",
     "replicated": "Copies répliquées"

@@ -8,8 +8,8 @@
     "headline": "{{pct}} of assets protected",
     "inclExcluded": "Including excluded assets"
   },
-  "gaps": {
-    "title": "Protection Gaps",
+  "exposure": {
+    "title": "Recovery exposure",
     "unprotectedTb": "Unprotected data (TB)",
     "assets": "Unprotected assets"
   },
@@ -22,8 +22,8 @@
     "success": "Successful jobs",
     "total": "Total jobs"
   },
-  "compliance": {
-    "title": "Compliance",
+  "resilience": {
+    "title": "Cyber-resilience",
     "appConsistent": "App-consistent backups",
     "immutable": "Immutable copies",
     "replicated": "Replicated copies"

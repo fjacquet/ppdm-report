@@ -190,15 +190,15 @@ export function buildExportModel(
 
   const gapsKpis: ExportKpi[] = [
     {
-      label: t('dashboard:gaps.unprotectedTb'),
+      label: t('dashboard:exposure.unprotectedTb'),
       value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
       tone: 'bad',
     },
-    { label: t('dashboard:gaps.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
+    { label: t('dashboard:exposure.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
   ]
   const gapsSection: ExportSection = {
-    id: 'gaps',
-    title: t('dashboard:gaps.title'),
+    id: 'exposure',
+    title: t('dashboard:exposure.title'),
     kpis: gapsKpis,
     table: {
       columns: [t('common:col.name'), t('common:col.type'), t('common:col.size')],
@@ -236,7 +236,7 @@ export function buildExportModel(
             columns: [
               t('dashboard:perServer.col.server'),
               t('dashboard:kpi.coverage'),
-              t('dashboard:gaps.assets'),
+              t('dashboard:exposure.assets'),
               t('dashboard:jobs.success'),
             ],
             rows: perServer.map((s) => [
@@ -312,21 +312,21 @@ export function buildExportModel(
   }
 
   const complianceSection: ExportSection = {
-    id: 'compliance',
-    title: t('dashboard:compliance.title'),
+    id: 'resilience',
+    title: t('dashboard:resilience.title'),
     kpis: [
       {
-        label: t('dashboard:compliance.appConsistent'),
+        label: t('dashboard:resilience.appConsistent'),
         value: fmtPercent(compliance.appConsistentPct, locale),
         tone: 'ok',
       },
       {
-        label: t('dashboard:compliance.immutable'),
+        label: t('dashboard:resilience.immutable'),
         value: fmtPercent(compliance.immutablePct, locale),
         tone: immutableTone(compliance.immutablePct),
       },
       {
-        label: t('dashboard:compliance.replicated'),
+        label: t('dashboard:resilience.replicated'),
         value: fmtPercent(compliance.replicatedPct, locale),
         tone: 'accent',
       },
@@ -341,19 +341,19 @@ export function buildExportModel(
       bars: toBars(
         [
           {
-            label: t('dashboard:compliance.appConsistent'),
+            label: t('dashboard:resilience.appConsistent'),
             magnitude: compliance.appConsistentPct,
             value: fmtPercent(compliance.appConsistentPct, locale),
             tone: 'ok' as const,
           },
           {
-            label: t('dashboard:compliance.replicated'),
+            label: t('dashboard:resilience.replicated'),
             magnitude: compliance.replicatedPct,
             value: fmtPercent(compliance.replicatedPct, locale),
             tone: 'accent' as const,
           },
           {
-            label: t('dashboard:compliance.immutable'),
+            label: t('dashboard:resilience.immutable'),
             magnitude: compliance.immutablePct,
             value: fmtPercent(compliance.immutablePct, locale),
             tone: immutableTone(compliance.immutablePct),
@@ -439,10 +439,10 @@ export function buildExportModel(
   const byId: Record<SectionId, ExportSection | null> = {
     perServer: perServerSection,
     coverage: withCaveat(coverageSection, 'coverageByType', view, t),
-    gaps: withCaveat(gapsSection, 'gapsList', view, t),
+    exposure: withCaveat(gapsSection, 'gapsList', view, t),
     idle: idleSection,
     jobs: jobsSection,
-    compliance: withCaveat(complianceSection, 'compliance', view, t),
+    resilience: withCaveat(complianceSection, 'compliance', view, t),
     capacity: withCaveat(capacitySection, 'storageTargets', view, t),
     policies: policiesSection,
   }

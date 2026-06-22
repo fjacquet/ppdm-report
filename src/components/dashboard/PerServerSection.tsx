@@ -52,8 +52,8 @@ export function PerServerSection({ servers, dark }: PerServerSectionProps) {
             <tr className="border-b border-gray-200 text-left text-gray-500 dark:border-gray-700 dark:text-gray-400">
               <th className="pb-2 pr-4 font-medium">{t('dashboard:perServer.col.server')}</th>
               <th className="pb-2 pr-4 font-medium">{t('dashboard:kpi.coverage')}</th>
-              <th className="pb-2 pr-4 font-medium">{t('dashboard:gaps.assets')}</th>
-              <th className="pb-2 pr-4 font-medium">{t('dashboard:gaps.unprotectedTb')}</th>
+              <th className="pb-2 pr-4 font-medium">{t('dashboard:exposure.assets')}</th>
+              <th className="pb-2 pr-4 font-medium">{t('dashboard:exposure.unprotectedTb')}</th>
               <th className="pb-2 pr-4 font-medium">{t('dashboard:jobs.success')}</th>
               <th className="pb-2 pr-4 font-medium">{t('dashboard:perServer.col.captured')}</th>
               <th className="pb-2 font-medium">{t('dashboard:perServer.col.version')}</th>
