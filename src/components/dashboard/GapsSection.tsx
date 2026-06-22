@@ -58,7 +58,9 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
         </div>
         <div>
           <p className="text-3xl font-bold text-red-500">{fmtInt(count, locale)}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('dashboard:exposure.assets')}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t('dashboard:exposure.assets')}
+          </p>
         </div>
       </div>
 

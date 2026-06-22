@@ -326,7 +326,12 @@ describe('buildExportModel', () => {
         count: 1,
         byPurpose: { CENTRALIZED: 1 },
         perPolicy: [
-          { name: 'SQL - Prod', purpose: 'CENTRALIZED', assetCount: 6, protectionCapacityGb: 19732 },
+          {
+            name: 'SQL - Prod',
+            purpose: 'CENTRALIZED',
+            assetCount: 6,
+            protectionCapacityGb: 19732,
+          },
         ],
       },
     }
@@ -357,7 +362,10 @@ describe('buildExportModel', () => {
       (s) => s.id === 'resilience',
     )
     expect(res?.table?.columns).toEqual(['Backup level', 'Copies'])
-    expect(res?.table?.rows).toEqual([['FULL', '150'], ['INCR', '2,000']])
+    expect(res?.table?.rows).toEqual([
+      ['FULL', '150'],
+      ['INCR', '2,000'],
+    ])
   })
 
   it('does not add a caveat when provenance is fully available (byte-identical detail export)', () => {

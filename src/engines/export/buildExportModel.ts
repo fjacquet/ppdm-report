@@ -11,7 +11,14 @@ import {
   gbToBytes,
 } from '../../utils/format'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
-import { appConsistentTone, coverageTone, immutableTone, jobSuccessTone, replicatedTone, utilizationTone } from './thresholds'
+import {
+  appConsistentTone,
+  coverageTone,
+  immutableTone,
+  jobSuccessTone,
+  replicatedTone,
+  utilizationTone,
+} from './thresholds'
 import { toneHex } from './tone'
 import type {
   DeckBar,
@@ -351,7 +358,9 @@ export function buildExportModel(
       ? [t('common:capped', { n: fmtInt(compliance.windowSize, locale) })]
       : [],
     deck: {
-      subtitle: t('dashboard:resilience.takeaway', { pct: fmtPercent(compliance.immutablePct, locale) }),
+      subtitle: t('dashboard:resilience.takeaway', {
+        pct: fmtPercent(compliance.immutablePct, locale),
+      }),
       caveat: compliance.capped
         ? t('common:capped', { n: fmtInt(compliance.windowSize, locale) })
         : undefined,
@@ -402,7 +411,9 @@ export function buildExportModel(
     },
     notes: [t('dashboard:capacity.mtrees', { count: fmtInt(capacity.mtreeCount, locale) })],
     deck: {
-      subtitle: t('dashboard:capacity.takeaway', { count: fmtInt(capacity.flagged.length, locale) }),
+      subtitle: t('dashboard:capacity.takeaway', {
+        count: fmtInt(capacity.flagged.length, locale),
+      }),
       kpiChips: [
         {
           label: t('dashboard:capacity.mtrees', { count: '' }).trim(),
@@ -504,9 +515,7 @@ export function buildExportModel(
   }
   const dropped = allSections.filter((s) => !isRenderable(s))
   const sections = allSections.filter(isRenderable)
-  const suppressionNotes = dropped.map((s) =>
-    t('common:sectionUnavailable', { title: s.title }),
-  )
+  const suppressionNotes = dropped.map((s) => t('common:sectionUnavailable', { title: s.title }))
 
   const captured = meta.capturedAt ? meta.capturedAt.slice(0, 10) : ''
   const footerParts = [
