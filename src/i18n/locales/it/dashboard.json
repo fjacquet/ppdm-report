@@ -40,7 +40,10 @@
     "utilization": "Utilizzo dello storage",
     "mtrees": "{{count}} mtrees",
     "flagged": "{{count}} vicini alla saturazione",
-    "takeaway": "{{count}} destinazione/i di storage vicina/e alla saturazione"
+    "takeaway": "{{count}} destinazione/i di storage vicina/e alla saturazione",
+    "used": "Usato",
+    "total": "Totale",
+    "free": "Libero"
   },
   "policies": {
     "title": "Criteri",
@@ -65,9 +68,15 @@
   },
   "perServer": {
     "title": "Dettaglio per server",
-    "col": { "server": "Server", "version": "Versione", "captured": "Acquisito" }
+    "col": {
+      "server": "Server",
+      "version": "Versione",
+      "captured": "Acquisito"
+    }
   },
-  "product": { "badge": "Prodotto di origine" },
+  "product": {
+    "badge": "Prodotto di origine"
+  },
   "provenance": {
     "unavailable": "Non disponibile per questo tipo di report",
     "partial": "Copre {{covered}} server su {{total}}",

@@ -385,11 +385,19 @@ export function buildExportModel(
     id: 'capacity',
     title: t('dashboard:capacity.title'),
     table: {
-      columns: [t('common:col.name'), t('common:col.type'), t('dashboard:capacity.utilization')],
+      columns: [
+        t('common:col.name'),
+        t('dashboard:capacity.utilization'),
+        t('dashboard:capacity.used'),
+        t('dashboard:capacity.total'),
+        t('dashboard:capacity.free'),
+      ],
       rows: capacity.targets.map((tg) => [
         tg.name,
-        tg.type,
         fmtPercentValue(tg.utilizationPct, locale),
+        formatGbOrUnknown(tg.usedGb, locale, t('common:sizeUnknown')),
+        formatGbOrUnknown(tg.totalGb, locale, t('common:sizeUnknown')),
+        formatGbOrUnknown(tg.freeGb, locale, t('common:sizeUnknown')),
       ]),
     },
     notes: [t('dashboard:capacity.mtrees', { count: fmtInt(capacity.mtreeCount, locale) })],

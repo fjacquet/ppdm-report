@@ -40,7 +40,10 @@
     "utilization": "Storage utilization",
     "mtrees": "{{count}} mtrees",
     "flagged": "{{count}} near capacity",
-    "takeaway": "{{count}} storage target(s) are near capacity"
+    "takeaway": "{{count}} storage target(s) are near capacity",
+    "used": "Used",
+    "total": "Total",
+    "free": "Free"
   },
   "policies": {
     "title": "Policies",
@@ -65,9 +68,15 @@
   },
   "perServer": {
     "title": "Per-server breakdown",
-    "col": { "server": "Server", "version": "Version", "captured": "Captured" }
+    "col": {
+      "server": "Server",
+      "version": "Version",
+      "captured": "Captured"
+    }
   },
-  "product": { "badge": "Source product" },
+  "product": {
+    "badge": "Source product"
+  },
   "provenance": {
     "unavailable": "Not available for this report type",
     "partial": "Covers {{covered}} of {{total}} servers",

@@ -40,7 +40,10 @@
     "utilization": "Speichernutzung",
     "mtrees": "{{count}} Mtrees",
     "flagged": "{{count}} nahe der Kapazität",
-    "takeaway": "{{count}} Speicherziel(e) nahe der Kapazitätsgrenze"
+    "takeaway": "{{count}} Speicherziel(e) nahe der Kapazitätsgrenze",
+    "used": "Belegt",
+    "total": "Gesamt",
+    "free": "Frei"
   },
   "policies": {
     "title": "Richtlinien",
@@ -65,9 +68,15 @@
   },
   "perServer": {
     "title": "Aufschlüsselung pro Server",
-    "col": { "server": "Server", "version": "Version", "captured": "Erfasst" }
+    "col": {
+      "server": "Server",
+      "version": "Version",
+      "captured": "Erfasst"
+    }
   },
-  "product": { "badge": "Quellprodukt" },
+  "product": {
+    "badge": "Quellprodukt"
+  },
   "provenance": {
     "unavailable": "Für diesen Berichtstyp nicht verfügbar",
     "partial": "Deckt {{covered}} von {{total}} Servern ab",

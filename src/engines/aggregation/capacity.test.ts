@@ -48,4 +48,27 @@ describe('computeCapacity', () => {
     expect(cap.flagged).toEqual([])
     expect(cap.mtreeCount).toBe(0)
   })
+
+  it('captures used/total/free when the columns are present', () => {
+    const cap = computeCapacity(
+      wb({
+        'Storage Targets': sheet(
+          'Storage Targets',
+          ['Name', 'Type', 'Utilization (%)', 'Total Used (GB)', 'Total Size (GB)'],
+          [
+            {
+              Name: 'dd1',
+              Type: 'DATA_DOMAIN_SYSTEM',
+              'Utilization (%)': '87.6',
+              'Total Used (GB)': '111466.73',
+              'Total Size (GB)': '127249.42',
+            },
+          ],
+        ),
+      }),
+    )
+    expect(cap.targets[0]?.usedGb).toBe(111466.73)
+    expect(cap.targets[0]?.totalGb).toBe(127249.42)
+    expect(cap.targets[0]?.freeGb).toBeCloseTo(15782.69, 1)
+  })
 })

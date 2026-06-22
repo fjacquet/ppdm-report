@@ -40,7 +40,10 @@
     "utilization": "Utilisation du stockage",
     "mtrees": "{{count}} mtrees",
     "flagged": "{{count}} proche de la saturation",
-    "takeaway": "{{count}} cible(s) de stockage proche(s) de la saturation"
+    "takeaway": "{{count}} cible(s) de stockage proche(s) de la saturation",
+    "used": "Utilisé",
+    "total": "Total",
+    "free": "Libre"
   },
   "policies": {
     "title": "Politiques",
@@ -65,9 +68,15 @@
   },
   "perServer": {
     "title": "Détail par serveur",
-    "col": { "server": "Serveur", "version": "Version", "captured": "Capturé le" }
+    "col": {
+      "server": "Serveur",
+      "version": "Version",
+      "captured": "Capturé le"
+    }
   },
-  "product": { "badge": "Produit source" },
+  "product": {
+    "badge": "Produit source"
+  },
   "provenance": {
     "unavailable": "Non disponible pour ce type de rapport",
     "partial": "Couvre {{covered}} serveurs sur {{total}}",
