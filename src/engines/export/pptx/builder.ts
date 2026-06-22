@@ -276,6 +276,51 @@ function drawIdle(slide: Slide, sec: ExportSection, p: Palette) {
   if (sec.deck?.tiles?.length) drawTiles(slide, M, 1.7, CONTENT_W, sec.deck.tiles, p)
 }
 
+function drawTableSlide(slide: Slide, sec: ExportSection, p: Palette) {
+  slide.addText(sec.title, {
+    x: M,
+    y: 0.4,
+    w: CONTENT_W,
+    h: 0.6,
+    fontSize: 22,
+    bold: true,
+    color: hx(p.ink),
+    fontFace: FONT,
+  })
+  const tbl = sec.table
+  if (!tbl || tbl.rows.length === 0) return
+  const header = tbl.columns.map((c) => ({
+    text: c,
+    options: { bold: true, color: hx(p.muted), fill: { color: hx(p.surface) }, fontSize: 11 },
+  }))
+  const body = tbl.rows.map((r) =>
+    r.map((cell) => ({ text: cell, options: { color: hx(p.ink), fontSize: 10 } })),
+  )
+  slide.addTable([header, ...body], {
+    x: M,
+    y: 1.2,
+    w: CONTENT_W,
+    border: { type: 'solid', pt: 0.5, color: hx(p.line) },
+    fontFace: FONT,
+    valign: 'middle',
+    autoPage: true,
+    autoPageRepeatHeader: true,
+    newSlideStartY: 0.5,
+  })
+  if (tbl.caption) {
+    slide.addText(tbl.caption, {
+      x: M,
+      y: 7.0,
+      w: CONTENT_W,
+      h: 0.3,
+      fontSize: 9,
+      italic: true,
+      color: hx(p.muted),
+      fontFace: FONT,
+    })
+  }
+}
+
 function drawExec(slide: Slide, model: ExportModel, p: Palette) {
   slide.addText(model.execTitle, {
     x: M,
@@ -414,6 +459,8 @@ export async function buildPptx(model: ExportModel, theme: ExportTheme): Promise
     slide.background = { color: bg }
     if (item.kind === 'single') {
       drawIdle(slide, item.section, p)
+    } else if (item.kind === 'table') {
+      drawTableSlide(slide, item.section, p)
     } else {
       drawSection(slide, item.top, BAND_TOP, p)
       slide.addShape('line' as pptxgen.SHAPE_NAME, {

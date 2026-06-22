@@ -1,7 +1,7 @@
 import type { EChartsOption } from 'echarts/types/dist/shared'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { immutableTone } from '../../engines/export/tone'
+import { immutableTone } from '../../engines/export/thresholds'
 import { DARK, LIGHT } from '../../theme/palette'
 import type { ReportView } from '../../types/reportView'
 import { fmtInt, fmtPercent } from '../../utils/format'
@@ -46,19 +46,19 @@ export function JobsComplianceSection({ view, dark }: JobsComplianceSectionProps
   const compBars: BarDatum[] = useMemo(
     () => [
       {
-        label: t('dashboard:compliance.appConsistent'),
+        label: t('dashboard:resilience.appConsistent'),
         value: compliance.appConsistentPct,
         valueText: fmtPercent(compliance.appConsistentPct, locale),
         color: palette.ok,
       },
       {
-        label: t('dashboard:compliance.replicated'),
+        label: t('dashboard:resilience.replicated'),
         value: compliance.replicatedPct,
         valueText: fmtPercent(compliance.replicatedPct, locale),
         color: palette.accent,
       },
       {
-        label: t('dashboard:compliance.immutable'),
+        label: t('dashboard:resilience.immutable'),
         value: compliance.immutablePct,
         valueText: fmtPercent(compliance.immutablePct, locale),
         color: immutableTone(compliance.immutablePct) === 'bad' ? palette.bad : palette.ok,
@@ -132,7 +132,7 @@ export function JobsComplianceSection({ view, dark }: JobsComplianceSectionProps
       )}
 
       <h3 className="mb-3 mt-4 text-base font-semibold text-gray-900 dark:text-gray-100">
-        {t('dashboard:compliance.title')}
+        {t('dashboard:resilience.title')}
       </h3>
       <Chart
         option={compOption}

@@ -6,12 +6,14 @@
     "unprotected": "Non protetto",
     "excluded": "Escluso",
     "headline": "{{pct}} degli asset protetti",
-    "inclExcluded": "Inclusi gli asset esclusi"
+    "inclExcluded": "Inclusi gli asset esclusi",
+    "takeaway": "{{pct}} degli asset ha un criterio di protezione"
   },
-  "gaps": {
-    "title": "Lacune di protezione",
+  "exposure": {
+    "title": "Esposizione al ripristino",
     "unprotectedTb": "Dati non protetti (TB)",
-    "assets": "Asset non protetti"
+    "assets": "Asset non protetti",
+    "takeaway": "{{count}} asset sono completamente non protetti"
   },
   "idle": {
     "title": "Agenti inattivi",
@@ -20,19 +22,28 @@
   "jobs": {
     "title": "Attività dei job",
     "success": "Job riusciti",
-    "total": "Job totali"
+    "total": "Job totali",
+    "takeaway": "{{pct}} dei job di backup recenti è riuscito"
   },
-  "compliance": {
-    "title": "Conformità",
+  "resilience": {
+    "title": "Cyber-resilienza",
     "appConsistent": "Backup coerenti con l'applicazione",
     "immutable": "Copie immutabili",
-    "replicated": "Copie replicate"
+    "replicated": "Copie replicate",
+    "takeaway": "Resilienza ai ransomware: {{pct}} delle copie è immutabile",
+    "backupLevel": "Distribuzione dei livelli di backup",
+    "level": "Livello di backup",
+    "count": "Copie"
   },
   "capacity": {
     "title": "Capacità",
     "utilization": "Utilizzo dello storage",
     "mtrees": "{{count}} mtrees",
-    "flagged": "{{count}} vicini alla saturazione"
+    "flagged": "{{count}} vicini alla saturazione",
+    "takeaway": "{{count}} destinazione/i di storage vicina/e alla saturazione",
+    "used": "Usato",
+    "total": "Totale",
+    "free": "Libero"
   },
   "policies": {
     "title": "Criteri",
@@ -43,19 +54,29 @@
       "assets": "Asset",
       "capacity": "Capacità",
       "count": "Numero"
-    }
+    },
+    "takeaway": "{{count}} criteri di protezione attivi"
   },
   "kpi": {
     "coverage": "Copertura",
     "unprotected": "Non protetto",
     "jobSuccess": "Tasso di successo dei job",
-    "immutable": "Immutabile"
+    "immutable": "Immutabile",
+    "unprotectedDetail": "Dati senza criterio di protezione",
+    "jobSuccessDetail": "Sulla finestra di job recente",
+    "immutableDetail": "Copie che non possono essere modificate o eliminate"
   },
   "perServer": {
     "title": "Dettaglio per server",
-    "col": { "server": "Server", "version": "Versione", "captured": "Acquisito" }
+    "col": {
+      "server": "Server",
+      "version": "Versione",
+      "captured": "Acquisito"
+    }
   },
-  "product": { "badge": "Prodotto di origine" },
+  "product": {
+    "badge": "Prodotto di origine"
+  },
   "provenance": {
     "unavailable": "Non disponibile per questo tipo di report",
     "partial": "Copre {{covered}} server su {{total}}",

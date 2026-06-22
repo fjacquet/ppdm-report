@@ -69,6 +69,18 @@ const view: ReportView = {
 }
 
 describe('buildPptx (deck)', () => {
+  it('builds without throwing when a section carries a detail table', async () => {
+    const prevLanguage = i18n.language
+    await i18n.changeLanguage('en')
+    try {
+      const model = buildExportModel(view, 'assessment', 'light', t, 'en')
+      const bytes = await buildPptx(model, 'light')
+      expect(bytes.byteLength).toBeGreaterThan(0)
+    } finally {
+      await i18n.changeLanguage(prevLanguage)
+    }
+  })
+
   it('produces a valid .pptx for both themes and both flavors', async () => {
     const prevLanguage = i18n.language
     await i18n.changeLanguage('en')

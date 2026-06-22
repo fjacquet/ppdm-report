@@ -31,13 +31,13 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
     switch (id) {
       case 'coverage':
         return <CoverageSection key={id} view={view} dark={dark} />
-      case 'gaps':
+      case 'exposure':
         return <GapsSection key={id} view={view} dark={dark} />
       case 'idle':
         return <IdleAgentsSection key={id} view={view} />
       case 'jobs':
         return <JobsComplianceSection key={id} view={view} dark={dark} />
-      case 'compliance':
+      case 'resilience':
         return null
       case 'capacity':
         return <CapacitySection key={id} view={view} dark={dark} />

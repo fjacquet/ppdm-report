@@ -88,15 +88,15 @@ describe('buildExportModel', () => {
     )
     expect(assessment).toEqual([
       'coverage',
-      'gaps',
+      'exposure',
       'idle',
       'jobs',
-      'compliance',
+      'resilience',
       'capacity',
       'policies',
     ])
     const ops = buildExportModel(view, 'ops', 'light', t, 'en').sections.map((s) => s.id)
-    expect(ops.slice(0, 3)).toEqual(['jobs', 'compliance', 'capacity'])
+    expect(ops.slice(0, 3)).toEqual(['jobs', 'resilience', 'capacity'])
   })
 
   it('omits the idle section when no idle agents are present', () => {
@@ -113,7 +113,7 @@ describe('buildExportModel', () => {
 
   it('caps the gaps list and shows the honest top-of caption', () => {
     const gaps = buildExportModel(view, 'assessment', 'light', t, 'en').sections.find(
-      (s) => s.id === 'gaps',
+      (s) => s.id === 'exposure',
     )
     expect(gaps?.table?.caption).toBe('Top 1 of 281')
     expect(gaps?.table?.rows[0]?.[0]).toBe('HR_PAYROLL')
@@ -122,7 +122,7 @@ describe('buildExportModel', () => {
   it('renders capped-window caveats for jobs and compliance (no silent caps)', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en')
     const jobs = model.sections.find((s) => s.id === 'jobs')
-    const compliance = model.sections.find((s) => s.id === 'compliance')
+    const compliance = model.sections.find((s) => s.id === 'resilience')
     expect(jobs?.notes?.some((n) => /10,000/.test(n))).toBe(true)
     expect(compliance?.notes?.some((n) => /window/i.test(n))).toBe(true)
   })
@@ -182,11 +182,11 @@ describe('buildExportModel', () => {
     expect(success).toMatchObject({ value: '9,297', color: '#16a34a' })
 
     // compliance: three percent bars; immutable (0%) colored bad
-    const immut = byId.compliance?.deck?.bars?.find((b) => b.value === '0%')
+    const immut = byId.resilience?.deck?.bars?.find((b) => b.value === '0%')
     expect(immut?.color).toBe('#dc2626')
 
-    // capacity: flagged target colored warn + a flagged KPI chip
-    expect(byId.capacity?.deck?.bars?.[0]).toMatchObject({ label: 'dd1', color: '#d97706' })
+    // capacity: 87.6% ≥ 85 → bad (#dc2626) per utilizationTone thresholds
+    expect(byId.capacity?.deck?.bars?.[0]).toMatchObject({ label: 'dd1', color: '#dc2626' })
     // utilization bars scale absolutely (87.6% → 0.876 of the track), not to the local max
     expect(byId.capacity?.deck?.bars?.[0]?.ratio).toBeCloseTo(0.876, 3)
     expect(byId.capacity?.deck?.kpiChips?.some((k) => /near capacity/.test(k.label))).toBe(true)
@@ -224,7 +224,7 @@ describe('buildExportModel', () => {
       },
     }
     const gaps = buildExportModel(many, 'assessment', 'light', t, 'en').sections.find(
-      (s) => s.id === 'gaps',
+      (s) => s.id === 'exposure',
     )
     expect(gaps?.deck?.bars).toHaveLength(10)
     expect(gaps?.deck?.caveat).toMatch(/Excel/)
@@ -284,7 +284,7 @@ describe('buildExportModel', () => {
   it('appends an unavailable caveat to detail-only sections for summary provenance', () => {
     const summaryView: ReportView = { ...view, provenance: allUnavailable(100) }
     const model = buildExportModel(summaryView, 'assessment', 'light', t, 'en', [])
-    const compliance = model.sections.find((s) => s.id === 'compliance')
+    const compliance = model.sections.find((s) => s.id === 'resilience')
     expect(compliance?.deck?.caveat ?? compliance?.notes?.join(' ')).toMatch(/not available/i)
   })
 
@@ -303,17 +303,76 @@ describe('buildExportModel', () => {
       },
     }
     const model = buildExportModel(partialView, 'assessment', 'light', t, 'en', [])
-    const compliance = model.sections.find((s) => s.id === 'compliance')
+    const compliance = model.sections.find((s) => s.id === 'resilience')
     const caveatOrNotes = compliance?.deck?.caveat ?? compliance?.notes?.join(' ') ?? ''
     expect(caveatOrNotes).toMatch(/1 of 2 servers/)
     expect(caveatOrNotes).toMatch(/370 of 3886 assets/)
   })
 
+  it('gives each section a plain-language takeaway subtitle', () => {
+    const m = buildExportModel(view, 'assessment', 'light', t, 'en')
+    const byId = Object.fromEntries(m.sections.map((s) => [s.id, s]))
+    expect(byId.jobs?.deck?.subtitle).toBe('93% of recent backup jobs succeeded')
+    expect(byId.capacity?.deck?.subtitle).toMatch(/near capacity/)
+    expect(byId.policies?.deck?.subtitle).toBe('32 protection policies in force')
+    const unprotected = m.kpis.find((k) => k.label === t('dashboard:kpi.unprotected'))
+    expect(unprotected?.detail).toBe('Data with no protection policy')
+  })
+
+  it('renders a per-policy governance table from perPolicy', () => {
+    const v: ReportView = {
+      ...view,
+      policies: {
+        count: 1,
+        byPurpose: { CENTRALIZED: 1 },
+        perPolicy: [
+          {
+            name: 'SQL - Prod',
+            purpose: 'CENTRALIZED',
+            assetCount: 6,
+            protectionCapacityGb: 19732,
+          },
+        ],
+      },
+    }
+    const policies = buildExportModel(v, 'assessment', 'light', t, 'en').sections.find(
+      (s) => s.id === 'policies',
+    )
+    expect(policies?.table?.columns).toEqual(['Policy', 'Purpose', 'Assets', 'Capacity'])
+    expect(policies?.table?.rows[0]?.[0]).toBe('SQL - Prod')
+    expect(policies?.table?.rows[0]?.[2]).toBe('6')
+  })
+
+  it('suppresses an all-empty section and records it in caveats', () => {
+    const empty: ReportView = {
+      ...view,
+      policies: { count: 0, byPurpose: {}, perPolicy: [] },
+    }
+    const m = buildExportModel(empty, 'assessment', 'light', t, 'en')
+    expect(m.sections.find((s) => s.id === 'policies')).toBeUndefined()
+    expect(m.warnings?.some((w) => /Policies: no data/.test(w))).toBe(true)
+  })
+
+  it('renders the backup-level mix as the resilience detail table', () => {
+    const v: ReportView = {
+      ...view,
+      compliance: { ...view.compliance, backupLevelMix: { FULL: 150, INCR: 2000 } },
+    }
+    const res = buildExportModel(v, 'assessment', 'light', t, 'en').sections.find(
+      (s) => s.id === 'resilience',
+    )
+    expect(res?.table?.columns).toEqual(['Backup level', 'Copies'])
+    expect(res?.table?.rows).toEqual([
+      ['FULL', '150'],
+      ['INCR', '2,000'],
+    ])
+  })
+
   it('does not add a caveat when provenance is fully available (byte-identical detail export)', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en', [])
-    const compliance = model.sections.find((s) => s.id === 'compliance')
+    const compliance = model.sections.find((s) => s.id === 'resilience')
     const coverage = model.sections.find((s) => s.id === 'coverage')
-    const gaps = model.sections.find((s) => s.id === 'gaps')
+    const gaps = model.sections.find((s) => s.id === 'exposure')
     const capacity = model.sections.find((s) => s.id === 'capacity')
     // none of the four detail-only sections should carry a provenance caveat
     const hasUnavailable = (notes?: string[]) => (notes ?? []).some((n) => /not available/i.test(n))

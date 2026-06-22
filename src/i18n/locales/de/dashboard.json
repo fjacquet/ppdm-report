@@ -6,12 +6,14 @@
     "unprotected": "Ungeschützt",
     "excluded": "Ausgeschlossen",
     "headline": "{{pct}} der Assets geschützt",
-    "inclExcluded": "Einschließlich ausgeschlossener Assets"
+    "inclExcluded": "Einschließlich ausgeschlossener Assets",
+    "takeaway": "{{pct}} der Assets haben eine Schutzrichtlinie"
   },
-  "gaps": {
-    "title": "Schutzlücken",
+  "exposure": {
+    "title": "Wiederherstellungsrisiko",
     "unprotectedTb": "Ungeschützte Daten (TB)",
-    "assets": "Ungeschützte Assets"
+    "assets": "Ungeschützte Assets",
+    "takeaway": "{{count}} Assets sind völlig ungeschützt"
   },
   "idle": {
     "title": "Inaktive Agenten",
@@ -20,19 +22,28 @@
   "jobs": {
     "title": "Job-Aktivität",
     "success": "Erfolgreiche Jobs",
-    "total": "Jobs gesamt"
+    "total": "Jobs gesamt",
+    "takeaway": "{{pct}} der letzten Sicherungsjobs waren erfolgreich"
   },
-  "compliance": {
-    "title": "Compliance",
+  "resilience": {
+    "title": "Cyber-Resilienz",
     "appConsistent": "Anwendungskonsistente Sicherungen",
     "immutable": "Unveränderliche Kopien",
-    "replicated": "Replizierte Kopien"
+    "replicated": "Replizierte Kopien",
+    "takeaway": "Ransomware-Resilienz: {{pct}} der Kopien sind unveränderlich",
+    "backupLevel": "Verteilung der Sicherungsebenen",
+    "level": "Sicherungsebene",
+    "count": "Kopien"
   },
   "capacity": {
     "title": "Kapazität",
     "utilization": "Speichernutzung",
     "mtrees": "{{count}} Mtrees",
-    "flagged": "{{count}} nahe der Kapazität"
+    "flagged": "{{count}} nahe der Kapazität",
+    "takeaway": "{{count}} Speicherziel(e) nahe der Kapazitätsgrenze",
+    "used": "Belegt",
+    "total": "Gesamt",
+    "free": "Frei"
   },
   "policies": {
     "title": "Richtlinien",
@@ -43,19 +54,29 @@
       "assets": "Assets",
       "capacity": "Kapazität",
       "count": "Anzahl"
-    }
+    },
+    "takeaway": "{{count}} aktive Schutzrichtlinien"
   },
   "kpi": {
     "coverage": "Abdeckung",
     "unprotected": "Ungeschützt",
     "jobSuccess": "Job-Erfolgsquote",
-    "immutable": "Unveränderlich"
+    "immutable": "Unveränderlich",
+    "unprotectedDetail": "Daten ohne Schutzrichtlinie",
+    "jobSuccessDetail": "Über das jüngste Job-Fenster",
+    "immutableDetail": "Kopien, die nicht geändert oder gelöscht werden können"
   },
   "perServer": {
     "title": "Aufschlüsselung pro Server",
-    "col": { "server": "Server", "version": "Version", "captured": "Erfasst" }
+    "col": {
+      "server": "Server",
+      "version": "Version",
+      "captured": "Erfasst"
+    }
   },
-  "product": { "badge": "Quellprodukt" },
+  "product": {
+    "badge": "Quellprodukt"
+  },
   "provenance": {
     "unavailable": "Für diesen Berichtstyp nicht verfügbar",
     "partial": "Deckt {{covered}} von {{total}} Servern ab",

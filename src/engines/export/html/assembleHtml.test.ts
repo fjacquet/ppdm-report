@@ -79,7 +79,7 @@ describe('assembleHtml (deck)', () => {
     expect(html).not.toContain('<script')
   })
 
-  it('renders deck visuals (bars, donut, posture, tiles) and drops data tables', async () => {
+  it('renders deck visuals (bars, donut, posture, tiles)', async () => {
     await i18n.changeLanguage('en')
     const html = assembleHtml(model(), 'light')
     expect(html).toContain('WHO')
@@ -88,7 +88,15 @@ describe('assembleHtml (deck)', () => {
     expect(html).toContain('class="posture"')
     expect(html).toContain('class="tiles"')
     expect(html).toContain('Oracle Databases') // complete idle tile list
-    expect(html).not.toContain('<table') // tables are gone
+  })
+
+  it('renders a section table (columns + rows + caption) in HTML', async () => {
+    await i18n.changeLanguage('en')
+    const html = assembleHtml(model(), 'light')
+    expect(html).toContain('<table')
+    expect(html).toContain('<th>') // header cells
+    // a coverage by-type row value appears in a cell
+    expect(html).toMatch(/<td>[^<]*<\/td>/)
   })
 
   it('theme-matches the background (light vs dark differ)', async () => {

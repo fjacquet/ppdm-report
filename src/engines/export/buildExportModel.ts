@@ -11,7 +11,15 @@ import {
   gbToBytes,
 } from '../../utils/format'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
-import { immutableTone, toneHex } from './tone'
+import {
+  appConsistentTone,
+  coverageTone,
+  immutableTone,
+  jobSuccessTone,
+  replicatedTone,
+  utilizationTone,
+} from './thresholds'
+import { toneHex } from './tone'
 import type {
   DeckBar,
   DeckStack,
@@ -100,21 +108,24 @@ export function buildExportModel(
       label: t('dashboard:kpi.coverage'),
       value: fmtPercent(coverage.overall.pct, locale),
       detail: t('dashboard:coverage.inclExcluded'),
-      tone: 'ok' as const,
+      tone: coverageTone(coverage.overall.pct),
     },
     {
       label: t('dashboard:kpi.unprotected'),
       value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
+      detail: t('dashboard:kpi.unprotectedDetail'),
       tone: 'warn' as const,
     },
     {
       label: t('dashboard:kpi.jobSuccess'),
       value: fmtPercent(jobs.successPct, locale),
-      tone: 'ok' as const,
+      detail: t('dashboard:kpi.jobSuccessDetail'),
+      tone: jobSuccessTone(jobs.successPct),
     },
     {
       label: t('dashboard:kpi.immutable'),
       value: fmtPercent(compliance.immutablePct, locale),
+      detail: t('dashboard:kpi.immutableDetail'),
       tone: immutableTone(compliance.immutablePct),
     },
   ]
@@ -181,7 +192,7 @@ export function buildExportModel(
             label: type,
             magnitude: b.pct,
             value: fmtPercent(b.pct, locale),
-            tone: b.pct < 0.5 ? ('warn' as const) : ('ok' as const),
+            tone: coverageTone(b.pct),
           })),
         pal,
       ),
@@ -190,15 +201,15 @@ export function buildExportModel(
 
   const gapsKpis: ExportKpi[] = [
     {
-      label: t('dashboard:gaps.unprotectedTb'),
+      label: t('dashboard:exposure.unprotectedTb'),
       value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
       tone: 'bad',
     },
-    { label: t('dashboard:gaps.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
+    { label: t('dashboard:exposure.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
   ]
   const gapsSection: ExportSection = {
-    id: 'gaps',
-    title: t('dashboard:gaps.title'),
+    id: 'exposure',
+    title: t('dashboard:exposure.title'),
     kpis: gapsKpis,
     table: {
       columns: [t('common:col.name'), t('common:col.type'), t('common:col.size')],
@@ -210,6 +221,7 @@ export function buildExportModel(
       caption: t('common:topOf', { shown: gaps.top.shown, total: gaps.top.total }),
     },
     deck: {
+      subtitle: t('dashboard:exposure.takeaway', { count: fmtInt(gaps.count, locale) }),
       kpiChips: gapsKpis,
       caveat: `${t('common:topOf', { shown: Math.min(10, gaps.top.items.length), total: gaps.top.total })} · ${t('common:fullListInExcel')}`,
       bars: toBars(
@@ -236,7 +248,7 @@ export function buildExportModel(
             columns: [
               t('dashboard:perServer.col.server'),
               t('dashboard:kpi.coverage'),
-              t('dashboard:gaps.assets'),
+              t('dashboard:exposure.assets'),
               t('dashboard:jobs.success'),
             ],
             rows: perServer.map((s) => [
@@ -297,6 +309,7 @@ export function buildExportModel(
       ...(jobs.capped ? [t('common:capped', { n: fmtInt(jobs.windowSize, locale) })] : []),
     ],
     deck: {
+      subtitle: t('dashboard:jobs.takeaway', { pct: fmtPercent(jobs.successPct, locale) }),
       kpiChips: jobsKpis,
       caveat: jobs.capped ? t('common:capped', { n: fmtInt(jobs.windowSize, locale) }) : undefined,
       bars: toBars(
@@ -312,48 +325,61 @@ export function buildExportModel(
   }
 
   const complianceSection: ExportSection = {
-    id: 'compliance',
-    title: t('dashboard:compliance.title'),
+    id: 'resilience',
+    title: t('dashboard:resilience.title'),
     kpis: [
       {
-        label: t('dashboard:compliance.appConsistent'),
+        label: t('dashboard:resilience.appConsistent'),
         value: fmtPercent(compliance.appConsistentPct, locale),
-        tone: 'ok',
+        tone: appConsistentTone(compliance.appConsistentPct),
       },
       {
-        label: t('dashboard:compliance.immutable'),
+        label: t('dashboard:resilience.immutable'),
         value: fmtPercent(compliance.immutablePct, locale),
         tone: immutableTone(compliance.immutablePct),
       },
       {
-        label: t('dashboard:compliance.replicated'),
+        label: t('dashboard:resilience.replicated'),
         value: fmtPercent(compliance.replicatedPct, locale),
-        tone: 'accent',
+        tone: replicatedTone(compliance.replicatedPct),
       },
     ],
+    table:
+      Object.keys(compliance.backupLevelMix).length > 0
+        ? {
+            columns: [t('dashboard:resilience.level'), t('dashboard:resilience.count')],
+            rows: Object.entries(compliance.backupLevelMix).map(([lvl, n]) => [
+              lvl,
+              fmtInt(n, locale),
+            ]),
+          }
+        : undefined,
     notes: compliance.capped
       ? [t('common:capped', { n: fmtInt(compliance.windowSize, locale) })]
       : [],
     deck: {
+      subtitle: t('dashboard:resilience.takeaway', {
+        pct: fmtPercent(compliance.immutablePct, locale),
+      }),
       caveat: compliance.capped
         ? t('common:capped', { n: fmtInt(compliance.windowSize, locale) })
         : undefined,
       bars: toBars(
         [
           {
-            label: t('dashboard:compliance.appConsistent'),
+            label: t('dashboard:resilience.appConsistent'),
             magnitude: compliance.appConsistentPct,
             value: fmtPercent(compliance.appConsistentPct, locale),
-            tone: 'ok' as const,
+            tone: appConsistentTone(compliance.appConsistentPct),
           },
           {
-            label: t('dashboard:compliance.replicated'),
+            label: t('dashboard:resilience.replicated'),
             magnitude: compliance.replicatedPct,
             value: fmtPercent(compliance.replicatedPct, locale),
-            tone: 'accent' as const,
+            tone: replicatedTone(compliance.replicatedPct),
           },
           {
-            label: t('dashboard:compliance.immutable'),
+            label: t('dashboard:resilience.immutable'),
             magnitude: compliance.immutablePct,
             value: fmtPercent(compliance.immutablePct, locale),
             tone: immutableTone(compliance.immutablePct),
@@ -368,15 +394,26 @@ export function buildExportModel(
     id: 'capacity',
     title: t('dashboard:capacity.title'),
     table: {
-      columns: [t('common:col.name'), t('common:col.type'), t('dashboard:capacity.utilization')],
+      columns: [
+        t('common:col.name'),
+        t('dashboard:capacity.utilization'),
+        t('dashboard:capacity.used'),
+        t('dashboard:capacity.total'),
+        t('dashboard:capacity.free'),
+      ],
       rows: capacity.targets.map((tg) => [
         tg.name,
-        tg.type,
         fmtPercentValue(tg.utilizationPct, locale),
+        formatGbOrUnknown(tg.usedGb, locale, t('common:sizeUnknown')),
+        formatGbOrUnknown(tg.totalGb, locale, t('common:sizeUnknown')),
+        formatGbOrUnknown(tg.freeGb, locale, t('common:sizeUnknown')),
       ]),
     },
     notes: [t('dashboard:capacity.mtrees', { count: fmtInt(capacity.mtreeCount, locale) })],
     deck: {
+      subtitle: t('dashboard:capacity.takeaway', {
+        count: fmtInt(capacity.flagged.length, locale),
+      }),
       kpiChips: [
         {
           label: t('dashboard:capacity.mtrees', { count: '' }).trim(),
@@ -400,31 +437,25 @@ export function buildExportModel(
             // (89.6% → 89.6% of the track), not relative to the busiest target.
             magnitude: tg.utilizationPct / 100,
             value: fmtPercentValue(tg.utilizationPct, locale),
-            tone: tg.flagged ? ('warn' as const) : ('accent' as const),
+            tone: utilizationTone(tg.utilizationPct),
           })),
         pal,
       ),
     },
   }
 
-  const policiesKpis: ExportKpi[] = [
-    {
-      label: t('dashboard:policies.title'),
-      value: fmtInt(policies.count, locale),
-      tone: 'accent',
-    },
-  ]
-  const policiesSection: ExportSection = {
-    id: 'policies',
-    title: t('dashboard:policies.title'),
-    kpis: policiesKpis,
-    table: {
-      columns: [t('dashboard:policies.col.purpose'), t('dashboard:policies.col.count')],
-      rows: Object.entries(policies.byPurpose).map(([purpose, n]) => [purpose, fmtInt(n, locale)]),
-    },
-    deck: {
-      kpiChips: policiesKpis,
-      bars: toBars(
+  const hasAnyPolicies = policies.count > 0
+  const policiesKpis: ExportKpi[] = hasAnyPolicies
+    ? [
+        {
+          label: t('dashboard:policies.title'),
+          value: fmtInt(policies.count, locale),
+          tone: 'accent',
+        },
+      ]
+    : []
+  const policiesByPurposeBars = hasAnyPolicies
+    ? toBars(
         Object.entries(policies.byPurpose).map(([purpose, n], i) => ({
           label: purpose,
           magnitude: n,
@@ -432,23 +463,59 @@ export function buildExportModel(
           tone: i === 0 ? ('accent' as const) : ('muted' as const),
         })),
         pal,
-      ),
+      )
+    : []
+  const policiesSection: ExportSection = {
+    id: 'policies',
+    title: t('dashboard:policies.title'),
+    kpis: hasAnyPolicies ? policiesKpis : undefined,
+    table: {
+      columns: [
+        t('dashboard:policies.col.policy'),
+        t('dashboard:policies.col.purpose'),
+        t('dashboard:policies.col.assets'),
+        t('dashboard:policies.col.capacity'),
+      ],
+      rows: policies.perPolicy.map((pp) => [
+        pp.name,
+        pp.purpose,
+        fmtInt(pp.assetCount, locale),
+        formatBytes(gbToBytes(pp.protectionCapacityGb), locale),
+      ]),
+    },
+    deck: {
+      subtitle: t('dashboard:policies.takeaway', { count: fmtInt(policies.count, locale) }),
+      kpiChips: hasAnyPolicies ? policiesKpis : [],
+      bars: policiesByPurposeBars,
     },
   }
 
   const byId: Record<SectionId, ExportSection | null> = {
     perServer: perServerSection,
     coverage: withCaveat(coverageSection, 'coverageByType', view, t),
-    gaps: withCaveat(gapsSection, 'gapsList', view, t),
+    exposure: withCaveat(gapsSection, 'gapsList', view, t),
     idle: idleSection,
     jobs: jobsSection,
-    compliance: withCaveat(complianceSection, 'compliance', view, t),
+    resilience: withCaveat(complianceSection, 'compliance', view, t),
     capacity: withCaveat(capacitySection, 'storageTargets', view, t),
     policies: policiesSection,
   }
-  const sections = SECTION_ORDER[flavor]
+  const allSections = SECTION_ORDER[flavor]
     .map((id) => byId[id])
     .filter((s): s is ExportSection => s !== null)
+
+  const isRenderable = (s: ExportSection): boolean => {
+    const d = s.deck
+    const hasDeck = Boolean(
+      d && (d.donut || d.tiles?.length || d.bars?.length || d.kpiChips?.length),
+    )
+    const hasTable = (s.table?.rows.length ?? 0) > 0
+    const hasKpis = (s.kpis?.length ?? 0) > 0
+    return hasDeck || hasTable || hasKpis
+  }
+  const dropped = allSections.filter((s) => !isRenderable(s))
+  const sections = allSections.filter(isRenderable)
+  const suppressionNotes = dropped.map((s) => t('common:sectionUnavailable', { title: s.title }))
 
   const captured = meta.capturedAt ? meta.capturedAt.slice(0, 10) : ''
   const footerParts = [
@@ -494,7 +561,7 @@ export function buildExportModel(
     kpis: execKpis,
     sections,
     footer: footerParts.join(' · '),
-    warnings: [...new Set(view.warnings)],
+    warnings: [...new Set([...view.warnings, ...suppressionNotes])],
     warningsTitle: t('common:warnings.title'),
     posture,
   }

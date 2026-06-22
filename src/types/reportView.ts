@@ -72,6 +72,9 @@ export interface StorageTarget {
   type: string
   utilizationPct: number
   flagged: boolean
+  usedGb?: number
+  totalGb?: number
+  freeGb?: number
 }
 
 export interface Capacity {

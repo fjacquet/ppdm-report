@@ -4,6 +4,7 @@ import type { ExportSection } from '../types'
 export type SlidePlanItem =
   | { kind: 'single'; section: ExportSection }
   | { kind: 'pair'; top: ExportSection; bottom?: ExportSection }
+  | { kind: 'table'; section: ExportSection }
 
 /**
  * Pair sections into band-slides. `idle` is pulled out as a full-width single
@@ -24,15 +25,19 @@ export function planSlides(sections: ExportSection[]): SlidePlanItem[] {
     pairs.push({ kind: 'pair', top, bottom: rest[i + 1] })
   }
 
-  if (!idle) return pairs
+  const appendix: SlidePlanItem[] = sections
+    .filter((s) => s.id !== 'idle' && (s.table?.rows.length ?? 0) > 0)
+    .map((s) => ({ kind: 'table', section: s }))
+
+  if (!idle) return [...pairs, ...appendix]
 
   const idleSingle: SlidePlanItem = { kind: 'single', section: idle }
-  if (predecessorId === null) return [idleSingle, ...pairs]
+  if (predecessorId === null) return [idleSingle, ...pairs, ...appendix]
 
   const afterIdx = pairs.findIndex(
     (p) => p.kind === 'pair' && (p.top.id === predecessorId || p.bottom?.id === predecessorId),
   )
   const out = [...pairs]
   out.splice(afterIdx + 1, 0, idleSingle)
-  return out
+  return [...out, ...appendix]
 }

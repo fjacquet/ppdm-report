@@ -49,6 +49,7 @@
   },
   "docs": "Docs",
   "sizeUnknown": "Taille inconnue",
+  "sectionUnavailable": "{{title}} : aucune donnée disponible pour ce rapport",
   "showDetails": "Afficher les détails",
   "update": {
     "available": "Nouvelle version disponible",
