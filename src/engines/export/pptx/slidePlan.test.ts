@@ -51,4 +51,17 @@ describe('planSlides', () => {
       bottom: undefined,
     })
   })
+
+  it('appends a full-width table slide for each section that has table rows', () => {
+    const withTable = (id: string): ExportSection => ({
+      id,
+      title: id,
+      table: { columns: ['a'], rows: [['1']] },
+    })
+    const plan = planSlides([sec('coverage'), withTable('policies')])
+    const kinds = plan.map((p) => (p.kind === 'table' ? `table:${p.section.id}` : p.kind))
+    expect(kinds).toContain('table:policies')
+    // the band pair still comes before the appendix
+    expect(kinds.indexOf('pair')).toBeLessThan(kinds.indexOf('table:policies'))
+  })
 })
