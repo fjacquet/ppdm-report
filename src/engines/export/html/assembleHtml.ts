@@ -62,6 +62,17 @@ function tilesHtml(tiles: string[]): string {
   return `<div class="tiles">${tiles.map((t) => `<div class="tile">${esc(t)}</div>`).join('')}</div>`
 }
 
+/** A section detail table (columns + rows + optional caption). */
+function tableHtml(tbl: { columns: string[]; rows: string[][]; caption?: string }): string {
+  if (!tbl.rows.length) return ''
+  const head = tbl.columns.map((c) => `<th>${esc(c)}</th>`).join('')
+  const body = tbl.rows
+    .map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join('')}</tr>`)
+    .join('')
+  const cap = tbl.caption ? `<caption>${esc(tbl.caption)}</caption>` : ''
+  return `<table class="tbl">${cap}<thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`
+}
+
 /** 100%-stacked posture bar with a legend (exec protection posture). */
 function postureHtml(stack: DeckStack): string {
   const bar = stack.segments
@@ -98,7 +109,8 @@ function sectionHtml(s: ExportSection, p: typeof LIGHT): string {
     left || right
       ? `<div class="deck-row"><div class="deck-left">${left}</div><div class="deck-right">${right}</div></div>`
       : ''
-  return `<section>${head}${body}${caveat}</section>`
+  const table = s.table ? tableHtml(s.table) : ''
+  return `<section>${head}${body}${table}${caveat}</section>`
 }
 
 /** Assemble a self-contained, theme-matched HTML report (inline CSS, CSP, no JS). */
@@ -123,6 +135,9 @@ export function assembleHtml(model: ExportModel, theme: ExportTheme): string {
     .br{display:flex;align-items:center;gap:14px} .br-l{width:190px;font-size:13px;font-weight:600;color:${p.muted};flex:0 0 auto} .br-t{flex:1;height:20px;background:${p.line};border-radius:6px;overflow:hidden;min-width:0} .br-f{display:block;height:100%;border-radius:6px} .br-v{width:88px;text-align:right;font-size:13px;font-weight:700;flex:0 0 auto;font-variant-numeric:tabular-nums}
     .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:8px} .tile{background:${p.surface};border:1px solid ${p.line};border-left:3px solid ${p.accent};border-radius:9px;padding:11px 15px;font-size:13px;font-weight:600}
     .cap{font-size:11px;color:${p.muted};margin-top:10px;font-style:italic}
+    table.tbl{border-collapse:collapse;width:100%;margin-top:14px;font-size:12px} table.tbl caption{caption-side:bottom;color:${p.muted};font-style:italic;text-align:left;margin-top:6px;font-size:11px}
+    .tbl th{text-align:left;padding:7px 10px;border-bottom:2px solid ${p.line};color:${p.muted};text-transform:uppercase;letter-spacing:.03em;font-size:10px}
+    .tbl td{padding:6px 10px;border-bottom:1px solid ${p.line};font-variant-numeric:tabular-nums}
     footer{margin-top:36px;font-size:11px;color:${p.muted};border-top:1px solid ${p.line};padding-top:10px}
     .warnings{margin:20px 0;padding:14px 18px;border:1px solid ${p.line};border-left:4px solid ${p.bad};border-radius:10px;background:${p.surface}} .warnings h2{font-size:14px;margin:0 0 8px} .warnings ul{margin:0;padding-left:20px;font-size:12px;color:${p.muted}} .warnings li{margin:3px 0}
   `
