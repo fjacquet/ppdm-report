@@ -10,9 +10,11 @@ describe('planSlides', () => {
     const ids = ['coverage', 'exposure', 'idle', 'jobs', 'resilience', 'capacity', 'policies']
     const plan = planSlides(ids.map(sec))
     expect(
-      plan.map((p) =>
-        p.kind === 'single' ? `single:${p.section.id}` : `pair:${p.top.id}+${p.bottom?.id}`,
-      ),
+      plan.map((p) => {
+        if (p.kind === 'single') return `single:${p.section.id}`
+        if (p.kind === 'table') return `table:${p.section.id}`
+        return `pair:${p.top.id}+${p.bottom?.id}`
+      }),
     ).toEqual([
       'pair:coverage+exposure',
       'single:idle',
@@ -25,9 +27,11 @@ describe('planSlides', () => {
     const ids = ['jobs', 'resilience', 'capacity', 'coverage', 'exposure', 'idle', 'policies']
     const plan = planSlides(ids.map(sec))
     expect(
-      plan.map((p) =>
-        p.kind === 'single' ? `single:${p.section.id}` : `pair:${p.top.id}+${p.bottom?.id}`,
-      ),
+      plan.map((p) => {
+        if (p.kind === 'single') return `single:${p.section.id}`
+        if (p.kind === 'table') return `table:${p.section.id}`
+        return `pair:${p.top.id}+${p.bottom?.id}`
+      }),
     ).toEqual([
       'pair:jobs+resilience',
       'pair:capacity+coverage',
