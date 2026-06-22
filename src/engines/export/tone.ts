@@ -16,8 +16,3 @@ export function toneHex(tone: ExportTone, p: Palette): string {
       return p.accent
   }
 }
-
-/** Business rule: zero immutable copies is a red flag. */
-export function immutableTone(immutablePct: number): ExportTone {
-  return immutablePct === 0 ? 'bad' : 'ok'
-}
