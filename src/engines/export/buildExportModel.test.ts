@@ -319,6 +319,25 @@ describe('buildExportModel', () => {
     expect(unprotected?.detail).toBe('Data with no protection policy')
   })
 
+  it('renders a per-policy governance table from perPolicy', () => {
+    const v: ReportView = {
+      ...view,
+      policies: {
+        count: 1,
+        byPurpose: { CENTRALIZED: 1 },
+        perPolicy: [
+          { name: 'SQL - Prod', purpose: 'CENTRALIZED', assetCount: 6, protectionCapacityGb: 19732 },
+        ],
+      },
+    }
+    const policies = buildExportModel(v, 'assessment', 'light', t, 'en').sections.find(
+      (s) => s.id === 'policies',
+    )
+    expect(policies?.table?.columns).toEqual(['Policy', 'Purpose', 'Assets', 'Capacity'])
+    expect(policies?.table?.rows[0]?.[0]).toBe('SQL - Prod')
+    expect(policies?.table?.rows[0]?.[2]).toBe('6')
+  })
+
   it('does not add a caveat when provenance is fully available (byte-identical detail export)', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en', [])
     const compliance = model.sections.find((s) => s.id === 'resilience')

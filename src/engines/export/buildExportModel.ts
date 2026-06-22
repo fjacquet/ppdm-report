@@ -427,8 +427,18 @@ export function buildExportModel(
     title: t('dashboard:policies.title'),
     kpis: policiesKpis,
     table: {
-      columns: [t('dashboard:policies.col.purpose'), t('dashboard:policies.col.count')],
-      rows: Object.entries(policies.byPurpose).map(([purpose, n]) => [purpose, fmtInt(n, locale)]),
+      columns: [
+        t('dashboard:policies.col.policy'),
+        t('dashboard:policies.col.purpose'),
+        t('dashboard:policies.col.assets'),
+        t('dashboard:policies.col.capacity'),
+      ],
+      rows: policies.perPolicy.map((pp) => [
+        pp.name,
+        pp.purpose,
+        fmtInt(pp.assetCount, locale),
+        formatBytes(gbToBytes(pp.protectionCapacityGb), locale),
+      ]),
     },
     deck: {
       subtitle: t('dashboard:policies.takeaway', { count: fmtInt(policies.count, locale) }),
