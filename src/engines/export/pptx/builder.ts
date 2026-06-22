@@ -393,8 +393,15 @@ export async function buildPptx(model: ExportModel, theme: ExportTheme): Promise
   const pptx = new pptxgen()
   pptx.layout = 'LAYOUT_WIDE'
 
+  // A master carrying the themed background. autoPage continuation slides (from
+  // long table slides) are created internally via addSlide({ masterName }),
+  // inheriting the source slide's master — so giving every slide this master
+  // keeps overflow pages on-theme instead of defaulting to white.
+  const BG_MASTER = 'ppdm-bg'
+  pptx.defineSlideMaster({ title: BG_MASTER, background: { color: bg } })
+
   // Title slide
-  const title = pptx.addSlide()
+  const title = pptx.addSlide({ masterName: BG_MASTER })
   title.background = { color: bg }
   title.addShape('rect' as pptxgen.SHAPE_NAME, {
     x: M,
@@ -449,13 +456,13 @@ export async function buildPptx(model: ExportModel, theme: ExportTheme): Promise
   }
 
   // Executive summary (full-width single)
-  const exec = pptx.addSlide()
+  const exec = pptx.addSlide({ masterName: BG_MASTER })
   exec.background = { color: bg }
   drawExec(exec, model, p)
 
   // Section slides via the pairing plan
   for (const item of planSlides(model.sections)) {
-    const slide = pptx.addSlide()
+    const slide = pptx.addSlide({ masterName: BG_MASTER })
     slide.background = { color: bg }
     if (item.kind === 'single') {
       drawIdle(slide, item.section, p)
