@@ -433,17 +433,31 @@ export function buildExportModel(
     },
   }
 
-  const policiesKpis: ExportKpi[] = [
-    {
-      label: t('dashboard:policies.title'),
-      value: fmtInt(policies.count, locale),
-      tone: 'accent',
-    },
-  ]
+  const hasAnyPolicies = policies.count > 0
+  const policiesKpis: ExportKpi[] = hasAnyPolicies
+    ? [
+        {
+          label: t('dashboard:policies.title'),
+          value: fmtInt(policies.count, locale),
+          tone: 'accent',
+        },
+      ]
+    : []
+  const policiesByPurposeBars = hasAnyPolicies
+    ? toBars(
+        Object.entries(policies.byPurpose).map(([purpose, n], i) => ({
+          label: purpose,
+          magnitude: n,
+          value: fmtInt(n, locale),
+          tone: i === 0 ? ('accent' as const) : ('muted' as const),
+        })),
+        pal,
+      )
+    : []
   const policiesSection: ExportSection = {
     id: 'policies',
     title: t('dashboard:policies.title'),
-    kpis: policiesKpis,
+    kpis: hasAnyPolicies ? policiesKpis : undefined,
     table: {
       columns: [
         t('dashboard:policies.col.policy'),
@@ -460,16 +474,8 @@ export function buildExportModel(
     },
     deck: {
       subtitle: t('dashboard:policies.takeaway', { count: fmtInt(policies.count, locale) }),
-      kpiChips: policiesKpis,
-      bars: toBars(
-        Object.entries(policies.byPurpose).map(([purpose, n], i) => ({
-          label: purpose,
-          magnitude: n,
-          value: fmtInt(n, locale),
-          tone: i === 0 ? ('accent' as const) : ('muted' as const),
-        })),
-        pal,
-      ),
+      kpiChips: hasAnyPolicies ? policiesKpis : [],
+      bars: policiesByPurposeBars,
     },
   }
 
@@ -483,9 +489,24 @@ export function buildExportModel(
     capacity: withCaveat(capacitySection, 'storageTargets', view, t),
     policies: policiesSection,
   }
-  const sections = SECTION_ORDER[flavor]
+  const allSections = SECTION_ORDER[flavor]
     .map((id) => byId[id])
     .filter((s): s is ExportSection => s !== null)
+
+  const isRenderable = (s: ExportSection): boolean => {
+    const d = s.deck
+    const hasDeck = Boolean(
+      d && (d.donut || d.tiles?.length || d.bars?.length || d.kpiChips?.length),
+    )
+    const hasTable = (s.table?.rows.length ?? 0) > 0
+    const hasKpis = (s.kpis?.length ?? 0) > 0
+    return hasDeck || hasTable || hasKpis
+  }
+  const dropped = allSections.filter((s) => !isRenderable(s))
+  const sections = allSections.filter(isRenderable)
+  const suppressionNotes = dropped.map((s) =>
+    t('common:sectionUnavailable', { title: s.title }),
+  )
 
   const captured = meta.capturedAt ? meta.capturedAt.slice(0, 10) : ''
   const footerParts = [
@@ -531,7 +552,7 @@ export function buildExportModel(
     kpis: execKpis,
     sections,
     footer: footerParts.join(' · '),
-    warnings: [...new Set(view.warnings)],
+    warnings: [...new Set([...view.warnings, ...suppressionNotes])],
     warningsTitle: t('common:warnings.title'),
     posture,
   }

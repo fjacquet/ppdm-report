@@ -338,6 +338,16 @@ describe('buildExportModel', () => {
     expect(policies?.table?.rows[0]?.[2]).toBe('6')
   })
 
+  it('suppresses an all-empty section and records it in caveats', () => {
+    const empty: ReportView = {
+      ...view,
+      policies: { count: 0, byPurpose: {}, perPolicy: [] },
+    }
+    const m = buildExportModel(empty, 'assessment', 'light', t, 'en')
+    expect(m.sections.find((s) => s.id === 'policies')).toBeUndefined()
+    expect(m.warnings?.some((w) => /Policies: no data/.test(w))).toBe(true)
+  })
+
   it('renders the backup-level mix as the resilience detail table', () => {
     const v: ReportView = {
       ...view,
