@@ -69,6 +69,7 @@ Hard rules that the whole design depends on — do not violate them:
 - **Gaps size-optional contract**: `UnprotectedAsset.sizeGb?: number` and `Gaps.totalCapacityGb?: number` are optional. When absent (as in Avamar), the UI and exports render "size unknown" via `formatGbOrUnknown`. Other products that carry sizes are unaffected.
 - **Parse output is product-neutral.** `normalizeWorkbook` emits `RawWorkbook = { meta, sheets, warnings }`. PPDM-specific logic (agent classification via `classifyAgents`) lives in `buildPpdmView`, not in the parser.
 - **Two report flavors** (`assessment` / `ops`) share one metric engine; only slide order and KPI emphasis differ. Never fork the engine per flavor.
+- **Front-end volumetry** (`engines/aggregation/frontEnd.ts` → `ReportView.frontEnd`): per-workload-type front-end TB (discovered + FETB) split protected/unprotected, rendered table-first via a `planSlides` full-width special-case. Totals derived at render; sizes are size-optional ("–" when no figure).
 
 ### Detail vs summary format
 
