@@ -81,5 +81,20 @@
     "unavailable": "Not available for this report type",
     "partial": "Covers {{covered}} of {{total}} servers",
     "partialAssets": "Covers {{covered}} of {{total}} servers ({{assetsCovered}} of {{assetsTotal}} assets)"
+  },
+  "volumetry": {
+    "title": "Front-end volumetry by workload",
+    "col": {
+      "type": "Workload type",
+      "protectedDiscovered": "Protected · discovered",
+      "protectedFetb": "Protected · FETB",
+      "unprotectedDiscovered": "Unprotected · discovered",
+      "unprotectedFetb": "Unprotected · FETB"
+    },
+    "total": "TOTAL",
+    "excludedNote": "{{count}} excluded assets (e.g. templates, decommissioned) are not counted.",
+    "partialNote": "≥ : some workloads report no figure for that column; the total is a floor.",
+    "sizingNote": "Front-end input only — back-end capacity depends on change rate, retention and dedupe.",
+    "takeaway": "Front-end FETB protected: {{fetb}}"
   }
 }

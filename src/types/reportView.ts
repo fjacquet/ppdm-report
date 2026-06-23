@@ -1,6 +1,6 @@
 import type { CaptureMeta, ProductId } from './ppdm'
 
-export type MetricKey = 'coverageByType' | 'gapsList' | 'compliance' | 'storageTargets'
+export type MetricKey = 'coverageByType' | 'gapsList' | 'compliance' | 'storageTargets' | 'frontEnd'
 
 /** Availability of a detail-only metric across the servers in scope. */
 export interface MetricProvenance {
@@ -96,6 +96,23 @@ export interface Policies {
   perPolicy: PolicyRow[]
 }
 
+/** Front-end volume for one workload type. Size fields are tri-state: a number ≥ 0 = measured;
+ * undefined = "no figure" (column absent or assets present but sums to 0) → renders "–". */
+export interface FrontEndTypeRow {
+  type: string
+  protectedDiscoveredGb?: number
+  protectedFetbGb?: number
+  unprotectedDiscoveredGb?: number
+  unprotectedFetbGb?: number
+}
+
+/** Per-type front-end volumetry for one scope. Totals are derived at render, never stored. */
+export interface FrontEnd {
+  byType: FrontEndTypeRow[]
+  /** EXCLUDED assets across in-use types — footnote only, never in totals. */
+  excludedCount: number
+}
+
 /** The single derived view of the whole report. Recomputed, never stored. */
 export interface ReportView {
   meta: CaptureMeta
@@ -108,6 +125,7 @@ export interface ReportView {
   compliance: Compliance
   capacity: Capacity
   policies: Policies
+  frontEnd: FrontEnd
   provenance: Record<MetricKey, MetricProvenance>
 }
 

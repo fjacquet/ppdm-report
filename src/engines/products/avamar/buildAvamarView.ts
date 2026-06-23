@@ -1,6 +1,7 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
+import { emptyFrontEnd } from '../../aggregation/frontEnd'
 import { avamarProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr } from '../../aggregation/rows'
 
@@ -121,6 +122,7 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     },
     capacity: { targets, flagged: targets.filter((t) => t.flagged), mtreeCount: 0 },
     policies: { count: groupNames.size, byPurpose: {}, perPolicy: [] },
+    frontEnd: emptyFrontEnd(),
     provenance: avamarProvenance(),
   }
 }

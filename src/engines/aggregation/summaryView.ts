@@ -1,5 +1,5 @@
 import { AGENT_SHEETS, type RawWorkbook, type SheetData } from '../../types/ppdm'
-import type { ReportView } from '../../types/reportView'
+import type { FrontEndTypeRow, ReportView } from '../../types/reportView'
 import { emptyBand, finalizeBand } from './coverage'
 import { allUnavailable } from './provenance'
 import { cellNum, cellStr, countBy } from './rows'
@@ -22,6 +22,17 @@ function fieldNum(sheet: SheetData | undefined, pred: (field: string) => boolean
   if (!sheet) return 0
   for (const r of sheet.rows) if (pred(cellStr(r, 'Field'))) return cellNum(r, 'Value')
   return 0
+}
+
+/** Like `fieldNum`, but `undefined` when no Field row matches — so an absent capacity
+ *  field reads as "no figure" ("–"), not an invented measured 0. A present 0 stays 0. */
+function fieldOrUndefined(
+  sheet: SheetData | undefined,
+  pred: (field: string) => boolean,
+): number | undefined {
+  if (!sheet) return undefined
+  for (const r of sheet.rows) if (pred(cellStr(r, 'Field'))) return cellNum(r, 'Value')
+  return undefined
 }
 
 /** Build a ReportView from an older summary-format workbook. Pure. */
@@ -76,6 +87,26 @@ export function summaryView(wb: RawWorkbook): ReportView {
     if (fieldNum(wb.sheets[sheet], (f) => /Asset Count$/i.test(f)) > 0) inUseSet.add(agent)
   }
 
+  // frontEnd: discovered-only volumetry per in-use type from summary capacity fields.
+  // Absent capacity field → undefined ("–"), never an invented 0 (tri-state, as in detail).
+  const feByType: FrontEndTypeRow[] = []
+  for (const { sheet, agent } of COUNT_CAP) {
+    if (!agent) continue
+    const s = wb.sheets[sheet]
+    if (!s || fieldNum(s, (f) => /Asset Count$/i.test(f)) <= 0) continue
+    feByType.push({
+      type: agent,
+      protectedDiscoveredGb: fieldOrUndefined(s, (f) =>
+        /Capacity Protected Assets \(GB\)/i.test(f),
+      ),
+      unprotectedDiscoveredGb: fieldOrUndefined(s, (f) =>
+        /Capacity Unprotected Assets \(GB\)/i.test(f),
+      ),
+      protectedFetbGb: undefined,
+      unprotectedFetbGb: undefined,
+    })
+  }
+
   return {
     meta: wb.meta,
     inUse: AGENT_SHEETS.filter((a) => inUseSet.has(a)),
@@ -111,6 +142,14 @@ export function summaryView(wb: RawWorkbook): ReportView {
       mtreeCount: wb.sheets['Data Domain Mtrees']?.rows.length ?? 0,
     },
     policies: { count: policyRows.length, byPurpose: countBy(policyRows, 'Category'), perPolicy },
-    provenance: allUnavailable(totalAssets),
+    frontEnd: { byType: feByType, excludedCount: 0 },
+    provenance: {
+      ...allUnavailable(totalAssets),
+      frontEnd: {
+        available: feByType.length > 0,
+        serversCovered: feByType.length > 0 ? 1 : 0,
+        serversTotal: 1,
+      },
+    },
   }
 }

@@ -67,6 +67,7 @@ const view: ReportView = {
     mtreeCount: 17,
   },
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
+  frontEnd: { byType: [], excludedCount: 0 },
   provenance: allAvailable(0),
 }
 

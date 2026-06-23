@@ -235,6 +235,7 @@ render "size unknown" rather than a misleading zero. PPDM gaps carry sizes and a
 | `capacity.ts` | `wb.sheets['Storage Targets']` + `wb.sheets['Data Domain Mtrees']` | `Capacity` | `StorageTarget[]` with `flagged: utilizationPct >= 80`; `flagged` (subset); `mtreeCount` |
 | `policies.ts` | `wb.sheets.Policies` | `Policies` | `count`, `byPurpose` (countBy `Purpose`), `perPolicy` (`PolicyRow[]`) |
 | `rows.ts` | any `Row` | helpers | `cellStr` (trims, maps `N/A` → `""`), `cellNum` (comma-stripping, finite check), `countBy` (non-blank tally) |
+| `frontEnd.ts` | `inUse` sheet names + `RawWorkbook.sheets` | `FrontEnd` | Per-type discovered + FETB (licensed), split protected/unprotected; tri-state sizes (number / 0 / undefined-when-no-figure); EXCLUDED → `excludedCount` footnote. PPDM detail; summary fills discovered only; NetWorker maps workload capacity → protected FETB; Avamar → empty (suppressed). |
 
 ### `topN` helper (`src/engines/aggregation/topN.ts`)
 
