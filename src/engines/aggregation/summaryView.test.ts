@@ -41,6 +41,12 @@ describe('summaryView — synthetic summary workbook', () => {
     expect(v.inUse).not.toContain('SQL Databases')
   })
 
+  it('lists agent types present with zero assets as idle (not used)', () => {
+    // VMs (60) and File Systems (10) are in use; SQL DBs sheet is present with count 0.
+    // The other agent types have no Count-And-Cap sheet → no signal → not listed.
+    expect(v.idleAgents).toEqual(['SQL Databases'])
+  })
+
   it('marks the four detail-only metrics unavailable', () => {
     expect(v.provenance.compliance.available).toBe(false)
     expect(v.provenance.gapsList.available).toBe(false)
@@ -86,6 +92,13 @@ describe.skipIf(!existsSync('ref/chuv-a1n01136i.xlsx'))('summaryView — chuv-a1
   it('maps in-use asset types to canonical agent sheets', () => {
     expect(v.inUse).toContain('Virtual Machines')
     expect(v.inUse).toContain('File Systems')
+  })
+
+  it('derives idle ("not used") agents from zero-count Count-And-Cap types', () => {
+    expect(v.idleAgents).toContain('Oracle Databases')
+    expect(v.idleAgents).toContain('Kubernetes')
+    expect(v.idleAgents).not.toContain('Virtual Machines')
+    expect(v.idleAgents).not.toContain('File Systems')
   })
 
   it('marks the four detail-only metrics unavailable', () => {
