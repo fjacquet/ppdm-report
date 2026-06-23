@@ -94,7 +94,7 @@ Live Optics caps row-bearing sheets at `LIVE_OPTICS_ROW_CAP` (10,000). When a sh
 - **SheetJS pin.** `xlsx` is pinned to the official CDN tarball (`https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`). Never `npm install xlsx` or swap to the npm-registry package (frozen at 0.18.5, carries CVE-2023-30533 + CVE-2024-22363). The supply-chain gate (`scripts/check-supply-chain.mjs`) enforces the pin, a telemetry-SDK denylist (no Sentry/PostHog/Amplitude/Datadog/etc.), and a service-worker allowlist (only `vite-plugin-pwa` + `workbox-*`). Adding any of those deps fails `build`.
 - **i18n parity.** Four locales (en/fr/de/it). `src/i18n/keyParity.test.ts` fails CI on any missing translation key. When you add a UI/export string, add the key to all four namespaces.
 - **One ECharts import.** Charts go through `src/components/Chart.tsx` (the only ECharts import, SVG renderer, tree-shaken). Build chart options as data in `engines`/`*Option.ts` helpers, render through `Chart`.
-- **Base-10 byte formatting.** `src/utils/format.ts` does locale-aware number/date/bytes in base-10 (Live Optics convention), not base-2.
+- **Base-10 byte formatting (default).** `src/utils/format.ts` does locale-aware number/date/bytes. Default is base-10 (PPDM/NetWorker Live Optics convention); pass `baseTen = false` (opt-in) to `formatBytes`, `gbToBytes`, and `formatGbOrUnknown` for base-2 GiB/TiB labels — Avamar uses base-2 byte values (`meta.baseTen === false`). All existing call sites omit the flag and continue to behave as before.
 
 ## Conventions
 

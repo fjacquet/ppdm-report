@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   fmtDate,
   fmtInt,
+  fmtNum,
   fmtPercent,
   fmtPercentValue,
   fmtPercentWhole,
@@ -94,6 +95,28 @@ describe('formatGbOrUnknown', () => {
   })
   it('returns the unknown label when undefined', () => {
     expect(formatGbOrUnknown(undefined, 'en', 'Size unknown')).toBe('Size unknown')
+  })
+})
+
+describe('base-2 byte formatting', () => {
+  it('formatBytes base-2 uses GiB/TiB tiers', () => {
+    expect(formatBytes(2 ** 30, 'en-US', false)).toBe('1.0 GiB')
+    expect(formatBytes(2 ** 40, 'en-US', false)).toBe('1.0 TiB')
+  })
+
+  it('gbToBytes base-2 multiplies by 2^30', () => {
+    expect(gbToBytes(1, false)).toBe(2 ** 30)
+    // round-trip: 125 GiB → "125.0 GiB"
+    expect(formatBytes(gbToBytes(125, false), 'en-US', false)).toBe('125.0 GiB')
+  })
+
+  it('default stays base-10', () => {
+    expect(formatBytes(1e9, 'en-US')).toBe('1.0 GB')
+    expect(gbToBytes(1)).toBe(1e9)
+  })
+
+  it('fmtNum formats a locale decimal', () => {
+    expect(fmtNum(24.49, 'en-US', 1)).toBe('24.5')
   })
 })
 

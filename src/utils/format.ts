@@ -3,9 +3,11 @@
  * (`src/utils/format.ts`). All helpers are pure functions with no external
  * imports, so the full set is portable.
  *
- * PPDM export declares base-10 units; `fmtBytes` below uses base-10
- * (KB = 1 000, MB = 1 000 000, …). The base-2 `fmtMemMb` from vatlas is
- * pruned here because PPDM storage figures are base-10.
+ * Base-10 byte formatting (default): PPDM and NetWorker exports declare
+ * base-10 units (KB = 1 000, MB = 1 000 000, …). All existing callers that
+ * omit the `baseTen` parameter continue to use base-10, so PPDM/NetWorker
+ * are unaffected. Pass `baseTen = false` (opt-in) to render base-2
+ * GiB/TiB labels — Avamar uses GiB (2^30-based) byte values.
  *
  * The em-dash sentinel on non-finite input is mandatory (never 0 / "N/A").
  */
@@ -16,6 +18,10 @@
  */
 export const fmtInt = (n: number, locale = 'fr-FR'): string =>
   Number.isFinite(n) ? n.toLocaleString(locale, { maximumFractionDigits: 0 }) : '—'
+
+/** Locale-aware decimal number (default 1 fraction digit). Em-dash for non-finite. */
+export const fmtNum = (n: number, locale = 'fr-FR', digits = 1): string =>
+  Number.isFinite(n) ? n.toLocaleString(locale, { maximumFractionDigits: digits }) : '—'
 
 /**
  * Alias matching the task-brief interface name.
@@ -60,21 +66,35 @@ export const fmtRatio = (ratio: number, locale = 'fr-FR'): string => {
 }
 
 /**
- * Formats a byte count with base-10 tiers (PPDM exports base-10 units):
- *   ≥ 1 000 000 000 000 B → `"X.X TB"`
- *   ≥ 1 000 000 000 B     → `"X.X GB"`
- *   ≥ 1 000 000 B         → `"X.X MB"`
- *   ≥ 1 000 B             → `"X.X KB"`
- *   else                  → `"X B"`
+ * Formats a byte count with locale-aware tiers.
+ *
+ * Base-10 (default, `baseTen = true`):
+ *   ≥ 1e12 B → `"X.X TB"`, ≥ 1e9 B → `"X.X GB"`, ≥ 1e6 B → `"X.X MB"`,
+ *   ≥ 1e3 B → `"X.X KB"`, else → `"X B"`
+ *
+ * Base-2 (`baseTen = false`):
+ *   ≥ 2^40 B → `"X.X TiB"`, ≥ 2^30 B → `"X.X GiB"`, ≥ 2^20 B → `"X.X MiB"`,
+ *   ≥ 2^10 B → `"X.X KiB"`, else → `"X B"`
  */
-export const formatBytes = (bytes: number, locale = 'fr-FR'): string => {
+export const formatBytes = (bytes: number, locale = 'fr-FR', baseTen = true): string => {
   if (!Number.isFinite(bytes)) return '—'
   const opts = { maximumFractionDigits: 1, minimumFractionDigits: 1 } as const
   const abs = Math.abs(bytes)
-  if (abs >= 1e12) return `${(bytes / 1e12).toLocaleString(locale, opts)} TB`
-  if (abs >= 1e9) return `${(bytes / 1e9).toLocaleString(locale, opts)} GB`
-  if (abs >= 1e6) return `${(bytes / 1e6).toLocaleString(locale, opts)} MB`
-  if (abs >= 1e3) return `${(bytes / 1e3).toLocaleString(locale, opts)} KB`
+  if (baseTen) {
+    if (abs >= 1e12) return `${(bytes / 1e12).toLocaleString(locale, opts)} TB`
+    if (abs >= 1e9) return `${(bytes / 1e9).toLocaleString(locale, opts)} GB`
+    if (abs >= 1e6) return `${(bytes / 1e6).toLocaleString(locale, opts)} MB`
+    if (abs >= 1e3) return `${(bytes / 1e3).toLocaleString(locale, opts)} KB`
+    return `${Math.round(bytes).toLocaleString(locale, { maximumFractionDigits: 0 })} B`
+  }
+  const T = 2 ** 40
+  const G = 2 ** 30
+  const M = 2 ** 20
+  const K = 2 ** 10
+  if (abs >= T) return `${(bytes / T).toLocaleString(locale, opts)} TiB`
+  if (abs >= G) return `${(bytes / G).toLocaleString(locale, opts)} GiB`
+  if (abs >= M) return `${(bytes / M).toLocaleString(locale, opts)} MiB`
+  if (abs >= K) return `${(bytes / K).toLocaleString(locale, opts)} KiB`
   return `${Math.round(bytes).toLocaleString(locale, { maximumFractionDigits: 0 })} B`
 }
 
@@ -109,10 +129,15 @@ export const fmtDate = (iso: string, locale = 'fr-FR'): string => {
  */
 export const formatDate = fmtDate
 
-/** Convert gigabytes (base-10) to bytes. */
-export const gbToBytes = (gb: number): number => gb * 1e9
+/** Convert gigabytes to bytes; base-10 (×1e9) by default, base-2 GiB (×2^30) when baseTen=false. */
+export const gbToBytes = (gb: number, baseTen = true): number => gb * (baseTen ? 1e9 : 2 ** 30)
 
 /** Bytes for a GB value, or the supplied "unknown" label when the size is absent. */
-export function formatGbOrUnknown(gb: number | undefined, locale: string, unknown: string): string {
-  return gb === undefined ? unknown : formatBytes(gbToBytes(gb), locale)
+export function formatGbOrUnknown(
+  gb: number | undefined,
+  locale: string,
+  unknown: string,
+  baseTen = true,
+): string {
+  return gb === undefined ? unknown : formatBytes(gbToBytes(gb, baseTen), locale, baseTen)
 }
