@@ -80,11 +80,17 @@ export function summaryView(wb: RawWorkbook): ReportView {
     protectionCapacityGb: cellNum(r, 'Total Asset Protection Capacity (GB)'),
   }))
 
-  // inUse: per-type Asset Count > 0, mapped to canonical agent sheet names.
+  // inUse vs idle: a Count-And-Cap sheet present with Asset Count > 0 is in use; present
+  // with 0 is an idle ("not used") agent type. An absent sheet gives no signal (the summary
+  // export only enumerates a subset of asset types), so it is neither — never invented.
   const inUseSet = new Set<string>()
+  const idleSet = new Set<string>()
   for (const { sheet, agent } of COUNT_CAP) {
     if (!agent) continue
-    if (fieldNum(wb.sheets[sheet], (f) => /Asset Count$/i.test(f)) > 0) inUseSet.add(agent)
+    const s = wb.sheets[sheet]
+    if (!s) continue
+    if (fieldNum(s, (f) => /Asset Count$/i.test(f)) > 0) inUseSet.add(agent)
+    else idleSet.add(agent)
   }
 
   // frontEnd: discovered-only volumetry per in-use type from summary capacity fields.
@@ -110,7 +116,7 @@ export function summaryView(wb: RawWorkbook): ReportView {
   return {
     meta: wb.meta,
     inUse: AGENT_SHEETS.filter((a) => inUseSet.has(a)),
-    idleAgents: [],
+    idleAgents: AGENT_SHEETS.filter((a) => idleSet.has(a)),
     warnings: wb.warnings,
     coverage: { byType: {}, overall },
     gaps: {
