@@ -3,7 +3,8 @@ import { makeWorkbook } from '../../../test-helpers/workbooks'
 import { normalizeWorkbook } from '../../parser/normalizeWorkbook'
 import { avamarJobs } from './jobs'
 
-const wb = (sheets: Record<string, (string | number)[][]>) => normalizeWorkbook(makeWorkbook(sheets))
+const wb = (sheets: Record<string, (string | number)[][]>) =>
+  normalizeWorkbook(makeWorkbook(sheets))
 
 describe('avamarJobs', () => {
   it('derives buckets from Avamar DPN Summary backups only (restore excluded)', () => {

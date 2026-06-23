@@ -3,7 +3,8 @@ import { makeWorkbook } from '../../test-helpers/workbooks'
 import { normalizeWorkbook } from '../parser/normalizeWorkbook'
 import { computeAvamarFrontEnd } from './frontEnd'
 
-const wb = (sheets: Record<string, (string | number)[][]>) => normalizeWorkbook(makeWorkbook(sheets))
+const wb = (sheets: Record<string, (string | number)[][]>) =>
+  normalizeWorkbook(makeWorkbook(sheets))
 
 describe('computeAvamarFrontEnd', () => {
   it('sums Client Capacity Max Peak GiB per Application as protected discovered', () => {
