@@ -5,6 +5,7 @@ import { normalizeWorkbook } from '../parser/normalizeWorkbook'
 import { buildAvamarView } from '../products/avamar/buildAvamarView'
 import { buildNetworkerView } from '../products/networker/buildNetworkerView'
 import { mergeViews } from './mergeViews'
+import { emptyOpsInsights } from './opsInsights'
 import { allAvailable, allUnavailable } from './provenance'
 
 function detail(over: Partial<ReportView>): ReportView {
@@ -39,6 +40,7 @@ function detail(over: Partial<ReportView>): ReportView {
     capacity: { targets: [], flagged: [], mtreeCount: 0 },
     policies: { count: 0, byPurpose: {}, perPolicy: [] },
     frontEnd: { byType: [], excludedCount: 0 },
+    opsInsights: emptyOpsInsights(),
     provenance: allAvailable(0),
     ...over,
   }

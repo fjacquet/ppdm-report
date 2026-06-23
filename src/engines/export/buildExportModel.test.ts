@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
+import { emptyOpsInsights } from '../aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../aggregation/provenance'
 import { buildExportModel } from './buildExportModel'
 
@@ -69,6 +70,7 @@ const view: ReportView = {
   },
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
   frontEnd: { byType: [], excludedCount: 0 },
+  opsInsights: emptyOpsInsights(),
   provenance: allAvailable(0),
 }
 
@@ -312,6 +314,7 @@ describe('buildExportModel', () => {
   it('adds a partialAssets caveat when compliance has partial asset coverage', () => {
     const partialView: ReportView = {
       ...view,
+      opsInsights: emptyOpsInsights(),
       provenance: {
         ...allAvailable(3886),
         compliance: {

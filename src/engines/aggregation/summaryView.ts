@@ -1,6 +1,7 @@
 import { AGENT_SHEETS, type RawWorkbook, type SheetData } from '../../types/ppdm'
 import type { FrontEndTypeRow, ReportView } from '../../types/reportView'
 import { emptyBand, finalizeBand } from './coverage'
+import { emptyOpsInsights } from './opsInsights'
 import { allUnavailable } from './provenance'
 import { cellNum, cellStr, countBy } from './rows'
 
@@ -149,6 +150,7 @@ export function summaryView(wb: RawWorkbook): ReportView {
     },
     policies: { count: policyRows.length, byPurpose: countBy(policyRows, 'Category'), perPolicy },
     frontEnd: { byType: feByType, excludedCount: 0 },
+    opsInsights: emptyOpsInsights(),
     provenance: {
       ...allUnavailable(totalAssets),
       frontEnd: {

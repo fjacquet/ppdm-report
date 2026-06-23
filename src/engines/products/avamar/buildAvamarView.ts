@@ -5,6 +5,7 @@ import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
 import { avamarProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr } from '../../aggregation/rows'
 import { avamarJobs } from './jobs'
+import { computeAvamarOpsInsights } from './opsInsights'
 import { avamarPolicies } from './policies'
 import { avamarReplication } from './replication'
 import { avamarWorkloads } from './workloads'
@@ -93,6 +94,7 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     capacity: { targets, flagged: targets.filter((t) => t.flagged), mtreeCount: 0 },
     policies: avamarPolicies(wb),
     frontEnd: computeAvamarFrontEnd(wb),
+    opsInsights: computeAvamarOpsInsights(wb),
     provenance: avamarProvenance(),
   }
 }

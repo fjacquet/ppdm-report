@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { emptyOpsInsights } from '../../engines/aggregation/opsInsights'
 import { allAvailable } from '../../engines/aggregation/provenance'
 import i18n from '../../i18n'
 import { useReportStore } from '../../store/reportStore'
@@ -71,6 +72,7 @@ const fixture: ReportView = {
     ],
   },
   frontEnd: { byType: [], excludedCount: 0 },
+  opsInsights: emptyOpsInsights(),
   provenance: allAvailable(0),
 }
 

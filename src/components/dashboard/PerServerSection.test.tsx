@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { emptyOpsInsights } from '../../engines/aggregation/opsInsights'
 import { allAvailable } from '../../engines/aggregation/provenance'
 import i18n from '../../i18n'
 import type { ReportView, ServerView } from '../../types/reportView'
@@ -37,6 +38,7 @@ function view(pct: number, count: number): ReportView {
     capacity: { targets: [], flagged: [], mtreeCount: 0 },
     policies: { count: 0, byPurpose: {}, perPolicy: [] },
     frontEnd: { byType: [], excludedCount: 0 },
+    opsInsights: emptyOpsInsights(),
     provenance: allAvailable(0),
   }
 }

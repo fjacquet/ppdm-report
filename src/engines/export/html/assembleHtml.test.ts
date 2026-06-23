@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import i18n from '../../../i18n'
 import type { ReportView } from '../../../types/reportView'
+import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { allAvailable } from '../../aggregation/provenance'
 import { buildExportModel } from '../buildExportModel'
 import { assembleHtml } from './assembleHtml'
@@ -66,6 +67,7 @@ const view: ReportView = {
   },
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
   frontEnd: { byType: [], excludedCount: 0 },
+  opsInsights: emptyOpsInsights(),
   provenance: allAvailable(0),
 }
 

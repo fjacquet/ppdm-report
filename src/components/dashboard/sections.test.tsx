@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { emptyOpsInsights } from '../../engines/aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../../engines/aggregation/provenance'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
@@ -74,6 +75,7 @@ const fixture: ReportView = {
     perPolicy: [],
   },
   frontEnd: { byType: [], excludedCount: 0 },
+  opsInsights: emptyOpsInsights(),
   provenance: allAvailable(0),
 }
 
@@ -368,6 +370,7 @@ describe('ExecutiveKpis — compliance provenance gate', () => {
 
   it('shows em-dash for Immutable KPI when compliance provenance is unavailable', () => {
     const view = makeView({
+      opsInsights: emptyOpsInsights(),
       provenance: allUnavailable(100),
       compliance: { ...fixture.compliance, immutablePct: 0 },
     })
@@ -380,6 +383,7 @@ describe('ExecutiveKpis — compliance provenance gate', () => {
 
   it('shows immutable percent when compliance provenance is available', () => {
     const view = makeView({
+      opsInsights: emptyOpsInsights(),
       provenance: allAvailable(100),
       compliance: { ...fixture.compliance, immutablePct: 0.42 },
     })
@@ -441,6 +445,7 @@ describe('ProvenanceNote integration — summary-format provenance', () => {
 
   it('CoverageSection shows partial note when coverageByType covers 1 of 2 servers', () => {
     const view = makeView({
+      opsInsights: emptyOpsInsights(),
       provenance: {
         ...allAvailable(100),
         coverageByType: { available: true, serversCovered: 1, serversTotal: 2 },
@@ -453,6 +458,7 @@ describe('ProvenanceNote integration — summary-format provenance', () => {
 
   it('JobsComplianceSection shows partialAssets note when compliance covers 1 of 2 servers with assets', () => {
     const view = makeView({
+      opsInsights: emptyOpsInsights(),
       provenance: {
         ...allAvailable(3886),
         compliance: {
