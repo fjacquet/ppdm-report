@@ -81,5 +81,20 @@
     "unavailable": "Für diesen Berichtstyp nicht verfügbar",
     "partial": "Deckt {{covered}} von {{total}} Servern ab",
     "partialAssets": "Deckt {{covered}} von {{total}} Servern ab ({{assetsCovered}} von {{assetsTotal}} Assets)"
+  },
+  "volumetry": {
+    "title": "Front-End-Volumetrie nach Workload",
+    "col": {
+      "type": "Workload-Typ",
+      "protectedDiscovered": "Geschützt · erkannt",
+      "protectedFetb": "Geschützt · FETB",
+      "unprotectedDiscovered": "Ungeschützt · erkannt",
+      "unprotectedFetb": "Ungeschützt · FETB"
+    },
+    "total": "GESAMT",
+    "excludedNote": "{{count}} ausgeschlossene Assets (z. B. Vorlagen, außer Betrieb) werden nicht gezählt.",
+    "partialNote": "≥ : Einige Workloads melden für diese Spalte keinen Wert; die Summe ist ein Mindestwert.",
+    "sizingNote": "Nur Front-End-Eingabe — die Back-End-Kapazität hängt von Änderungsrate, Aufbewahrung und Deduplizierung ab.",
+    "takeaway": "Front-End-FETB geschützt: {{fetb}}"
   }
 }

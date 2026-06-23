@@ -70,6 +70,7 @@ const fixture: ReportView = {
       { name: 'SQL - Prod', purpose: 'CENTRALIZED', assetCount: 380, protectionCapacityGb: 1234.5 },
     ],
   },
+  frontEnd: { byType: [], excludedCount: 0 },
   provenance: allAvailable(0),
 }
 

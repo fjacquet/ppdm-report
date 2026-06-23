@@ -81,5 +81,20 @@
     "unavailable": "Non disponibile per questo tipo di report",
     "partial": "Copre {{covered}} server su {{total}}",
     "partialAssets": "Copre {{covered}} server su {{total}} ({{assetsCovered}} asset su {{assetsTotal}})"
+  },
+  "volumetry": {
+    "title": "Volumetria front-end per tipo di workload",
+    "col": {
+      "type": "Tipo di workload",
+      "protectedDiscovered": "Protetto · rilevato",
+      "protectedFetb": "Protetto · FETB",
+      "unprotectedDiscovered": "Non protetto · rilevato",
+      "unprotectedFetb": "Non protetto · FETB"
+    },
+    "total": "TOTALE",
+    "excludedNote": "{{count}} asset esclusi (es. modelli, dismessi) non sono conteggiati.",
+    "partialNote": "≥ : alcuni workload non riportano alcun valore per questa colonna; il totale è un minimo.",
+    "sizingNote": "Solo dato front-end — la capacità back-end dipende da tasso di variazione, retention e deduplica.",
+    "takeaway": "FETB front-end protetto: {{fetb}}"
   }
 }

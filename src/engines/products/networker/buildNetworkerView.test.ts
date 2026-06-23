@@ -86,4 +86,14 @@ describe('buildNetworkerView', () => {
     expect(v.capacity.targets).toEqual([])
     expect(v.inUse).toEqual([])
   })
+
+  it('maps Front End Capacity by Workload to protected FETB per type', () => {
+    const v = buildNetworkerView(normalizeWorkbook(networkerWorkbookBuffer()))
+    expect(v.frontEnd.byType.map((r) => r.type)).toEqual(['Filesystem', 'Oracle RMAN'])
+    const fs = v.frontEnd.byType.find((r) => r.type === 'Filesystem')
+    expect(fs?.protectedFetbGb).toBe(410)
+    expect(fs?.protectedDiscoveredGb).toBeUndefined()
+    expect(fs?.unprotectedFetbGb).toBeUndefined()
+    expect(v.provenance.frontEnd.available).toBe(true)
+  })
 })

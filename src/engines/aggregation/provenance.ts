@@ -13,6 +13,7 @@ export function allAvailable(assetsTotal: number): Record<MetricKey, MetricProve
       assetsTotal,
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
+    frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
   }
 }
 
@@ -29,6 +30,7 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
       assetsTotal,
     },
     storageTargets: { available: false, serversCovered: 0, serversTotal: 1 },
+    frontEnd: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -46,6 +48,7 @@ export function avamarProvenance(): Record<MetricKey, MetricProvenance> {
       assetsTotal: 0,
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
+    frontEnd: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -63,5 +66,6 @@ export function networkerProvenance(assetsTotal: number): Record<MetricKey, Metr
       assetsTotal,
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
+    frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
   }
 }
