@@ -72,6 +72,48 @@ it('treats an absent capacity field as undefined (no invented 0); a present 0 st
   expect(fs?.unprotectedDiscoveredGb).toBeCloseTo(100)
 })
 
+it('derives idle ("not used") agents from multiple zero-count types, in canonical order', () => {
+  const wb = normalizeWorkbook(
+    makeWorkbook({
+      Details: [
+        ['Project Name', 'M'],
+        ['Date', '18/02/2025 03:54:24'],
+        ['Disclaimer', 'Base 10'],
+      ],
+      'System Configuration': [
+        ['Field', 'Value'],
+        ['Assets Count', 8],
+        ['Number of Protected Assets', 8],
+        ['Number of UnProtected Assets', 0],
+      ],
+      'VMs Count And Cap': [
+        ['Field', 'Value'],
+        ['VM Asset Count', 5],
+      ], // in use
+      'FileSystem Assets Count & Cap': [
+        ['Field', 'Value'],
+        ['File System Asset Count', 3],
+      ], // in use
+      'SQL DBs Count & Cap': [
+        ['Field', 'Value'],
+        ['SQL DB Asset Count', 0],
+      ], // idle
+      'Oracle DBs Count & Cap': [
+        ['Field', 'Value'],
+        ['Oracle DB Asset Count', 0],
+      ], // idle
+      'Kubernetes Assets & Cap': [
+        ['Field', 'Value'],
+        ['Kubernetes Asset Count', 0],
+      ], // idle
+      // NAS / Exchange / SAP HANA have no Count-And-Cap sheet → no signal → not listed
+    }),
+  )
+  const view = summaryView(wb)
+  expect(view.inUse).toEqual(['File Systems', 'Virtual Machines'])
+  expect(view.idleAgents).toEqual(['Kubernetes', 'Oracle Databases', 'SQL Databases'])
+})
+
 describe('summaryView — synthetic summary workbook', () => {
   const v = summaryView(normalizeWorkbook(summaryWorkbookBuffer()))
 
@@ -160,13 +202,6 @@ describe.skipIf(!existsSync('ref/chuv-a1n01136i.xlsx'))('summaryView — chuv-a1
   it('maps in-use asset types to canonical agent sheets', () => {
     expect(v.inUse).toContain('Virtual Machines')
     expect(v.inUse).toContain('File Systems')
-  })
-
-  it('derives idle ("not used") agents from zero-count Count-And-Cap types', () => {
-    expect(v.idleAgents).toContain('Oracle Databases')
-    expect(v.idleAgents).toContain('Kubernetes')
-    expect(v.idleAgents).not.toContain('Virtual Machines')
-    expect(v.idleAgents).not.toContain('File Systems')
   })
 
   it('marks the four detail-only metrics unavailable', () => {
