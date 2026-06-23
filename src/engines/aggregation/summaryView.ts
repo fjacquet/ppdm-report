@@ -1,6 +1,7 @@
 import { AGENT_SHEETS, type RawWorkbook, type SheetData } from '../../types/ppdm'
 import type { ReportView } from '../../types/reportView'
 import { emptyBand, finalizeBand } from './coverage'
+import { emptyFrontEnd } from './frontEnd'
 import { allUnavailable } from './provenance'
 import { cellNum, cellStr, countBy } from './rows'
 
@@ -111,6 +112,7 @@ export function summaryView(wb: RawWorkbook): ReportView {
       mtreeCount: wb.sheets['Data Domain Mtrees']?.rows.length ?? 0,
     },
     policies: { count: policyRows.length, byPurpose: countBy(policyRows, 'Category'), perPolicy },
+    frontEnd: emptyFrontEnd(),
     provenance: allUnavailable(totalAssets),
   }
 }

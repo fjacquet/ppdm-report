@@ -2,6 +2,7 @@ import { AGENT_SHEETS, TOP_N_DEFAULT } from '../../types/ppdm'
 import type { CoverageBand, MetricKey, MetricProvenance, ReportView } from '../../types/reportView'
 import { foldMeta } from '../parser/foldMeta'
 import { emptyBand, finalizeBand } from './coverage'
+import { mergeFrontEnd } from './frontEnd'
 import { topN } from './topN'
 
 const sum = (ns: number[]) => ns.reduce((a, b) => a + b, 0)
@@ -20,7 +21,7 @@ function mergeCounts(dicts: Record<string, number>[]): Record<string, number> {
 }
 
 function mergeProvenance(views: ReportView[]): Record<MetricKey, MetricProvenance> {
-  const keys: MetricKey[] = ['coverageByType', 'gapsList', 'compliance', 'storageTargets']
+  const keys: MetricKey[] = ['coverageByType', 'gapsList', 'compliance', 'storageTargets', 'frontEnd']
   const out = {} as Record<MetricKey, MetricProvenance>
   for (const key of keys) {
     const ps = views.map((v) => v.provenance[key])
@@ -124,6 +125,7 @@ export function mergeViews(views: ReportView[]): ReportView {
       byPurpose: mergeCounts(views.map((v) => v.policies.byPurpose)),
       perPolicy: views.flatMap((v) => v.policies.perPolicy),
     },
+    frontEnd: mergeFrontEnd(views.map((v) => v.frontEnd)),
     provenance: mergeProvenance(views),
   }
 }

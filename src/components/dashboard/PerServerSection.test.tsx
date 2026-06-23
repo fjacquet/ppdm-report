@@ -36,6 +36,7 @@ function view(pct: number, count: number): ReportView {
     },
     capacity: { targets: [], flagged: [], mtreeCount: 0 },
     policies: { count: 0, byPurpose: {}, perPolicy: [] },
+    frontEnd: { byType: [], excludedCount: 0 },
     provenance: allAvailable(0),
   }
 }

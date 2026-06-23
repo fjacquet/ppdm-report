@@ -73,6 +73,7 @@ const fixture: ReportView = {
     byPurpose: {},
     perPolicy: [],
   },
+  frontEnd: { byType: [], excludedCount: 0 },
   provenance: allAvailable(0),
 }
 
