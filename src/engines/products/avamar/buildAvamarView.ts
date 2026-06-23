@@ -53,7 +53,15 @@ function disabledGroups(wb: RawWorkbook): string[] {
   })
 }
 
-/** Avamar composition root: RawWorkbook → ReportView. Pure. MVP fidelity (see plan). */
+/**
+ * Avamar composition root: `RawWorkbook → ReportView`. Pure.
+ *
+ * Derives all metrics detail-first (Avamar DPN Summary / Job List Detailed /
+ * Client Capacity / Replication Completion Status) with summary-sheet fallback
+ * where a detail sheet is absent. Coverage-by-type is intentionally unavailable —
+ * Avamar exports do not carry per-type asset counts in a form that can be
+ * computed honestly.
+ */
 export function buildAvamarView(wb: RawWorkbook): ReportView {
   // coverage — count-based; retired clients → excluded band; no per-type breakdown.
   const protectedN = hasBackupsCount(wb, 'NonRetired Clients With Backups', 'True')
