@@ -258,7 +258,15 @@ describe('buildExportModel', () => {
       warnings: ['cap note', 'cap note', 'merge note'],
       // non-empty frontEnd so volumetry renders and adds no suppression warning
       frontEnd: {
-        byType: [{ type: 'Virtual Machines', protectedDiscoveredGb: 10, protectedFetbGb: 5, unprotectedDiscoveredGb: 2, unprotectedFetbGb: 1 }],
+        byType: [
+          {
+            type: 'Virtual Machines',
+            protectedDiscoveredGb: 10,
+            protectedFetbGb: 5,
+            unprotectedDiscoveredGb: 2,
+            unprotectedFetbGb: 1,
+          },
+        ],
         excludedCount: 0,
       },
     }
@@ -399,19 +407,31 @@ describe('buildExportModel', () => {
     const v = baseView({
       frontEnd: {
         byType: [
-          { type: 'Virtual Machines', protectedDiscoveredGb: 100, protectedFetbGb: 60, unprotectedDiscoveredGb: 30, unprotectedFetbGb: 3 },
-          { type: 'SQL Databases', protectedDiscoveredGb: undefined, protectedFetbGb: 15, unprotectedDiscoveredGb: undefined, unprotectedFetbGb: 2 },
+          {
+            type: 'Virtual Machines',
+            protectedDiscoveredGb: 100,
+            protectedFetbGb: 60,
+            unprotectedDiscoveredGb: 30,
+            unprotectedFetbGb: 3,
+          },
+          {
+            type: 'SQL Databases',
+            protectedDiscoveredGb: undefined,
+            protectedFetbGb: 15,
+            unprotectedDiscoveredGb: undefined,
+            unprotectedFetbGb: 2,
+          },
         ],
         excludedCount: 5,
       },
     })
     const model = buildExportModel(v, 'assessment', 'light', t, 'en')
-    const sec = model.sections.find((s) => s.id === 'volumetry')!
-    expect(sec.table!.rows.length).toBe(3) // 2 types + TOTAL
-    const total = sec.table!.rows[2]!
-    expect(total[2]).toBe('75.0 GB') // protected FETB exact: 60 + 15
-    expect(total[1]!.startsWith('≥')).toBe(true) // protected discovered: SQL missing → floor
-    expect(sec.table!.caption).toContain('5') // excluded footnote
+    const sec = model.sections.find((s) => s.id === 'volumetry')
+    expect(sec?.table?.rows.length).toBe(3) // 2 types + TOTAL
+    const total = sec?.table?.rows[2]
+    expect(total?.[2]).toBe('75.0 GB') // protected FETB exact: 60 + 15
+    expect(total?.[1]?.startsWith('≥')).toBe(true) // protected discovered: SQL missing → floor
+    expect(sec?.table?.caption).toContain('5') // excluded footnote
   })
 
   it('suppresses the volumetry section when there is no per-type data (Avamar)', () => {

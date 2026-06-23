@@ -555,8 +555,16 @@ export function buildExportModel(
           deck: {
             subtitle: t('dashboard:volumetry.takeaway', { fetb: feBytes(feProtFetb) }),
             kpiChips: [
-              { label: t('dashboard:volumetry.col.protectedFetb'), value: feBytes(feProtFetb), tone: 'accent' as const },
-              { label: t('dashboard:volumetry.col.unprotectedDiscovered'), value: feBytes(feUnprotDisc), tone: 'warn' as const },
+              {
+                label: t('dashboard:volumetry.col.protectedFetb'),
+                value: feBytes(feProtFetb),
+                tone: 'accent' as const,
+              },
+              {
+                label: t('dashboard:volumetry.col.unprotectedDiscovered'),
+                value: feBytes(feUnprotDisc),
+                tone: 'warn' as const,
+              },
             ],
           },
         }

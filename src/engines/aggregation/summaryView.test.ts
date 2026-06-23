@@ -7,7 +7,11 @@ import { summaryView } from './summaryView'
 it('builds discovered-only front-end volumetry per type and marks it available', () => {
   const wb = normalizeWorkbook(
     makeWorkbook({
-      Details: [['Project Name', 'S'], ['Date', '18/02/2025 03:54:24'], ['Disclaimer', 'Base 10']],
+      Details: [
+        ['Project Name', 'S'],
+        ['Date', '18/02/2025 03:54:24'],
+        ['Disclaimer', 'Base 10'],
+      ],
       'System Configuration': [
         ['Field', 'Value'],
         ['Assets Count', 100],
@@ -23,10 +27,10 @@ it('builds discovered-only front-end volumetry per type and marks it available',
     }),
   )
   const view = summaryView(wb)
-  const vm = view.frontEnd.byType.find((r) => r.type === 'Virtual Machines')!
-  expect(vm.protectedDiscoveredGb).toBeCloseTo(2555.53)
-  expect(vm.unprotectedDiscoveredGb).toBeCloseTo(5552.92)
-  expect(vm.protectedFetbGb).toBeUndefined()
+  const vm = view.frontEnd.byType.find((r) => r.type === 'Virtual Machines')
+  expect(vm?.protectedDiscoveredGb).toBeCloseTo(2555.53)
+  expect(vm?.unprotectedDiscoveredGb).toBeCloseTo(5552.92)
+  expect(vm?.protectedFetbGb).toBeUndefined()
   expect(view.provenance.frontEnd.available).toBe(true)
 })
 

@@ -21,7 +21,13 @@ function mergeCounts(dicts: Record<string, number>[]): Record<string, number> {
 }
 
 function mergeProvenance(views: ReportView[]): Record<MetricKey, MetricProvenance> {
-  const keys: MetricKey[] = ['coverageByType', 'gapsList', 'compliance', 'storageTargets', 'frontEnd']
+  const keys: MetricKey[] = [
+    'coverageByType',
+    'gapsList',
+    'compliance',
+    'storageTargets',
+    'frontEnd',
+  ]
   const out = {} as Record<MetricKey, MetricProvenance>
   for (const key of keys) {
     const ps = views.map((v) => v.provenance[key])
