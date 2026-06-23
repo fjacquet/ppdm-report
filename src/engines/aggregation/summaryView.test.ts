@@ -1,8 +1,34 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { summaryWorkbookBuffer } from '../../test-helpers/workbooks'
+import { makeWorkbook, summaryWorkbookBuffer } from '../../test-helpers/workbooks'
 import { normalizeWorkbook } from '../parser/normalizeWorkbook'
 import { summaryView } from './summaryView'
+
+it('builds discovered-only front-end volumetry per type and marks it available', () => {
+  const wb = normalizeWorkbook(
+    makeWorkbook({
+      Details: [['Project Name', 'S'], ['Date', '18/02/2025 03:54:24'], ['Disclaimer', 'Base 10']],
+      'System Configuration': [
+        ['Field', 'Value'],
+        ['Assets Count', 100],
+        ['Number of Protected Assets', 80],
+        ['Number of UnProtected Assets', 15],
+      ],
+      'VMs Count And Cap': [
+        ['Field', 'Value'],
+        ['VM Asset Count', 60],
+        ['VM Capacity Protected Assets (GB)', 2555.53],
+        ['VM Capacity Unprotected Assets (GB)', 5552.92],
+      ],
+    }),
+  )
+  const view = summaryView(wb)
+  const vm = view.frontEnd.byType.find((r) => r.type === 'Virtual Machines')!
+  expect(vm.protectedDiscoveredGb).toBeCloseTo(2555.53)
+  expect(vm.unprotectedDiscoveredGb).toBeCloseTo(5552.92)
+  expect(vm.protectedFetbGb).toBeUndefined()
+  expect(view.provenance.frontEnd.available).toBe(true)
+})
 
 describe('summaryView — synthetic summary workbook', () => {
   const v = summaryView(normalizeWorkbook(summaryWorkbookBuffer()))
