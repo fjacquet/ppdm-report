@@ -98,4 +98,32 @@ describe('planSlides', () => {
     const plan = planSlides([sec('coverage'), sec('exposure'), sec('idle'), sec('jobs')])
     expect(plan.some((p) => p.kind === 'single' && p.section.id === 'idle')).toBe(true)
   })
+
+  it('two co-anchored full-widths keep section order: volumetry (table) before idle (single)', () => {
+    const ids = [
+      'coverage',
+      'exposure',
+      'volumetry',
+      'idle',
+      'jobs',
+      'resilience',
+      'capacity',
+      'policies',
+    ]
+    const sections = ids.map((id) => (id === 'volumetry' ? secWithTable(id) : sec(id)))
+    const plan = planSlides(sections)
+    expect(
+      plan.map((p) => {
+        if (p.kind === 'single') return `single:${p.section.id}`
+        if (p.kind === 'table') return `table:${p.section.id}`
+        return `pair:${p.top.id}+${p.bottom?.id}`
+      }),
+    ).toEqual([
+      'pair:coverage+exposure',
+      'table:volumetry',
+      'single:idle',
+      'pair:jobs+resilience',
+      'pair:capacity+policies',
+    ])
+  })
 })

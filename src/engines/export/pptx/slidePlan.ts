@@ -15,6 +15,12 @@ const FULLWIDTH: Record<string, 'single' | 'table'> = { idle: 'single', volumetr
  * preceding non-full-width section (or at the front if none). Remaining sections
  * pair consecutively in order; any paired section with a table also gets a
  * trailing appendix table slide.
+ *
+ * Full-width sections are spliced in reverse section order, so that when two of
+ * them share the same predecessor pair (e.g. `volumetry` then `idle`, both after
+ * the band ending in `exposure`) they land in the original `SECTION_ORDER`
+ * sequence rather than reversed. Single-full-width inputs (the common `idle`-only
+ * case) are unaffected.
  */
 export function planSlides(sections: ExportSection[]): SlidePlanItem[] {
   const fullwidth = sections
@@ -41,7 +47,9 @@ export function planSlides(sections: ExportSection[]): SlidePlanItem[] {
   }
 
   const out: SlidePlanItem[] = [...pairs]
-  for (const fw of fullwidth) {
+  // Reverse: same-predecessor full-widths splice at the same index, so processing
+  // last-to-first leaves them in section order (idle-only inputs are unchanged).
+  for (const fw of [...fullwidth].reverse()) {
     const item: SlidePlanItem =
       fw.kind === 'single'
         ? { kind: 'single', section: fw.section }
