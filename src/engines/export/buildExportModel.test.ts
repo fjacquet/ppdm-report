@@ -168,6 +168,77 @@ describe('buildExportModel', () => {
     expect(model.footer).not.toContain('base-10')
   })
 
+  it('formats volumetry and policy capacity in base-2 (GiB/TiB) when meta.baseTen is false', () => {
+    const base2View: ReportView = {
+      ...view,
+      meta: { ...view.meta, baseTen: false },
+      frontEnd: {
+        byType: [
+          {
+            type: 'VMs',
+            protectedDiscoveredGb: 1024,
+            protectedFetbGb: 1024,
+            unprotectedDiscoveredGb: 512,
+            unprotectedFetbGb: 512,
+          },
+        ],
+        excludedCount: 0,
+      },
+      policies: {
+        count: 1,
+        byPurpose: { CENTRALIZED: 1 },
+        perPolicy: [
+          { name: 'P1', purpose: 'CENTRALIZED', assetCount: 1, protectionCapacityGb: 1024 },
+        ],
+      },
+    }
+    const model = buildExportModel(base2View, 'assessment', 'light', t, 'en')
+    // volumetry section: 1024 base-2 GiB = 1.0 TiB (not 1.0 TB)
+    const vol = model.sections.find((s) => s.id === 'volumetry')
+    const row0 = vol?.table?.rows[0]
+    expect(row0?.some((cell) => /TiB|GiB/.test(cell))).toBe(true)
+    expect(row0?.some((cell) => /\bTB\b|\bGB\b/.test(cell))).toBe(false)
+    // policies section: per-policy capacity 1024 base-2 GiB = 1.0 TiB (not 1.0 TB)
+    const pol = model.sections.find((s) => s.id === 'policies')
+    const polRow = pol?.table?.rows[0]
+    expect(polRow?.some((cell) => /TiB|GiB/.test(cell))).toBe(true)
+    expect(polRow?.some((cell) => /\bTB\b|\bGB\b/.test(cell))).toBe(false)
+  })
+
+  it('formats volumetry and policy capacity in base-10 (GB/TB) when meta.baseTen is true', () => {
+    const v: ReportView = {
+      ...view,
+      frontEnd: {
+        byType: [
+          {
+            type: 'VMs',
+            protectedDiscoveredGb: 1000,
+            protectedFetbGb: 1000,
+            unprotectedDiscoveredGb: 500,
+            unprotectedFetbGb: 500,
+          },
+        ],
+        excludedCount: 0,
+      },
+      policies: {
+        count: 1,
+        byPurpose: { CENTRALIZED: 1 },
+        perPolicy: [
+          { name: 'P1', purpose: 'CENTRALIZED', assetCount: 1, protectionCapacityGb: 1000 },
+        ],
+      },
+    }
+    const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+    const vol = model.sections.find((s) => s.id === 'volumetry')
+    const row0 = vol?.table?.rows[0]
+    expect(row0?.some((cell) => /\bTB\b|\bGB\b/.test(cell))).toBe(true)
+    expect(row0?.some((cell) => /TiB|GiB/.test(cell))).toBe(false)
+    const pol = model.sections.find((s) => s.id === 'policies')
+    const polRow = pol?.table?.rows[0]
+    expect(polRow?.some((cell) => /\bTB\b|\bGB\b/.test(cell))).toBe(true)
+    expect(polRow?.some((cell) => /TiB|GiB/.test(cell))).toBe(false)
+  })
+
   it('builds a deck for every section + a posture stack', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en')
     const byId = Object.fromEntries(model.sections.map((s) => [s.id, s]))

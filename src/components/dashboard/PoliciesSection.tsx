@@ -17,6 +17,7 @@ export function PoliciesSection({ view, dark }: PoliciesSectionProps) {
   const { t, i18n } = useTranslation(['dashboard', 'common'])
   const locale = i18n.language
   const palette = dark ? DARK : LIGHT
+  const b10 = view.meta.baseTen
   const { policies } = view
 
   const barData: BarDatum[] = useMemo(
@@ -100,7 +101,7 @@ export function PoliciesSection({ view, dark }: PoliciesSectionProps) {
                         </td>
                         <td className="py-1.5 pr-4 text-right">{fmtInt(row.assetCount, locale)}</td>
                         <td className="py-1.5 text-right">
-                          {formatBytes(gbToBytes(row.protectionCapacityGb), locale)}
+                          {formatBytes(gbToBytes(row.protectionCapacityGb, b10), locale, b10)}
                         </td>
                       </tr>
                     ))}

@@ -1,7 +1,13 @@
 {
-  "appTitle": "PPDM-Bericht",
+  "appTitle": "Datensicherungsbericht",
+  "reportTitle": "{{product}}-Bericht",
+  "product": {
+    "ppdm": "PowerProtect Data Manager",
+    "avamar": "Avamar",
+    "networker": "NetWorker"
+  },
   "upload": {
-    "drop": "PPDM-Exportdatei hier ablegen",
+    "drop": "Live-Optics-Export hier ablegen",
     "choose": "Datei auswählen",
     "parsing": "Wird verarbeitet…"
   },

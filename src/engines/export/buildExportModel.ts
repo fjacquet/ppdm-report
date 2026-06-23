@@ -1,5 +1,6 @@
 import type { Palette } from '../../theme/palette'
 import { DARK, LIGHT } from '../../theme/palette'
+import type { ProductId } from '../../types/ppdm'
 import type { MetricKey, MetricProvenance, ReportView, ServerView } from '../../types/reportView'
 import {
   fmtInt,
@@ -16,6 +17,7 @@ import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder
 import {
   appConsistentTone,
   atRiskTone,
+  backupDurationTone,
   coverageTone,
   immutableTone,
   jobSuccessTone,
@@ -35,6 +37,13 @@ import type {
 
 /** Minimal translator surface (i18next TFunction, resolving `ns:key`). */
 type TFn = (key: string, opts?: Record<string, unknown>) => string
+
+/** Resolve the human-readable report title for the given product. */
+function resolveReportTitle(product: ProductId, t: TFn): string {
+  return product === 'unknown'
+    ? t('common:appTitle')
+    : t('common:reportTitle', { product: t(`common:product.${product}`) })
+}
 
 /** Localized provenance caveat for a detail-only section; '' when fully available. */
 function provenanceCaveat(p: MetricProvenance, t: TFn): string {
@@ -102,6 +111,7 @@ export function buildExportModel(
   t: TFn,
   locale: string,
   perServer: ServerView[] = [],
+  product: ProductId = 'ppdm',
 ): ExportModel {
   const pal = theme === 'dark' ? DARK : LIGHT
   const {
@@ -458,6 +468,9 @@ export function buildExportModel(
     },
   }
 
+  const b10 = meta.baseTen
+  const bytesOf = (gb: number) => formatBytes(gbToBytes(gb, b10), locale, b10)
+
   const hasAnyPolicies = policies.count > 0
   const policiesKpis: ExportKpi[] = hasAnyPolicies
     ? [
@@ -494,7 +507,7 @@ export function buildExportModel(
         pp.name,
         pp.purpose,
         fmtInt(pp.assetCount, locale),
-        formatBytes(gbToBytes(pp.protectionCapacityGb), locale),
+        formatBytes(gbToBytes(pp.protectionCapacityGb, b10), locale, b10),
       ]),
     },
     deck: {
@@ -503,9 +516,6 @@ export function buildExportModel(
       bars: policiesByPurposeBars,
     },
   }
-
-  const b10 = meta.baseTen
-  const bytesOf = (gb: number) => formatBytes(gbToBytes(gb, b10), locale, b10)
 
   const { agentVersions, atRisk, longestBackups } = opsInsights
 
@@ -624,12 +634,20 @@ export function buildExportModel(
             subtitle: t('dashboard:longestBackups.takeaway', {
               hours: fmtNum(longestBackups.items[0]?.durationHr ?? 0, locale, 1),
             }),
+            kpiChips: [
+              {
+                label: t('dashboard:longestBackups.col.duration'),
+                value: fmtNum(longestBackups.items[0]?.durationHr ?? 0, locale, 1),
+                tone: backupDurationTone(longestBackups.items[0]?.durationHr ?? 0),
+              },
+            ],
           }
         : undefined,
   }
 
-  const feBytes = (gb: number) => formatBytes(gbToBytes(gb), locale)
-  const feCell = (gb: number | undefined) => formatGbOrUnknown(gb, locale, t('common:sizeUnknown'))
+  const feBytes = (gb: number) => formatBytes(gbToBytes(gb, b10), locale, b10)
+  const feCell = (gb: number | undefined) =>
+    formatGbOrUnknown(gb, locale, t('common:sizeUnknown'), b10)
   const feTotalCell = (k: (typeof FRONT_END_METRICS)[number]): string => {
     const defined = frontEnd.byType.filter((r) => r[k] !== undefined)
     if (defined.length === 0) return t('common:sizeUnknown')
@@ -775,7 +793,7 @@ export function buildExportModel(
   })()
 
   return {
-    title: t('common:appTitle'),
+    title: resolveReportTitle(product, t),
     customer: meta.customer,
     subtitle: [t(`common:flavor.${flavor}`), captured].filter(Boolean).join(' · '),
     execTitle: t('dashboard:execSummary'),

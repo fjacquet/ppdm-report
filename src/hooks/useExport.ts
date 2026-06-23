@@ -4,8 +4,16 @@ import { buildExportModel } from '../engines/export/buildExportModel'
 import { assembleHtml } from '../engines/export/html/assembleHtml'
 import type { ExportKind } from '../engines/export/types'
 import { useReportStore } from '../store/reportStore'
+import type { ProductId } from '../types/ppdm'
 import type { EstateDocument } from '../types/reportView'
 import { useTheme } from './useTheme'
+
+const SLUG: Record<ProductId, string> = {
+  ppdm: 'ppdm',
+  avamar: 'avamar',
+  networker: 'networker',
+  unknown: 'report',
+}
 
 const PPTX_MIME = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
 
@@ -44,7 +52,7 @@ export function useExport(doc: EstateDocument | null) {
   const [error, setError] = useState<string | null>(null)
 
   async function run(kind: ExportKind): Promise<void> {
-    // Phase-1: products[0] is always the sole PPDM section.
+    const product: ProductId = doc?.products[0]?.product ?? 'unknown'
     const estate = doc?.products[0]?.estate
     if (!estate) return
     setBusy(kind)
@@ -58,10 +66,10 @@ export function useExport(doc: EstateDocument | null) {
         t,
         i18n.language,
         estate.perServer,
+        product,
       )
       const stamp = new Date().toISOString().slice(0, 10)
-      // Phase-1 product is always PPDM, so the stem uses the ppdm-report prefix.
-      const base = `ppdm-report_${sanitize(estate.combined.meta.customer)}_${stamp}`
+      const base = `${SLUG[product]}-report_${sanitize(estate.combined.meta.customer)}_${stamp}`
       if (kind === 'pptx') {
         // Dynamically imported so pptxgenjs + jszip stay out of the main bundle.
         const { buildPptx } = await import('../engines/export/pptx/builder')
@@ -72,7 +80,7 @@ export function useExport(doc: EstateDocument | null) {
     } catch (err) {
       // Surface failures (e.g. a stale dynamically-imported chunk 404 after a
       // redeploy) instead of failing silently — the button must never look dead.
-      console.error('PPDM export failed:', err)
+      console.error('Export failed:', err)
       setError(i18n.t('common:export.error') as string)
     } finally {
       setBusy(null)

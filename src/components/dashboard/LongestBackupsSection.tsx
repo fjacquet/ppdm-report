@@ -1,6 +1,16 @@
 import { useTranslation } from 'react-i18next'
+import { backupDurationTone } from '../../engines/export/thresholds'
+import type { ExportTone } from '../../engines/export/types'
 import type { ReportView } from '../../types/reportView'
 import { fmtNum, formatBytes, gbToBytes } from '../../utils/format'
+
+const TONE_CLASS: Record<ExportTone, string> = {
+  ok: 'text-emerald-600 dark:text-emerald-400',
+  warn: 'text-amber-600 dark:text-amber-400',
+  bad: 'text-red-600 dark:text-red-400',
+  accent: '',
+  muted: '',
+}
 
 export function LongestBackupsSection({ view }: { view: ReportView }) {
   const { t, i18n } = useTranslation(['dashboard', 'common'])
@@ -41,7 +51,11 @@ export function LongestBackupsSection({ view }: { view: ReportView }) {
                 >
                   <td className="py-1.5 pr-4 font-medium">{r.server}</td>
                   <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{r.policyType}</td>
-                  <td className="py-1.5 pr-4 text-right">{fmtNum(r.durationHr, locale, 1)}</td>
+                  <td
+                    className={`py-1.5 pr-4 text-right font-semibold ${TONE_CLASS[backupDurationTone(r.durationHr)]}`}
+                  >
+                    {fmtNum(r.durationHr, locale, 1)}
+                  </td>
                   <td className="py-1.5 pr-4 text-right">
                     {r.capacityGb === undefined
                       ? '–'

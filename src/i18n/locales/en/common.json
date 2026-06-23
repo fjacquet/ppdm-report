@@ -1,7 +1,13 @@
 {
-  "appTitle": "PPDM Report",
+  "appTitle": "Data Protection Report",
+  "reportTitle": "{{product}} Report",
+  "product": {
+    "ppdm": "PowerProtect Data Manager",
+    "avamar": "Avamar",
+    "networker": "NetWorker"
+  },
   "upload": {
-    "drop": "Drop your PPDM export file here",
+    "drop": "Drop your Live Optics export here",
     "choose": "Choose file",
     "parsing": "Parsing…"
   },
