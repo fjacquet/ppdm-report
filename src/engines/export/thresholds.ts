@@ -40,3 +40,15 @@ export function utilizationTone(pct: number): ExportTone {
   if (pct >= 70) return 'warn'
   return 'ok'
 }
+
+/** At-risk client count — any breach is a warning. */
+export function atRiskTone(count: number): ExportTone {
+  return count === 0 ? 'ok' : 'warn'
+}
+
+/** Backup duration (hours) — long jobs threaten the window. */
+export function backupDurationTone(hours: number): ExportTone {
+  if (hours >= 12) return 'bad'
+  if (hours >= 4) return 'warn'
+  return 'ok'
+}

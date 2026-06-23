@@ -35,20 +35,21 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
 }
 
 /** Provenance for a single Avamar server: count-based coverage + node capacity available;
- *  per-type coverage and copy compliance are not in Avamar exports. */
+ *  per-type coverage unavailable; replication resilience + front-end volumetry available
+ *  via detail sheets. */
 export function avamarProvenance(): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
     gapsList: { available: true, serversCovered: 1, serversTotal: 1 },
     compliance: {
-      available: false,
-      serversCovered: 0,
+      available: true,
+      serversCovered: 1,
       serversTotal: 1,
-      assetsCovered: 0,
-      assetsTotal: 0,
+      assetsCovered: 1,
+      assetsTotal: 1,
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
-    frontEnd: { available: false, serversCovered: 0, serversTotal: 1 },
+    frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
   }
 }
 

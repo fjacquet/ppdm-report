@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
+import { emptyOpsInsights } from '../aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../aggregation/provenance'
 import { buildExportModel } from './buildExportModel'
 
@@ -69,6 +70,7 @@ const view: ReportView = {
   },
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
   frontEnd: { byType: [], excludedCount: 0 },
+  opsInsights: emptyOpsInsights(),
   provenance: allAvailable(0),
 }
 
@@ -164,6 +166,77 @@ describe('buildExportModel', () => {
     const model = buildExportModel(base2View, 'assessment', 'light', t, 'en')
     expect(model.footer).toContain('base-2')
     expect(model.footer).not.toContain('base-10')
+  })
+
+  it('formats volumetry and policy capacity in base-2 (GiB/TiB) when meta.baseTen is false', () => {
+    const base2View: ReportView = {
+      ...view,
+      meta: { ...view.meta, baseTen: false },
+      frontEnd: {
+        byType: [
+          {
+            type: 'VMs',
+            protectedDiscoveredGb: 1024,
+            protectedFetbGb: 1024,
+            unprotectedDiscoveredGb: 512,
+            unprotectedFetbGb: 512,
+          },
+        ],
+        excludedCount: 0,
+      },
+      policies: {
+        count: 1,
+        byPurpose: { CENTRALIZED: 1 },
+        perPolicy: [
+          { name: 'P1', purpose: 'CENTRALIZED', assetCount: 1, protectionCapacityGb: 1024 },
+        ],
+      },
+    }
+    const model = buildExportModel(base2View, 'assessment', 'light', t, 'en')
+    // volumetry section: 1024 base-2 GiB = 1.0 TiB (not 1.0 TB)
+    const vol = model.sections.find((s) => s.id === 'volumetry')
+    const row0 = vol?.table?.rows[0]
+    expect(row0?.some((cell) => /TiB|GiB/.test(cell))).toBe(true)
+    expect(row0?.some((cell) => /\bTB\b|\bGB\b/.test(cell))).toBe(false)
+    // policies section: per-policy capacity 1024 base-2 GiB = 1.0 TiB (not 1.0 TB)
+    const pol = model.sections.find((s) => s.id === 'policies')
+    const polRow = pol?.table?.rows[0]
+    expect(polRow?.some((cell) => /TiB|GiB/.test(cell))).toBe(true)
+    expect(polRow?.some((cell) => /\bTB\b|\bGB\b/.test(cell))).toBe(false)
+  })
+
+  it('formats volumetry and policy capacity in base-10 (GB/TB) when meta.baseTen is true', () => {
+    const v: ReportView = {
+      ...view,
+      frontEnd: {
+        byType: [
+          {
+            type: 'VMs',
+            protectedDiscoveredGb: 1000,
+            protectedFetbGb: 1000,
+            unprotectedDiscoveredGb: 500,
+            unprotectedFetbGb: 500,
+          },
+        ],
+        excludedCount: 0,
+      },
+      policies: {
+        count: 1,
+        byPurpose: { CENTRALIZED: 1 },
+        perPolicy: [
+          { name: 'P1', purpose: 'CENTRALIZED', assetCount: 1, protectionCapacityGb: 1000 },
+        ],
+      },
+    }
+    const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+    const vol = model.sections.find((s) => s.id === 'volumetry')
+    const row0 = vol?.table?.rows[0]
+    expect(row0?.some((cell) => /\bTB\b|\bGB\b/.test(cell))).toBe(true)
+    expect(row0?.some((cell) => /TiB|GiB/.test(cell))).toBe(false)
+    const pol = model.sections.find((s) => s.id === 'policies')
+    const polRow = pol?.table?.rows[0]
+    expect(polRow?.some((cell) => /\bTB\b|\bGB\b/.test(cell))).toBe(true)
+    expect(polRow?.some((cell) => /TiB|GiB/.test(cell))).toBe(false)
   })
 
   it('builds a deck for every section + a posture stack', () => {
@@ -269,6 +342,19 @@ describe('buildExportModel', () => {
         ],
         excludedCount: 0,
       },
+      // non-empty opsInsights so atRisk/agentVersions/longestBackups render and add no suppression warnings
+      opsInsights: {
+        agentVersions: [{ version: '19.4', count: 1 }],
+        atRisk: {
+          overtime: { items: [{ name: 'c1' }], total: 1, shown: 1 },
+          staleBackups: { items: [], total: 0, shown: 0 },
+        },
+        longestBackups: {
+          items: [{ server: 's1', policyType: 'FS', durationHr: 2 }],
+          total: 1,
+          shown: 1,
+        },
+      },
     }
     const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
     expect(model.warnings).toEqual(['cap note', 'merge note'])
@@ -312,6 +398,7 @@ describe('buildExportModel', () => {
   it('adds a partialAssets caveat when compliance has partial asset coverage', () => {
     const partialView: ReportView = {
       ...view,
+      opsInsights: emptyOpsInsights(),
       provenance: {
         ...allAvailable(3886),
         compliance: {
@@ -438,5 +525,39 @@ describe('buildExportModel', () => {
     const v = baseView({ frontEnd: { byType: [], excludedCount: 0 } })
     const model = buildExportModel(v, 'assessment', 'light', t, 'en')
     expect(model.sections.find((s) => s.id === 'volumetry')).toBeUndefined()
+  })
+
+  it('renders the three ops-insight sections when opsInsights is populated', () => {
+    const v = baseView({
+      opsInsights: {
+        agentVersions: [{ version: '19.4', count: 4 }],
+        atRisk: {
+          overtime: { items: [{ name: 'c1', clientType: 'VM' }], total: 1, shown: 1 },
+          staleBackups: { items: [{ name: 'c2' }], total: 1, shown: 1 },
+        },
+        longestBackups: {
+          items: [
+            { server: 's1', policyType: 'FS', durationHr: 10, capacityGb: 5, throughputMbSec: 2 },
+          ],
+          total: 1,
+          shown: 1,
+        },
+      },
+    })
+    const model = buildExportModel(v, 'ops', 'light', t, 'en-US')
+    const ids = model.sections.map((s) => s.id)
+    expect(ids).toContain('agentVersions')
+    expect(ids).toContain('atRisk')
+    expect(ids).toContain('longestBackups')
+    const atRisk = model.sections.find((s) => s.id === 'atRisk')
+    expect(atRisk?.table?.rows.length).toBe(2) // overtime + stale flattened
+  })
+
+  it('suppresses ops-insight sections when opsInsights is empty', () => {
+    const model = buildExportModel(baseView({}), 'ops', 'light', t, 'en-US')
+    const ids = model.sections.map((s) => s.id)
+    expect(ids).not.toContain('agentVersions')
+    expect(ids).not.toContain('atRisk')
+    expect(ids).not.toContain('longestBackups')
   })
 })

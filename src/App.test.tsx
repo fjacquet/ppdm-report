@@ -13,7 +13,7 @@ afterEach(() => {
 
 test('renders the app title', () => {
   render(<App />)
-  expect(screen.getByRole('heading', { name: 'PPDM Report' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Data Protection Report' })).toBeInTheDocument()
 })
 
 test('links to the documentation in a new tab', () => {

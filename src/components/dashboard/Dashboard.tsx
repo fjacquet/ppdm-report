@@ -2,12 +2,15 @@ import { SECTION_ORDER, type SectionId } from '../../engines/export/sectionOrder
 import { useTheme } from '../../hooks/useTheme'
 import { useReportStore } from '../../store/reportStore'
 import type { ReportView, ServerView } from '../../types/reportView'
+import { AgentVersionsSection } from './AgentVersionsSection'
+import { AtRiskSection } from './AtRiskSection'
 import { CapacitySection } from './CapacitySection'
 import { CoverageSection } from './CoverageSection'
 import { ExecutiveKpis } from './ExecutiveKpis'
 import { GapsSection } from './GapsSection'
 import { IdleAgentsSection } from './IdleAgentsSection'
 import { JobsComplianceSection } from './JobsComplianceSection'
+import { LongestBackupsSection } from './LongestBackupsSection'
 import { PerServerSection } from './PerServerSection'
 import { PoliciesSection } from './PoliciesSection'
 import { WarningsBanner } from './WarningsBanner'
@@ -43,6 +46,12 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return <CapacitySection key={id} view={view} dark={dark} />
       case 'policies':
         return <PoliciesSection key={id} view={view} dark={dark} />
+      case 'atRisk':
+        return <AtRiskSection key={id} view={view} />
+      case 'agentVersions':
+        return <AgentVersionsSection key={id} view={view} />
+      case 'longestBackups':
+        return <LongestBackupsSection key={id} view={view} />
     }
   }
 

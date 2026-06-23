@@ -113,6 +113,42 @@ export interface FrontEnd {
   excludedCount: number
 }
 
+/** One agent/client-software version and how many clients run it. */
+export interface AgentVersionRow {
+  version: string
+  count: number
+}
+
+/** A client flagged as at-risk (window breach or stale backup). */
+export interface AtRiskClient {
+  name: string
+  clientType?: string
+}
+
+/** Two distinct at-risk populations. */
+export interface AtRiskClients {
+  /** Clients breaching their backup window. */
+  overtime: TopList<AtRiskClient>
+  /** Clients with no backup in the last 7 days. */
+  staleBackups: TopList<AtRiskClient>
+}
+
+/** One long-running backup job. */
+export interface LongBackupRow {
+  server: string
+  policyType: string
+  durationHr: number
+  capacityGb?: number
+  throughputMbSec?: number
+}
+
+/** Cross-product operational insights. Populated by Avamar today; empty elsewhere. */
+export interface OpsInsights {
+  agentVersions: AgentVersionRow[]
+  atRisk: AtRiskClients
+  longestBackups: TopList<LongBackupRow>
+}
+
 /** The single derived view of the whole report. Recomputed, never stored. */
 export interface ReportView {
   meta: CaptureMeta
@@ -126,6 +162,7 @@ export interface ReportView {
   capacity: Capacity
   policies: Policies
   frontEnd: FrontEnd
+  opsInsights: OpsInsights
   provenance: Record<MetricKey, MetricProvenance>
 }
 

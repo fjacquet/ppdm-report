@@ -3,7 +3,15 @@ import { basename, dirname, join } from 'node:path'
 import { buildExportModel } from '../engines/export/buildExportModel'
 import { buildPptx } from '../engines/export/pptx/builder'
 import { ingestReport } from '../engines/ingestReport'
+import type { ProductId } from '../types/ppdm'
 import { createReportT } from './i18n'
+
+const SLUG: Record<ProductId, string> = {
+  ppdm: 'ppdm',
+  avamar: 'avamar',
+  networker: 'networker',
+  unknown: 'report',
+}
 
 interface Args {
   input?: string
@@ -39,6 +47,7 @@ export async function runCli(argv: string[]): Promise<number> {
   try {
     const bytes = await readFile(args.input)
     const doc = ingestReport([{ name: basename(args.input), bytes }])
+    const product: ProductId = doc.products[0]?.product ?? 'unknown'
     const estate = doc.products[0]?.estate
     if (!estate) {
       process.stderr.write('error: no product estate produced from the input\n')
@@ -52,11 +61,15 @@ export async function runCli(argv: string[]): Promise<number> {
       t,
       args.lang,
       estate.perServer,
+      product,
     )
     const deck = await buildPptx(model, args.theme)
     const out =
       args.out ??
-      join(dirname(args.input), `${basename(args.input).replace(/\.[^.]+$/, '')}_ppdm-report.pptx`)
+      join(
+        dirname(args.input),
+        `${basename(args.input).replace(/\.[^.]+$/, '')}_${SLUG[product]}-report.pptx`,
+      )
     await writeFile(out, Buffer.from(deck))
     if (!args.quiet) process.stdout.write(`${out}\n`)
     return 0

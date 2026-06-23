@@ -13,13 +13,19 @@ export default function App() {
   const { t } = useTranslation('common')
   const report = useReportView()
 
+  const products = report?.products ?? []
+  const headerTitle =
+    products.length === 1 && products[0] !== undefined && products[0].product !== 'unknown'
+      ? t('reportTitle', { product: t(`product.${products[0].product}`) })
+      : t('appTitle')
+
   return (
     <div
       className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
       style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
     >
       <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-6 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <h1 className="text-xl font-bold">{t('appTitle')}</h1>
+        <h1 className="text-xl font-bold">{headerTitle}</h1>
         <div className="flex flex-wrap items-center gap-3">
           <a
             href="https://github.com/fjacquet/ppdm-report/blob/main/docs/USER-GUIDE.md"

@@ -22,11 +22,11 @@ describe('buildAvamarView', () => {
     expect(c.byType).toEqual({})
   })
 
-  it('jobs: Avamar-native buckets, success excludes exception+failed', () => {
+  it('jobs: detail DPN-Summary buckets, restore excluded, capped false', () => {
     const j = view().jobs
-    expect(j.counts).toEqual({ SUCCESS: 7, EXCEPTION: 1, FAILED: 2 })
-    expect(j.total).toBe(10)
-    expect(j.successPct).toBeCloseTo(7 / 10, 6)
+    expect(j.counts).toEqual({ SUCCESS: 2, EXCEPTION: 1, FAILED: 1 })
+    expect(j.total).toBe(4)
+    expect(j.successPct).toBeCloseTo(0.5, 6)
     expect(j.capped).toBe(false)
   })
 
@@ -54,26 +54,40 @@ describe('buildAvamarView', () => {
     ])
   })
 
-  it('inUse = plugins with count>0; idleAgents = disabled groups (domain-disambiguated)', () => {
-    const v = view()
-    expect(v.inUse).toEqual(['Linux VMware Image'])
-    expect(v.idleAgents).toEqual(['Default Group', 'Default Virtual Machine Group (/dc1)'])
+  it('inUse = detail Policy Types (GC + No Plug-in excluded)', () => {
+    expect(view().inUse).toEqual(['Linux VMware Image', 'Windows File System'])
   })
 
-  it('policies = distinct group count only', () => {
+  it('idleAgents = disabled groups (domain-disambiguated)', () => {
+    expect(view().idleAgents).toEqual(['Default Group', 'Default Virtual Machine Group (/dc1)'])
+  })
+
+  it('policies = distinct Group Name with per-group hosts + capacity', () => {
     const p = view().policies
-    expect(p.count).toBe(2)
+    expect(p.count).toBe(3)
     expect(p.byPurpose).toEqual({})
-    expect(p.perPolicy).toEqual([])
+    expect(p.perPolicy).toContainEqual({
+      name: 'G1',
+      purpose: '',
+      assetCount: 2,
+      protectionCapacityGb: 30,
+    })
   })
 
-  it('compliance is empty and provenance marks the right metrics', () => {
+  it('front-end volumetry per Application (base-2 GiB)', () => {
+    const fe = view().frontEnd
+    expect(fe.byType).toContainEqual({ type: 'Linux VMware Image', protectedDiscoveredGb: 125 })
+    expect(fe.byType).toContainEqual({ type: 'Windows File System', protectedDiscoveredGb: 50 })
+  })
+
+  it('replication resilience populated; provenance marks compliance + frontEnd available', () => {
     const v = view()
-    expect(v.compliance.windowSize).toBe(0)
+    expect(v.compliance.replicatedPct).toBeCloseTo(0.9, 6)
     expect(v.compliance.immutablePct).toBe(0)
     expect(v.provenance.coverageByType.available).toBe(false)
+    expect(v.provenance.compliance.available).toBe(true)
+    expect(v.provenance.frontEnd.available).toBe(true)
     expect(v.provenance.gapsList.available).toBe(true)
-    expect(v.provenance.compliance.available).toBe(false)
     expect(v.provenance.storageTargets.available).toBe(true)
   })
 })

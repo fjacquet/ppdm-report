@@ -7,7 +7,13 @@ export type SlidePlanItem =
   | { kind: 'table'; section: ExportSection }
 
 /** Section ids that render full-width in place (not band-paired, not in the appendix). */
-const FULLWIDTH: Record<string, 'single' | 'table'> = { idle: 'single', volumetry: 'table' }
+const FULLWIDTH: Record<string, 'single' | 'table'> = {
+  idle: 'single',
+  volumetry: 'table',
+  atRisk: 'table',
+  agentVersions: 'table',
+  longestBackups: 'table',
+}
 
 /**
  * Pair sections into band-slides. Full-width sections (`idle` → tiles single,

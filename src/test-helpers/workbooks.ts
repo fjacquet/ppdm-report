@@ -176,9 +176,9 @@ export function networkerWorkbookBuffer(): ArrayBuffer {
 }
 
 /**
- * Synthetic AVAMAR workbook (Backup Completion Summary, NonRetired/Retired
- * client counts, Clients No Backups, Backup Plugins, Node Utilization, Disabled
- * Groups, Group Summary), mirroring a Dell Avamar Live Optics export.
+ * Synthetic AVAMAR workbook (detail-first: Avamar DPN Summary + Job List Detailed
+ * + Client Capacity + Replication sheets; summary sheets retained as fallback),
+ * mirroring a Dell Avamar Live Optics export with full detail data.
  */
 export function avamarWorkbookBuffer(): ArrayBuffer {
   return makeWorkbook({
@@ -191,10 +191,38 @@ export function avamarWorkbookBuffer(): ArrayBuffer {
       ['Hostname', 'Serial'],
       ['ava-host', 'SN1'],
     ],
+    // Detail jobs: 4 backups (1 restore excluded) → SUCCESS 2 / EXCEPTION 1 / FAILED 1
     'Avamar DPN Summary': [
-      ['Server', 'Host', 'Status'],
-      ['ava-host', 'h1', 'Activity completed successfully.'],
+      ['Server', 'Host', 'Operation', 'Status'],
+      ['ava-host', 'h1', 'On-Demand Backup', 'Activity completed successfully.'],
+      ['ava-host', 'h2', 'On-Demand Backup', 'Activity completed successfully.'],
+      ['ava-host', 'h3', 'Scheduled Backup', 'Activity completed with exceptions.'],
+      ['ava-host', 'h4', 'On-Demand Backup', 'Activity failed - client error(s).'],
+      ['ava-host', 'h5', 'Restore', 'Activity completed successfully.'],
     ],
+    // Detail workloads + policies. Policy Types: GC + No Plug-in excluded from inUse.
+    'Job List Detailed': [
+      ['Host', 'Policy Type', 'Job Type', 'Group Name', 'Capacity (GiB)'],
+      ['h1', 'Linux VMware Image', 'Backup', 'G1', 10],
+      ['h2', 'Windows File System', 'Backup', 'G1', 20],
+      ['h3', 'Linux VMware Image', 'Backup', 'G2', 5],
+      ['h4', 'GC', 'GC', 'G2', 0],
+      ['h5', 'No Plug-in', 'Backup', 'G3', 1],
+    ],
+    // Front-end volumetry: Linux VMware Image 125 GiB, Windows File System 50 GiB
+    'Client Capacity': [
+      ['Hostname', 'Application', 'Max Peak GiB'],
+      ['h1', 'Linux VMware Image', 100],
+      ['h2', 'Windows File System', 50],
+      ['h3', 'Linux VMware Image', 25],
+    ],
+    // Replication resilience: 90/100 = 90%
+    'Replication (Completion Status)': [
+      ['Status', 'Total'],
+      ['Activity completed successfully.', 90],
+      ['Activity failed - client error(s).', 10],
+    ],
+    // Summary sheets retained (now fallback-only; detail wins above)
     'Backup Completion Summary': [
       ['Total', 'Successful', 'Exception', 'Failed'],
       [10, 7, 1, 2],
