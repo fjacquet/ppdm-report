@@ -121,6 +121,7 @@ describe('computeFrontEnd', () => {
     const fs = fe.byType.find((r) => r.type === 'File Systems')
     expect(fs?.unprotectedDiscoveredGb).toBe(0) // no unprotected assets → measured 0
     const nas = fe.byType.find((r) => r.type === 'NAS')
+    expect(nas).toBeDefined() // guard: a dropped NAS row must fail, not pass via ?. on undefined
     expect(nas?.protectedDiscoveredGb).toBeUndefined() // column absent
     expect(nas?.protectedFetbGb).toBeUndefined()
   })
