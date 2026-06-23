@@ -1,7 +1,6 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
-import { emptyFrontEnd } from '../../aggregation/frontEnd'
 import { networkerProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr, countBy } from '../../aggregation/rows'
 
@@ -72,6 +71,20 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     .filter((r) => cellNum(r, 'Front End Capacity (GB)') === 0)
     .map((r) => cellStr(r, 'Workload Type'))
 
+  // front-end volumetry — capacity-bearing workload rows map to protected FETB.
+  const frontEnd = {
+    byType: workloadRows
+      .filter((r) => cellNum(r, 'Front End Capacity (GB)') > 0)
+      .map((r) => ({
+        type: cellStr(r, 'Workload Type'),
+        protectedFetbGb: cellNum(r, 'Front End Capacity (GB)'),
+        protectedDiscoveredGb: undefined,
+        unprotectedDiscoveredGb: undefined,
+        unprotectedFetbGb: undefined,
+      })),
+    excludedCount: 0,
+  }
+
   // policies — distinct protection-policy count.
   const policyNames = new Set(
     rowsOf(wb, 'Policies')
@@ -125,7 +138,7 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
       mtreeCount: distinctCount(wb, 'Dedup Jobs', 'Mtree Name'),
     },
     policies: { count: policyNames.size, byPurpose: {}, perPolicy: [] },
-    frontEnd: emptyFrontEnd(),
+    frontEnd,
     provenance: networkerProvenance(windowSize),
   }
 }
