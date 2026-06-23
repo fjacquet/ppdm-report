@@ -96,5 +96,32 @@
     "partialNote": "≥ : some workloads report no figure for that column; the total is a floor.",
     "sizingNote": "Front-end input only — back-end capacity depends on change rate, retention and dedupe.",
     "takeaway": "Front-end FETB protected: {{fetb}}"
+  },
+  "agentVersions": {
+    "title": "Agent version spread",
+    "col": { "version": "Agent version", "count": "Clients" },
+    "takeaway": "{{count}} distinct agent versions in use",
+    "caption": "Client agent versions across the estate."
+  },
+  "atRisk": {
+    "title": "At-risk clients",
+    "col": { "client": "Client", "type": "Type", "risk": "Risk" },
+    "risk": { "overtime": "Backup window breach", "stale": "No backup in 7 days" },
+    "overtimeChip": "Over window",
+    "staleChip": "Missed 7 days",
+    "takeaway": "{{overtime}} over window · {{stale}} missed in 7 days",
+    "caption": "Top {{shown}} of {{total}}."
+  },
+  "longestBackups": {
+    "title": "Longest-running backups",
+    "col": {
+      "server": "Server",
+      "type": "Workload",
+      "duration": "Duration (h)",
+      "capacity": "Capacity",
+      "throughput": "Throughput (MB/s)"
+    },
+    "takeaway": "Longest backup ran {{hours}} h",
+    "caption": "Top {{shown}} of {{total}} by duration."
   }
 }

@@ -96,5 +96,32 @@
     "partialNote": "≥ : alcuni workload non riportano alcun valore per questa colonna; il totale è un minimo.",
     "sizingNote": "Solo dato front-end — la capacità back-end dipende da tasso di variazione, retention e deduplica.",
     "takeaway": "FETB front-end protetto: {{fetb}}"
+  },
+  "agentVersions": {
+    "title": "Distribuzione versioni agent",
+    "col": { "version": "Versione agent", "count": "Client" },
+    "takeaway": "{{count}} versioni agent distinte in uso",
+    "caption": "Versioni agent dei client nel parco."
+  },
+  "atRisk": {
+    "title": "Client a rischio",
+    "col": { "client": "Client", "type": "Tipo", "risk": "Rischio" },
+    "risk": { "overtime": "Finestra di backup superata", "stale": "Nessun backup da 7 giorni" },
+    "overtimeChip": "Oltre finestra",
+    "staleChip": "Mancati 7 giorni",
+    "takeaway": "{{overtime}} oltre finestra · {{stale}} mancati in 7 giorni",
+    "caption": "Primi {{shown}} di {{total}}."
+  },
+  "longestBackups": {
+    "title": "Backup più lunghi",
+    "col": {
+      "server": "Server",
+      "type": "Workload",
+      "duration": "Durata (h)",
+      "capacity": "Capacità",
+      "throughput": "Throughput (MB/s)"
+    },
+    "takeaway": "Il backup più lungo è durato {{hours}} h",
+    "caption": "Primi {{shown}} di {{total}} per durata."
   }
 }

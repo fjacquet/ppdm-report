@@ -96,5 +96,32 @@
     "partialNote": "≥ : certaines charges ne rapportent aucune valeur pour cette colonne ; le total est un plancher.",
     "sizingNote": "Donnée front-end uniquement — la capacité back-end dépend du taux de changement, de la rétention et de la déduplication.",
     "takeaway": "FETB front-end protégé : {{fetb}}"
+  },
+  "agentVersions": {
+    "title": "Répartition des versions d'agent",
+    "col": { "version": "Version d'agent", "count": "Clients" },
+    "takeaway": "{{count}} versions d'agent distinctes utilisées",
+    "caption": "Versions des agents clients dans le parc."
+  },
+  "atRisk": {
+    "title": "Clients à risque",
+    "col": { "client": "Client", "type": "Type", "risk": "Risque" },
+    "risk": { "overtime": "Dépassement de fenêtre", "stale": "Aucune sauvegarde depuis 7 jours" },
+    "overtimeChip": "Hors fenêtre",
+    "staleChip": "Manquées 7 jours",
+    "takeaway": "{{overtime}} hors fenêtre · {{stale}} manquées en 7 jours",
+    "caption": "Top {{shown}} sur {{total}}."
+  },
+  "longestBackups": {
+    "title": "Sauvegardes les plus longues",
+    "col": {
+      "server": "Serveur",
+      "type": "Charge de travail",
+      "duration": "Durée (h)",
+      "capacity": "Capacité",
+      "throughput": "Débit (Mo/s)"
+    },
+    "takeaway": "La plus longue sauvegarde a duré {{hours}} h",
+    "caption": "Top {{shown}} sur {{total}} par durée."
   }
 }
