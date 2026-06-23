@@ -34,6 +34,44 @@ it('builds discovered-only front-end volumetry per type and marks it available',
   expect(view.provenance.frontEnd.available).toBe(true)
 })
 
+it('treats an absent capacity field as undefined (no invented 0); a present 0 stays measured', () => {
+  const wb = normalizeWorkbook(
+    makeWorkbook({
+      Details: [
+        ['Project Name', 'S'],
+        ['Date', '18/02/2025 03:54:24'],
+        ['Disclaimer', 'Base 10'],
+      ],
+      'System Configuration': [
+        ['Field', 'Value'],
+        ['Assets Count', 100],
+        ['Number of Protected Assets', 80],
+        ['Number of UnProtected Assets', 15],
+      ],
+      // protected capacity field ABSENT → undefined (not an invented 0)
+      'VMs Count And Cap': [
+        ['Field', 'Value'],
+        ['VM Asset Count', 60],
+        ['VM Capacity Unprotected Assets (GB)', 5552.92],
+      ],
+      // protected capacity field PRESENT with 0 → a genuine measured 0
+      'FileSystem Assets Count & Cap': [
+        ['Field', 'Value'],
+        ['File System Asset Count', 10],
+        ['File System Capacity Protected Assets (GB)', 0],
+        ['File System Capacity Unprotected Assets (GB)', 100],
+      ],
+    }),
+  )
+  const view = summaryView(wb)
+  const vm = view.frontEnd.byType.find((r) => r.type === 'Virtual Machines')
+  expect(vm?.protectedDiscoveredGb).toBeUndefined()
+  expect(vm?.unprotectedDiscoveredGb).toBeCloseTo(5552.92)
+  const fs = view.frontEnd.byType.find((r) => r.type === 'File Systems')
+  expect(fs?.protectedDiscoveredGb).toBe(0)
+  expect(fs?.unprotectedDiscoveredGb).toBeCloseTo(100)
+})
+
 describe('summaryView — synthetic summary workbook', () => {
   const v = summaryView(normalizeWorkbook(summaryWorkbookBuffer()))
 
