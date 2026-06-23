@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   appConsistentTone,
+  atRiskTone,
+  backupDurationTone,
   coverageTone,
   immutableTone,
   jobSuccessTone,
@@ -40,5 +42,17 @@ describe('thresholds', () => {
     expect(utilizationTone(40)).toBe('ok')
     expect(utilizationTone(75)).toBe('warn')
     expect(utilizationTone(87.6)).toBe('bad')
+  })
+})
+
+describe('ops-insight tones', () => {
+  it('atRiskTone: zero ok, any breach warn', () => {
+    expect(atRiskTone(0)).toBe('ok')
+    expect(atRiskTone(5)).toBe('warn')
+  })
+  it('backupDurationTone: bands at 4h and 12h', () => {
+    expect(backupDurationTone(2)).toBe('ok')
+    expect(backupDurationTone(6)).toBe('warn')
+    expect(backupDurationTone(20)).toBe('bad')
   })
 })
