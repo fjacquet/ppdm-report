@@ -3,6 +3,7 @@ import { DARK, LIGHT } from '../../theme/palette'
 import type { MetricKey, MetricProvenance, ReportView, ServerView } from '../../types/reportView'
 import {
   fmtInt,
+  fmtNum,
   fmtPercent,
   fmtPercentValue,
   fmtPercentWhole,
@@ -14,6 +15,7 @@ import { FRONT_END_METRICS } from '../aggregation/frontEnd'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
 import {
   appConsistentTone,
+  atRiskTone,
   coverageTone,
   immutableTone,
   jobSuccessTone,
@@ -102,7 +104,18 @@ export function buildExportModel(
   perServer: ServerView[] = [],
 ): ExportModel {
   const pal = theme === 'dark' ? DARK : LIGHT
-  const { coverage, gaps, jobs, compliance, capacity, policies, meta, idleAgents, frontEnd } = view
+  const {
+    coverage,
+    gaps,
+    jobs,
+    compliance,
+    capacity,
+    policies,
+    meta,
+    idleAgents,
+    frontEnd,
+    opsInsights,
+  } = view
 
   const execKpis = [
     {
@@ -491,6 +504,130 @@ export function buildExportModel(
     },
   }
 
+  const b10 = meta.baseTen
+  const bytesOf = (gb: number) => formatBytes(gbToBytes(gb, b10), locale, b10)
+
+  const { agentVersions, atRisk, longestBackups } = opsInsights
+
+  const agentVersionsSection: ExportSection = {
+    id: 'agentVersions',
+    title: t('dashboard:agentVersions.title'),
+    table: {
+      columns: [t('dashboard:agentVersions.col.version'), t('dashboard:agentVersions.col.count')],
+      rows: agentVersions.map((r) => [r.version, fmtInt(r.count, locale)]),
+      caption: t('dashboard:agentVersions.caption'),
+    },
+    deck:
+      agentVersions.length > 0
+        ? {
+            subtitle: t('dashboard:agentVersions.takeaway', {
+              count: fmtInt(agentVersions.length, locale),
+            }),
+            kpiChips: [
+              {
+                label: t('dashboard:agentVersions.title'),
+                value: fmtInt(agentVersions.length, locale),
+                tone: 'accent',
+              },
+            ],
+            bars: toBars(
+              agentVersions.slice(0, 8).map((r) => ({
+                label: r.version,
+                magnitude: r.count,
+                value: fmtInt(r.count, locale),
+                tone: (r.version === 'Unknown' ? 'warn' : 'accent') as ExportTone,
+              })),
+              pal,
+            ),
+          }
+        : undefined,
+  }
+
+  const atRiskRows: string[][] = [
+    ...atRisk.overtime.items.map((c) => [
+      c.name,
+      c.clientType ?? '',
+      t('dashboard:atRisk.risk.overtime'),
+    ]),
+    ...atRisk.staleBackups.items.map((c) => [
+      c.name,
+      c.clientType ?? '',
+      t('dashboard:atRisk.risk.stale'),
+    ]),
+  ]
+  const atRiskSection: ExportSection = {
+    id: 'atRisk',
+    title: t('dashboard:atRisk.title'),
+    table: {
+      columns: [
+        t('dashboard:atRisk.col.client'),
+        t('dashboard:atRisk.col.type'),
+        t('dashboard:atRisk.col.risk'),
+      ],
+      rows: atRiskRows,
+      caption: t('dashboard:atRisk.caption', {
+        shown: atRiskRows.length,
+        total: atRisk.overtime.total + atRisk.staleBackups.total,
+      }),
+    },
+    deck:
+      atRiskRows.length > 0
+        ? {
+            subtitle: t('dashboard:atRisk.takeaway', {
+              overtime: fmtInt(atRisk.overtime.total, locale),
+              stale: fmtInt(atRisk.staleBackups.total, locale),
+            }),
+            kpiChips: [
+              {
+                label: t('dashboard:atRisk.overtimeChip'),
+                value: fmtInt(atRisk.overtime.total, locale),
+                tone: atRiskTone(atRisk.overtime.total),
+              },
+              {
+                label: t('dashboard:atRisk.staleChip'),
+                value: fmtInt(atRisk.staleBackups.total, locale),
+                tone: atRiskTone(atRisk.staleBackups.total),
+              },
+            ],
+          }
+        : undefined,
+  }
+
+  const longestBackupsSection: ExportSection = {
+    id: 'longestBackups',
+    title: t('dashboard:longestBackups.title'),
+    table: {
+      columns: [
+        t('dashboard:longestBackups.col.server'),
+        t('dashboard:longestBackups.col.type'),
+        t('dashboard:longestBackups.col.duration'),
+        t('dashboard:longestBackups.col.capacity'),
+        t('dashboard:longestBackups.col.throughput'),
+      ],
+      rows: longestBackups.items.map((r) => [
+        r.server,
+        r.policyType,
+        fmtNum(r.durationHr, locale, 1),
+        r.capacityGb === undefined ? t('common:sizeUnknown') : bytesOf(r.capacityGb),
+        r.throughputMbSec === undefined
+          ? t('common:sizeUnknown')
+          : fmtNum(r.throughputMbSec, locale, 1),
+      ]),
+      caption: t('dashboard:longestBackups.caption', {
+        shown: longestBackups.shown,
+        total: longestBackups.total,
+      }),
+    },
+    deck:
+      longestBackups.items.length > 0
+        ? {
+            subtitle: t('dashboard:longestBackups.takeaway', {
+              hours: fmtNum(longestBackups.items[0]?.durationHr ?? 0, locale, 1),
+            }),
+          }
+        : undefined,
+  }
+
   const feBytes = (gb: number) => formatBytes(gbToBytes(gb), locale)
   const feCell = (gb: number | undefined) => formatGbOrUnknown(gb, locale, t('common:sizeUnknown'))
   const feTotalCell = (k: (typeof FRONT_END_METRICS)[number]): string => {
@@ -581,6 +718,9 @@ export function buildExportModel(
     resilience: withCaveat(complianceSection, 'compliance', view, t),
     capacity: withCaveat(capacitySection, 'storageTargets', view, t),
     policies: policiesSection,
+    atRisk: atRiskSection,
+    agentVersions: agentVersionsSection,
+    longestBackups: longestBackupsSection,
   }
   const allSections = SECTION_ORDER[flavor]
     .map((id) => byId[id])

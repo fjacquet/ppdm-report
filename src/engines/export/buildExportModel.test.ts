@@ -271,6 +271,19 @@ describe('buildExportModel', () => {
         ],
         excludedCount: 0,
       },
+      // non-empty opsInsights so atRisk/agentVersions/longestBackups render and add no suppression warnings
+      opsInsights: {
+        agentVersions: [{ version: '19.4', count: 1 }],
+        atRisk: {
+          overtime: { items: [{ name: 'c1' }], total: 1, shown: 1 },
+          staleBackups: { items: [], total: 0, shown: 0 },
+        },
+        longestBackups: {
+          items: [{ server: 's1', policyType: 'FS', durationHr: 2 }],
+          total: 1,
+          shown: 1,
+        },
+      },
     }
     const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
     expect(model.warnings).toEqual(['cap note', 'merge note'])
@@ -441,5 +454,39 @@ describe('buildExportModel', () => {
     const v = baseView({ frontEnd: { byType: [], excludedCount: 0 } })
     const model = buildExportModel(v, 'assessment', 'light', t, 'en')
     expect(model.sections.find((s) => s.id === 'volumetry')).toBeUndefined()
+  })
+
+  it('renders the three ops-insight sections when opsInsights is populated', () => {
+    const v = baseView({
+      opsInsights: {
+        agentVersions: [{ version: '19.4', count: 4 }],
+        atRisk: {
+          overtime: { items: [{ name: 'c1', clientType: 'VM' }], total: 1, shown: 1 },
+          staleBackups: { items: [{ name: 'c2' }], total: 1, shown: 1 },
+        },
+        longestBackups: {
+          items: [
+            { server: 's1', policyType: 'FS', durationHr: 10, capacityGb: 5, throughputMbSec: 2 },
+          ],
+          total: 1,
+          shown: 1,
+        },
+      },
+    })
+    const model = buildExportModel(v, 'ops', 'light', t, 'en-US')
+    const ids = model.sections.map((s) => s.id)
+    expect(ids).toContain('agentVersions')
+    expect(ids).toContain('atRisk')
+    expect(ids).toContain('longestBackups')
+    const atRisk = model.sections.find((s) => s.id === 'atRisk')
+    expect(atRisk?.table?.rows.length).toBe(2) // overtime + stale flattened
+  })
+
+  it('suppresses ops-insight sections when opsInsights is empty', () => {
+    const model = buildExportModel(baseView({}), 'ops', 'light', t, 'en-US')
+    const ids = model.sections.map((s) => s.id)
+    expect(ids).not.toContain('agentVersions')
+    expect(ids).not.toContain('atRisk')
+    expect(ids).not.toContain('longestBackups')
   })
 })
