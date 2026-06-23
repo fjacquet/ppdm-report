@@ -10,6 +10,7 @@ import {
   formatGbOrUnknown,
   gbToBytes,
 } from '../../utils/format'
+import { FRONT_END_METRICS } from '../aggregation/frontEnd'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
 import {
   appConsistentTone,
@@ -101,7 +102,7 @@ export function buildExportModel(
   perServer: ServerView[] = [],
 ): ExportModel {
   const pal = theme === 'dark' ? DARK : LIGHT
-  const { coverage, gaps, jobs, compliance, capacity, policies, meta, idleAgents } = view
+  const { coverage, gaps, jobs, compliance, capacity, policies, meta, idleAgents, frontEnd } = view
 
   const execKpis = [
     {
@@ -490,10 +491,83 @@ export function buildExportModel(
     },
   }
 
+  const feBytes = (gb: number) => formatBytes(gbToBytes(gb), locale)
+  const feCell = (gb: number | undefined) => formatGbOrUnknown(gb, locale, t('common:sizeUnknown'))
+  const feTotalCell = (k: (typeof FRONT_END_METRICS)[number]): string => {
+    const defined = frontEnd.byType.filter((r) => r[k] !== undefined)
+    if (defined.length === 0) return t('common:sizeUnknown')
+    const sum = defined.reduce((acc, r) => acc + (r[k] as number), 0)
+    const cell = feBytes(sum)
+    return defined.length < frontEnd.byType.length ? `≥ ${cell}` : cell
+  }
+  const feHasPartial = FRONT_END_METRICS.some((k) => {
+    const def = frontEnd.byType.filter((r) => r[k] !== undefined).length
+    return def > 0 && def < frontEnd.byType.length
+  })
+  const feProtFetb = frontEnd.byType.reduce((a, r) => a + (r.protectedFetbGb ?? 0), 0)
+  const feUnprotDisc = frontEnd.byType.reduce((a, r) => a + (r.unprotectedDiscoveredGb ?? 0), 0)
+  const hasFrontEnd = frontEnd.byType.length > 0
+
+  const volumetrySection: ExportSection = {
+    id: 'volumetry',
+    title: t('dashboard:volumetry.title'),
+    table: {
+      columns: [
+        t('dashboard:volumetry.col.type'),
+        t('dashboard:volumetry.col.protectedDiscovered'),
+        t('dashboard:volumetry.col.protectedFetb'),
+        t('dashboard:volumetry.col.unprotectedDiscovered'),
+        t('dashboard:volumetry.col.unprotectedFetb'),
+      ],
+      rows: [
+        ...frontEnd.byType.map((r) => [
+          r.type,
+          feCell(r.protectedDiscoveredGb),
+          feCell(r.protectedFetbGb),
+          feCell(r.unprotectedDiscoveredGb),
+          feCell(r.unprotectedFetbGb),
+        ]),
+        ...(hasFrontEnd
+          ? [
+              [
+                t('dashboard:volumetry.total'),
+                feTotalCell('protectedDiscoveredGb'),
+                feTotalCell('protectedFetbGb'),
+                feTotalCell('unprotectedDiscoveredGb'),
+                feTotalCell('unprotectedFetbGb'),
+              ],
+            ]
+          : []),
+      ],
+      caption: [
+        frontEnd.excludedCount > 0
+          ? t('dashboard:volumetry.excludedNote', { count: fmtInt(frontEnd.excludedCount, locale) })
+          : '',
+        feHasPartial ? t('dashboard:volumetry.partialNote') : '',
+        t('dashboard:volumetry.sizingNote'),
+        provenanceCaveat(view.provenance.frontEnd, t),
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    },
+    ...(hasFrontEnd
+      ? {
+          deck: {
+            subtitle: t('dashboard:volumetry.takeaway', { fetb: feBytes(feProtFetb) }),
+            kpiChips: [
+              { label: t('dashboard:volumetry.col.protectedFetb'), value: feBytes(feProtFetb), tone: 'accent' as const },
+              { label: t('dashboard:volumetry.col.unprotectedDiscovered'), value: feBytes(feUnprotDisc), tone: 'warn' as const },
+            ],
+          },
+        }
+      : {}),
+  }
+
   const byId: Record<SectionId, ExportSection | null> = {
     perServer: perServerSection,
     coverage: withCaveat(coverageSection, 'coverageByType', view, t),
     exposure: withCaveat(gapsSection, 'gapsList', view, t),
+    volumetry: volumetrySection,
     idle: idleSection,
     jobs: jobsSection,
     resilience: withCaveat(complianceSection, 'compliance', view, t),

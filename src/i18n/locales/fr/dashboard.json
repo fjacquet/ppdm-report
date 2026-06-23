@@ -81,5 +81,20 @@
     "unavailable": "Non disponible pour ce type de rapport",
     "partial": "Couvre {{covered}} serveurs sur {{total}}",
     "partialAssets": "Couvre {{covered}} serveurs sur {{total}} ({{assetsCovered}} ressources sur {{assetsTotal}})"
+  },
+  "volumetry": {
+    "title": "Volumétrie front-end par charge de travail",
+    "col": {
+      "type": "Type de charge",
+      "protectedDiscovered": "Protégé · découvert",
+      "protectedFetb": "Protégé · FETB",
+      "unprotectedDiscovered": "Non protégé · découvert",
+      "unprotectedFetb": "Non protégé · FETB"
+    },
+    "total": "TOTAL",
+    "excludedNote": "{{count}} actifs exclus (p. ex. modèles, mis hors service) ne sont pas comptés.",
+    "partialNote": "≥ : certaines charges ne rapportent aucune valeur pour cette colonne ; le total est un plancher.",
+    "sizingNote": "Donnée front-end uniquement — la capacité back-end dépend du taux de changement, de la rétention et de la déduplication.",
+    "takeaway": "FETB front-end protégé : {{fetb}}"
   }
 }

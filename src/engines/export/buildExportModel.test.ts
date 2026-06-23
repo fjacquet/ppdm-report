@@ -6,6 +6,10 @@ import { buildExportModel } from './buildExportModel'
 
 const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, o) as string
 
+function baseView(over: Partial<ReportView> = {}): ReportView {
+  return { ...view, ...over }
+}
+
 const view: ReportView = {
   meta: {
     projectId: '1',
@@ -249,7 +253,15 @@ describe('buildExportModel', () => {
   })
 
   it('passes deduplicated warnings into the model', () => {
-    const dup: ReportView = { ...view, warnings: ['cap note', 'cap note', 'merge note'] }
+    const dup: ReportView = {
+      ...view,
+      warnings: ['cap note', 'cap note', 'merge note'],
+      // non-empty frontEnd so volumetry renders and adds no suppression warning
+      frontEnd: {
+        byType: [{ type: 'Virtual Machines', protectedDiscoveredGb: 10, protectedFetbGb: 5, unprotectedDiscoveredGb: 2, unprotectedFetbGb: 1 }],
+        excludedCount: 0,
+      },
+    }
     const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
     expect(model.warnings).toEqual(['cap note', 'merge note'])
   })
@@ -381,5 +393,30 @@ describe('buildExportModel', () => {
     expect(hasUnavailable(coverage?.notes)).toBe(false)
     expect(hasUnavailable(gaps?.notes)).toBe(false)
     expect(hasUnavailable(capacity?.notes)).toBe(false)
+  })
+
+  it('renders a volumetry section with a TOTAL row and ≥ floor for no-figure columns', () => {
+    const v = baseView({
+      frontEnd: {
+        byType: [
+          { type: 'Virtual Machines', protectedDiscoveredGb: 100, protectedFetbGb: 60, unprotectedDiscoveredGb: 30, unprotectedFetbGb: 3 },
+          { type: 'SQL Databases', protectedDiscoveredGb: undefined, protectedFetbGb: 15, unprotectedDiscoveredGb: undefined, unprotectedFetbGb: 2 },
+        ],
+        excludedCount: 5,
+      },
+    })
+    const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+    const sec = model.sections.find((s) => s.id === 'volumetry')!
+    expect(sec.table!.rows.length).toBe(3) // 2 types + TOTAL
+    const total = sec.table!.rows[2]!
+    expect(total[2]).toBe('75.0 GB') // protected FETB exact: 60 + 15
+    expect(total[1]!.startsWith('≥')).toBe(true) // protected discovered: SQL missing → floor
+    expect(sec.table!.caption).toContain('5') // excluded footnote
+  })
+
+  it('suppresses the volumetry section when there is no per-type data (Avamar)', () => {
+    const v = baseView({ frontEnd: { byType: [], excludedCount: 0 } })
+    const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+    expect(model.sections.find((s) => s.id === 'volumetry')).toBeUndefined()
   })
 })
