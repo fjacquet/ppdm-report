@@ -63,8 +63,9 @@ Each module exports its normalized input type(s), a compute function, and a resu
    - Avamar: `Policy Capacity-Retention` sheet (per policy type; also keep the per-policy-type split for the ops table).
    - NetWorker: `KPIs` rows `Total Capacity with Retention < 30 Days (TB)` … `>= 7 Years (TB)`.
 4. **Encryption coverage.** Avamar only: % of jobs and % of capacity with `Encrypted` ≠ false/empty in `Job List Detailed`. NetWorker unavailable.
+5. **Replication health.** Avamar only (added 2026-07-02): full status breakdown from `Replication (Completion Status)` — success / completed-with-exceptions / partial / cancelled / failed-* raw counts (sums, not vendor rates — allowed per the KPI rule), plus a failed+partial count KPI with tone. Today only the success share feeds `replicatedPct`; the failure side is invisible (GERTRI01: 1,438 exceptions + 164 partial + 35 cancelled + 15 failed behind a bare "93.8%"). Rendered as an extension of the existing **resilience** section (where replicated % already lives), not a new section. Hard limit verified on the JTI files: replication exists only as aggregate counts — no per-client/per-day replication rows in `Avamar DPN Summary` or `Job List Detailed` (Backup/Restore/GC only), so no per-client replication failure lists. NetWorker unavailable (its `Clone Status` is coverage, not success/failure; `50 Longest Clone Jobs` is empty and the vendor `Clone Success Percentage` KPI is a rate we don't ingest). PPDM unavailable (per-asset copy coverage only).
 
-**Merge rule:** never average averages — merge at the weighted-sum level (carry numerator/denominator in the result type so `mergeViews` can fold exactly). Retention buckets sum per label.
+**Merge rule:** never average averages — merge at the weighted-sum level (carry numerator/denominator in the result type so `mergeViews` can fold exactly). Retention buckets sum per label. Replication-health status counts sum per status.
 
 ## Family 3 — Capacity trend (`capacityTrend.ts`)
 
@@ -125,7 +126,7 @@ In `mergeViews`:
 Four sequential PRs to `main`, each complete (engine + adapters + UI + exports + i18n + tests):
 
 1. `feat/reliability-insights` — reliability.ts + Avamar/NetWorker wiring + sections.
-2. `feat/efficiency-retention` — efficiency.ts (dedupe, change rate, retention profile, encryption).
+2. `feat/efficiency-retention` — efficiency.ts (dedupe, change rate, retention profile, encryption, Avamar replication health).
 3. `feat/capacity-trend` — capacityTrend.ts + line chart.
 4. `feat/config-hygiene` — hygiene.ts + licenses.
 
