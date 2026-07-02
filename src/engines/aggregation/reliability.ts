@@ -166,3 +166,48 @@ export function computeReliability(
     capped: opts.capped ?? false,
   }
 }
+
+/** Fold per-server Reliability into one. Identity on a single element. Pure. */
+export function mergeReliability(list: Reliability[]): Reliability {
+  const first = list[0]
+  if (!first) return emptyReliability()
+  if (list.length === 1) return first
+
+  const items = list.flatMap((r) => r.repeatFailures.items)
+  const flaggedTotal = list.reduce((a, r) => a + r.repeatFailures.total, 0)
+  const cappedTop = topN(items, TOP_N_DEFAULT, (c) => c.failureDays)
+
+  const runtime = emptyRuntime()
+  for (const r of list) for (const id of RUNTIME_BUCKET_IDS) runtime[id] += r.runtime[id]
+
+  const queues = list.map((r) => r.queue).filter((q): q is QueueDelay => q !== undefined)
+  let queue: QueueDelay | undefined
+  if (queues.length > 0) {
+    const delayedCount = queues.reduce((a, q) => a + q.delayedCount, 0)
+    const total = queues.reduce((a, q) => a + q.total, 0)
+    const topItems = topN(
+      queues.flatMap((q) => q.top.items),
+      TOP_N_DEFAULT,
+      (q) => q.queuedHours,
+    )
+    queue = {
+      delayedCount,
+      total,
+      delayedPct: total > 0 ? delayedCount / total : 0,
+      top: { ...topItems, total: delayedCount },
+    }
+  }
+
+  const starts = list.map((r) => r.windowStart).filter((d): d is string => Boolean(d))
+  const ends = list.map((r) => r.windowEnd).filter((d): d is string => Boolean(d))
+
+  return {
+    repeatFailures: { items: cappedTop.items, total: flaggedTotal, shown: cappedTop.items.length },
+    runtime,
+    runtimeTotal: list.reduce((a, r) => a + r.runtimeTotal, 0),
+    queue,
+    windowStart: starts.length > 0 ? starts.reduce((a, b) => (a < b ? a : b)) : undefined,
+    windowEnd: ends.length > 0 ? ends.reduce((a, b) => (a > b ? a : b)) : undefined,
+    capped: list.some((r) => r.capped),
+  }
+}

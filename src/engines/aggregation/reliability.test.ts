@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { computeReliability, emptyReliability, type ReliabilityJob } from './reliability'
+import {
+  computeReliability,
+  emptyReliability,
+  mergeReliability,
+  type ReliabilityJob,
+} from './reliability'
 
 const j = (
   host: string,
@@ -141,5 +146,47 @@ describe('computeReliability', () => {
     expect(e.runtimeTotal).toBe(0)
     expect(e.queue).toBeUndefined()
     expect(e.capped).toBe(false)
+  })
+})
+
+describe('mergeReliability', () => {
+  it('is identity on a single element', () => {
+    const one = computeReliability([j('a', 'failed', '2026-06-01', 1)])
+    expect(mergeReliability([one])).toBe(one)
+  })
+
+  it('folds lists, histograms, queues, and windows across servers', () => {
+    const s1 = computeReliability(
+      [
+        j('a', 'failed', '2026-06-01', 1),
+        j('a', 'failed', '2026-06-02'),
+        j('a', 'failed', '2026-06-03'),
+      ],
+      { queue: [{ host: 'a', queuedHours: 1 }], capped: false },
+    )
+    const s2 = computeReliability(
+      [
+        j('b', 'failed', '2026-06-04', 10),
+        j('b', 'failed', '2026-06-05'),
+        j('b', 'failed', '2026-06-06'),
+        j('b', 'failed', '2026-06-07'),
+      ],
+      { capped: true },
+    )
+    const m = mergeReliability([s1, s2])
+    expect(m.repeatFailures.total).toBe(2)
+    expect(m.repeatFailures.items[0]?.host).toBe('b') // 4 failure days sorts first
+    expect(m.runtime.h1to2).toBe(1)
+    expect(m.runtime.gt8h).toBe(1)
+    expect(m.runtimeTotal).toBe(2)
+    expect(m.queue?.total).toBe(1) // only s1 had queue data
+    expect(m.windowStart).toBe('2026-06-01')
+    expect(m.windowEnd).toBe('2026-06-07')
+    expect(m.capped).toBe(true)
+  })
+
+  it('queue stays undefined when no server had queue data', () => {
+    const m = mergeReliability([computeReliability([]), computeReliability([])])
+    expect(m.queue).toBeUndefined()
   })
 })
