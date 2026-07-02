@@ -64,3 +64,20 @@ export function repeatFailureTone(count: number): ExportTone {
 export function queueDelayTone(pct: number): ExportTone {
   return pct > 0.1 ? 'warn' : 'ok'
 }
+
+/** Capacity-weighted dedupe % Common, expressed 0..100. */
+export function dedupeCommonTone(pct: number): ExportTone {
+  return pct < 50 ? 'warn' : 'ok'
+}
+
+/** Daily change rate (bytes sent / bytes processed), expressed 0..1. */
+export function changeRateTone(pct: number): ExportTone {
+  return pct > 0.1 ? 'warn' : 'ok'
+}
+
+/** Share of replication activities that failed or only partially completed, 0..1. */
+export function replicationIssueTone(pct: number): ExportTone {
+  if (pct >= 0.05) return 'bad'
+  if (pct > 0) return 'warn'
+  return 'ok'
+}
