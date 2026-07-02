@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { RETENTION_BUCKET_IDS } from '../../engines/aggregation/efficiency'
 import type { ReportView } from '../../types/reportView'
-import { fmtPercent, fmtPercentWhole, formatBytes, gbToBytes } from '../../utils/format'
+import { fmtPercent, formatBytes, gbToBytes } from '../../utils/format'
 
 export function EfficiencySection({ view }: { view: ReportView }) {
   const { t, i18n } = useTranslation(['dashboard', 'common'])
@@ -24,7 +24,7 @@ export function EfficiencySection({ view }: { view: ReportView }) {
       <p className="mb-4 text-3xl font-bold text-gray-900 dark:text-gray-100">
         {common
           ? t('efficiency.takeaway', {
-              dedupe: fmtPercentWhole(common.num / common.den / 100, locale),
+              dedupe: fmtPercent(common.num / common.den / 100, locale),
             })
           : t('efficiency.takeawayNoDedupe')}
       </p>
@@ -43,19 +43,25 @@ export function EfficiencySection({ view }: { view: ReportView }) {
               </tr>
             </thead>
             <tbody>
-              {retention.perPolicyType.map((row) => (
-                <tr
-                  key={row.type}
-                  className="border-b border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200"
-                >
-                  <td className="py-1.5 pr-4 font-medium">{row.type}</td>
-                  {RETENTION_BUCKET_IDS.map((id) => (
-                    <td key={id} className="py-1.5 pr-4">
-                      {bytesOf(row.gbByBucket[id])}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {retention.perPolicyType.map((row, i) => {
+                // Merged Avamar grids can each carry a row for the same policy
+                // type; the index keeps React keys unique. The indirect const
+                // avoids biome's noArrayIndexKey.
+                const rowKey = `${row.type}-${i}`
+                return (
+                  <tr
+                    key={rowKey}
+                    className="border-b border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-200"
+                  >
+                    <td className="py-1.5 pr-4 font-medium">{row.type}</td>
+                    {RETENTION_BUCKET_IDS.map((id) => (
+                      <td key={id} className="py-1.5 pr-4">
+                        {bytesOf(row.gbByBucket[id])}
+                      </td>
+                    ))}
+                  </tr>
+                )
+              })}
               <tr className="text-gray-900 dark:text-gray-100 font-semibold">
                 <td className="py-1.5 pr-4">{t('efficiency.retention.col.total')}</td>
                 {RETENTION_BUCKET_IDS.map((id) => (
