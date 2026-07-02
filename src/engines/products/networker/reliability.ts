@@ -31,7 +31,9 @@ export function networkerReliability(wb: RawWorkbook): Reliability {
   const successRateByHost: Record<string, number> = {}
   for (const r of wb.sheets['Client Statistics']?.rows ?? []) {
     const host = cellStr(r, 'Hostname')
-    if (host) successRateByHost[host] = cellNum(r, 'Success Rate')
+    if (host && cellStr(r, 'Success Rate') !== '') {
+      successRateByHost[host] = cellNum(r, 'Success Rate')
+    }
   }
 
   return computeReliability(jobs, {

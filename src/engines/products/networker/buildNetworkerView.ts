@@ -143,6 +143,6 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     frontEnd,
     opsInsights: emptyOpsInsights(),
     reliability: networkerReliability(wb),
-    provenance: networkerProvenance(windowSize),
+    provenance: networkerProvenance(windowSize, jobRows.length > 0),
   }
 }

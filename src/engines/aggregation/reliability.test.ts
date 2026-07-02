@@ -89,7 +89,7 @@ describe('computeReliability', () => {
     })
     expect(noDetail.runtime).toEqual(fallback)
     expect(noDetail.runtimeTotal).toBe(7)
-    const withDetail = computeReliability([j('a', 'success', '2026-06-01', 1)], {
+    const withDetail = computeReliability([j('a', 'success', '2026-06-01', 1.5)], {
       fallbackRuntime: fallback,
     })
     expect(withDetail.runtime.h1to2).toBe(1)
@@ -158,7 +158,7 @@ describe('mergeReliability', () => {
   it('folds lists, histograms, queues, and windows across servers', () => {
     const s1 = computeReliability(
       [
-        j('a', 'failed', '2026-06-01', 1),
+        j('a', 'failed', '2026-06-01', 1.5),
         j('a', 'failed', '2026-06-02'),
         j('a', 'failed', '2026-06-03'),
       ],

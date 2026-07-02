@@ -376,32 +376,35 @@ export function buildExportModel(
   const reliabilitySection: ExportSection = {
     id: 'reliability',
     title: t('dashboard:reliability.title'),
-    table: {
-      columns: [
-        t('dashboard:reliability.col.client'),
-        t('dashboard:reliability.col.failureDays'),
-        t('dashboard:reliability.col.failedJobs'),
-        t('dashboard:reliability.col.lastSuccess'),
-        t('dashboard:reliability.col.successRate'),
-      ],
-      rows: rel.repeatFailures.items.map((c) => [
-        c.host,
-        fmtInt(c.failureDays, locale),
-        fmtInt(c.failedJobs, locale),
-        c.daysSinceSuccess === undefined
-          ? t('dashboard:reliability.noSuccess')
-          : fmtInt(c.daysSinceSuccess, locale),
-        c.successRatePct === undefined ? '–' : fmtPercent(c.successRatePct / 100, locale),
-      ]),
-      caption: relWindow
-        ? t('dashboard:reliability.caption', {
-            shown: rel.repeatFailures.shown,
-            total: relFlagged,
-            start: relWindow.start,
-            end: relWindow.end,
-          })
+    table:
+      rel.repeatFailures.items.length > 0
+        ? {
+            columns: [
+              t('dashboard:reliability.col.client'),
+              t('dashboard:reliability.col.failureDays'),
+              t('dashboard:reliability.col.failedJobs'),
+              t('dashboard:reliability.col.lastSuccess'),
+              t('dashboard:reliability.col.successRate'),
+            ],
+            rows: rel.repeatFailures.items.map((c) => [
+              c.host,
+              fmtInt(c.failureDays, locale),
+              fmtInt(c.failedJobs, locale),
+              c.daysSinceSuccess === undefined
+                ? t('dashboard:reliability.noSuccess')
+                : fmtInt(c.daysSinceSuccess, locale),
+              c.successRatePct === undefined ? '–' : fmtPercent(c.successRatePct / 100, locale),
+            ]),
+            caption: relWindow
+              ? t('dashboard:reliability.caption', {
+                  shown: rel.repeatFailures.shown,
+                  total: relFlagged,
+                  start: relWindow.start,
+                  end: relWindow.end,
+                })
+              : undefined,
+          }
         : undefined,
-    },
     deck: relHasData
       ? {
           subtitle: t('dashboard:reliability.takeaway', { count: fmtInt(relFlagged, locale) }),

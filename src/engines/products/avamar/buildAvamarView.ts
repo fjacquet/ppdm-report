@@ -54,6 +54,16 @@ function disabledGroups(wb: RawWorkbook): string[] {
   })
 }
 
+/** True when any reliability source sheet (DPN Summary, Job List Detailed, or the
+ * pre-aggregated Backup Runtime Summary fallback) actually has rows. */
+function hasReliabilitySource(wb: RawWorkbook): boolean {
+  return (
+    (wb.sheets['Avamar DPN Summary']?.rows.length ?? 0) > 0 ||
+    (wb.sheets['Job List Detailed']?.rows.length ?? 0) > 0 ||
+    (wb.sheets['Backup Runtime Summary']?.rows.length ?? 0) > 0
+  )
+}
+
 /**
  * Avamar composition root: `RawWorkbook → ReportView`. Pure.
  *
@@ -105,6 +115,6 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     frontEnd: computeAvamarFrontEnd(wb),
     opsInsights: computeAvamarOpsInsights(wb),
     reliability: avamarReliability(wb),
-    provenance: avamarProvenance(),
+    provenance: avamarProvenance(hasReliabilitySource(wb)),
   }
 }

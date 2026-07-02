@@ -75,10 +75,11 @@ export function emptyReliability(): Reliability {
   }
 }
 
+// Right-inclusive cutoffs, matching Live Optics' ">X–Y" bucket labels (exclusive lower bound).
 function bucketOf(hours: number): RuntimeBucketId {
   if (hours <= 0.25) return 'le15m'
   if (hours <= 0.5) return 'm15to30'
-  if (hours < 1) return 'm30to60'
+  if (hours <= 1) return 'm30to60'
   if (hours <= 2) return 'h1to2'
   if (hours <= 4) return 'h2to4'
   if (hours <= 8) return 'h4to8'
@@ -128,6 +129,7 @@ export function computeReliability(
       host,
       failureDays: h.failDays.size,
       failedJobs: h.failedJobs,
+      // Measured against the global window end (latest day seen across all hosts), not per-host activity.
       daysSinceSuccess:
         h.lastSuccess && windowEnd
           ? Math.round((Date.parse(windowEnd) - Date.parse(h.lastSuccess)) / MS_PER_DAY)

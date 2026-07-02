@@ -36,4 +36,25 @@ describe('networkerReliability', () => {
     expect(r.runtimeTotal).toBe(5) // 5 backup jobs with durations
     expect(r.queue).toBeUndefined() // NetWorker exposes no queued timestamp
   })
+
+  it('never coerces a blank/N/A Success Rate to 0%', () => {
+    const r = networkerReliability(
+      wb({
+        Jobs: [
+          ['Job Type', 'Client Name', 'Completion Status', 'Start Time', 'End Time'],
+          ['save job', 'c1', 'Failed', 46201.5, 46201.51],
+          ['save job', 'c1', 'Failed', 46202.5, 46202.51],
+          ['save job', 'c1', 'Failed', 46203.5, 46203.51],
+        ],
+        'Client Statistics': [
+          ['Hostname', 'Success Rate'],
+          ['c1', 'N/A'],
+        ],
+      }),
+    )
+    expect(r.repeatFailures.items[0]).toMatchObject({
+      host: 'c1',
+      successRatePct: undefined,
+    })
+  })
 })

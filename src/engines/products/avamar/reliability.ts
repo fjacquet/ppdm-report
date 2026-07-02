@@ -41,7 +41,7 @@ export function avamarReliability(wb: RawWorkbook): Reliability {
             ? 'exception'
             : 'failed',
       day: dayOf(cellNum(r, 'Start Date')),
-      durationHours: cellNum(r, 'Seconds') / 3600,
+      durationHours: cellStr(r, 'Seconds') !== '' ? cellNum(r, 'Seconds') / 3600 : undefined,
     }
   })
 
@@ -52,9 +52,12 @@ export function avamarReliability(wb: RawWorkbook): Reliability {
       queuedHours: (cellNum(r, 'Time Started (GMT)') - cellNum(r, 'Time Queued (GMT)')) * 24,
     }))
 
+  // Computed whenever the Backup Runtime Summary sheet has a row; computeReliability only
+  // actually uses it when the detail durations total 0 (no DPN rows, or DPN rows with no
+  // Seconds column), so this is a no-op when detail durations exist.
   let fallbackRuntime: Record<RuntimeBucketId, number> | undefined
   const brs = wb.sheets['Backup Runtime Summary']?.rows[0]
-  if (jobs.length === 0 && brs) {
+  if (brs) {
     fallbackRuntime = emptyRuntime()
     for (const [col, id] of RUNTIME_COLUMNS) fallbackRuntime[id] = cellNum(brs, col)
   }

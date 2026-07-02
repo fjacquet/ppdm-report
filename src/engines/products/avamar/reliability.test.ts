@@ -58,4 +58,35 @@ describe('avamarReliability', () => {
     expect(r.runtimeTotal).toBe(34)
     expect(r.repeatFailures.total).toBe(0)
   })
+
+  it('never coerces a missing Seconds column to 0; falls back to Backup Runtime Summary for runtime while streaks still come from DPN rows', () => {
+    const r = avamarReliability(
+      wb({
+        'Avamar DPN Summary': [
+          ['Host', 'Operation', 'Status', 'Start Date'],
+          ['h1', 'Scheduled Backup', FAIL, 46203.5],
+          ['h1', 'Scheduled Backup', FAIL, 46204.5],
+          ['h1', 'Scheduled Backup', FAIL, 46205.5],
+        ],
+        'Backup Runtime Summary': [
+          [
+            '<=15 min',
+            '>15-30 mins',
+            '>30-60 mins',
+            '>1-2 hours',
+            '>2-4 hours',
+            '>4-8 hours',
+            '>8 hours',
+          ],
+          [10, 2, 3, 4, 5, 1, 9],
+        ],
+      }),
+    )
+    // No Seconds column at all → every job's durationHours is undefined, not 0.
+    expect(r.runtime.le15m).toBe(10) // from the fallback histogram, not a coerced-to-0 detail bucket
+    expect(r.runtimeTotal).toBe(34)
+    // Streaks are unaffected by the missing Seconds column — still computed from DPN rows.
+    expect(r.repeatFailures.total).toBe(1)
+    expect(r.repeatFailures.items[0]?.host).toBe('h1')
+  })
 })
