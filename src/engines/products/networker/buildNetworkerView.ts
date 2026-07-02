@@ -1,10 +1,10 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
-import { emptyEfficiency } from '../../aggregation/efficiency'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { networkerProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr, countBy } from '../../aggregation/rows'
+import { networkerEfficiency } from './efficiency'
 import { networkerReliability } from './reliability'
 
 const rowsOf = (wb: RawWorkbook, sheet: string) => wb.sheets[sheet]?.rows ?? []
@@ -106,6 +106,8 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
   const windowSize = backupRows.length
   const deviceTotal = deviceRows.length
 
+  const efficiency = networkerEfficiency(wb)
+
   return {
     meta: wb.meta,
     inUse,
@@ -144,8 +146,11 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     frontEnd,
     opsInsights: emptyOpsInsights(),
     reliability: networkerReliability(wb),
-    efficiency: emptyEfficiency(),
-    // efficiency wiring lands in the next task
-    provenance: networkerProvenance(windowSize, jobRows.length > 0, false),
+    efficiency,
+    provenance: networkerProvenance(
+      windowSize,
+      jobRows.length > 0,
+      Object.values(efficiency).some((v) => v !== undefined),
+    ),
   }
 }
