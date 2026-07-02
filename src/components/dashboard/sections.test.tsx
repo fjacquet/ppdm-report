@@ -12,6 +12,7 @@ import { GapsSection } from './GapsSection'
 import { IdleAgentsSection } from './IdleAgentsSection'
 import { JobsComplianceSection } from './JobsComplianceSection'
 import { PoliciesSection } from './PoliciesSection'
+import { ReliabilitySection } from './ReliabilitySection'
 
 const fixture: ReportView = {
   meta: {
@@ -476,5 +477,37 @@ describe('ProvenanceNote integration — summary-format provenance', () => {
     // expect the partialAssets string containing server counts and asset counts
     expect(screen.getByText(/covers 1 of 2 servers/i)).toBeInTheDocument()
     expect(screen.getByText(/370 of 3886 assets/i)).toBeInTheDocument()
+  })
+})
+
+describe('ReliabilitySection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('renders the repeat-failure table', () => {
+    const view = makeView({
+      reliability: {
+        repeatFailures: {
+          items: [{ host: 'bad-client', failureDays: 4, failedJobs: 9, daysSinceSuccess: 2 }],
+          total: 1,
+          shown: 1,
+        },
+        runtime: { le15m: 0, m15to30: 0, m30to60: 0, h1to2: 0, h2to4: 0, h4to8: 0, gt8h: 0 },
+        runtimeTotal: 0,
+        windowStart: '2026-06-01',
+        windowEnd: '2026-06-30',
+        capped: false,
+      },
+    })
+    render(<ReliabilitySection view={view} />)
+    expect(screen.getByText('bad-client')).toBeTruthy()
+  })
+
+  it('renders nothing when there are no repeat failures', () => {
+    const view = makeView({ reliability: emptyReliability() })
+    const { container } = render(<ReliabilitySection view={view} />)
+    expect(container).toBeEmptyDOMElement()
   })
 })
