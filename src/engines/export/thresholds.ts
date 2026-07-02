@@ -52,3 +52,15 @@ export function backupDurationTone(hours: number): ExportTone {
   if (hours >= 4) return 'warn'
   return 'ok'
 }
+
+/** Repeat-failure clients (≥3 distinct failure-days). */
+export function repeatFailureTone(count: number): ExportTone {
+  if (count >= 5) return 'bad'
+  if (count >= 1) return 'warn'
+  return 'ok'
+}
+
+/** Share of jobs queued > 15 min, expressed 0..1. */
+export function queueDelayTone(pct: number): ExportTone {
+  return pct > 0.1 ? 'warn' : 'ok'
+}
