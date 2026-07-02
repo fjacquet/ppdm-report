@@ -1,6 +1,7 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
+import { emptyEfficiency } from '../../aggregation/efficiency'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { networkerProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr, countBy } from '../../aggregation/rows'
@@ -143,6 +144,8 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     frontEnd,
     opsInsights: emptyOpsInsights(),
     reliability: networkerReliability(wb),
-    provenance: networkerProvenance(windowSize, jobRows.length > 0),
+    efficiency: emptyEfficiency(),
+    // efficiency wiring lands in the next task
+    provenance: networkerProvenance(windowSize, jobRows.length > 0, false),
   }
 }

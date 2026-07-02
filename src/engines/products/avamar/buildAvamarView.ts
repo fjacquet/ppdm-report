@@ -1,6 +1,7 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
+import { emptyEfficiency } from '../../aggregation/efficiency'
 import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
 import { avamarProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr } from '../../aggregation/rows'
@@ -115,6 +116,8 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     frontEnd: computeAvamarFrontEnd(wb),
     opsInsights: computeAvamarOpsInsights(wb),
     reliability: avamarReliability(wb),
-    provenance: avamarProvenance(hasReliabilitySource(wb)),
+    efficiency: emptyEfficiency(),
+    // efficiency wiring lands in the next task
+    provenance: avamarProvenance(hasReliabilitySource(wb), false),
   }
 }

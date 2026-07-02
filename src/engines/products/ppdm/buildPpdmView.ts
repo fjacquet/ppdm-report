@@ -3,6 +3,7 @@ import type { ReportView } from '../../../types/reportView'
 import { computeCapacity } from '../../aggregation/capacity'
 import { computeCompliance } from '../../aggregation/compliance'
 import { computeCoverage } from '../../aggregation/coverage'
+import { emptyEfficiency } from '../../aggregation/efficiency'
 import { computeFrontEnd } from '../../aggregation/frontEnd'
 import { findGaps } from '../../aggregation/gaps'
 import { computeJobs } from '../../aggregation/jobs'
@@ -35,6 +36,7 @@ export function buildPpdmView(wb: RawWorkbook): ReportView {
     frontEnd: computeFrontEnd(wb, inUse),
     opsInsights: emptyOpsInsights(),
     reliability: emptyReliability(),
+    efficiency: emptyEfficiency(),
     provenance: allAvailable(totalAssets),
   }
 }

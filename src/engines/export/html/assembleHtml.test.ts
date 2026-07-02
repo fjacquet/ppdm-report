@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import i18n from '../../../i18n'
 import type { ReportView } from '../../../types/reportView'
+import { emptyEfficiency } from '../../aggregation/efficiency'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { allAvailable } from '../../aggregation/provenance'
 import { emptyReliability } from '../../aggregation/reliability'
@@ -70,6 +71,7 @@ const view: ReportView = {
   frontEnd: { byType: [], excludedCount: 0 },
   opsInsights: emptyOpsInsights(),
   reliability: emptyReliability(),
+  efficiency: emptyEfficiency(),
   provenance: allAvailable(0),
 }
 

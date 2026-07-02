@@ -16,6 +16,8 @@ export function allAvailable(assetsTotal: number): Record<MetricKey, MetricProve
     frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
     // PPDM reliability wiring is a follow-up — unavailable for now.
     reliability: { available: false, serversCovered: 0, serversTotal: 1 },
+    // PPDM efficiency wiring is a follow-up — unavailable for now.
+    efficiency: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -34,6 +36,8 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
     storageTargets: { available: false, serversCovered: 0, serversTotal: 1 },
     frontEnd: { available: false, serversCovered: 0, serversTotal: 1 },
     reliability: { available: false, serversCovered: 0, serversTotal: 1 },
+    // PPDM efficiency wiring is a follow-up — unavailable for now.
+    efficiency: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -43,6 +47,7 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
  *  source sheets (Avamar DPN Summary / Job List Detailed / Backup Runtime Summary) had rows. */
 export function avamarProvenance(
   reliabilityAvailable: boolean,
+  efficiencyAvailable: boolean,
 ): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
@@ -61,6 +66,11 @@ export function avamarProvenance(
       serversCovered: reliabilityAvailable ? 1 : 0,
       serversTotal: 1,
     },
+    efficiency: {
+      available: efficiencyAvailable,
+      serversCovered: efficiencyAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
   }
 }
 
@@ -70,6 +80,7 @@ export function avamarProvenance(
 export function networkerProvenance(
   assetsTotal: number,
   reliabilityAvailable: boolean,
+  efficiencyAvailable: boolean,
 ): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
@@ -86,6 +97,11 @@ export function networkerProvenance(
     reliability: {
       available: reliabilityAvailable,
       serversCovered: reliabilityAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
+    efficiency: {
+      available: efficiencyAvailable,
+      serversCovered: efficiencyAvailable ? 1 : 0,
       serversTotal: 1,
     },
   }
