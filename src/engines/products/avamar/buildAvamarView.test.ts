@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { avamarWorkbookBuffer } from '../../../test-helpers/workbooks'
+import { avamarWorkbookBuffer, makeWorkbook } from '../../../test-helpers/workbooks'
 import { normalizeWorkbook } from '../../parser/normalizeWorkbook'
 import { buildAvamarView } from './buildAvamarView'
 
@@ -89,5 +89,27 @@ describe('buildAvamarView', () => {
     expect(v.provenance.frontEnd.available).toBe(true)
     expect(v.provenance.gapsList.available).toBe(true)
     expect(v.provenance.storageTargets.available).toBe(true)
+  })
+
+  it('reliability provenance reflects source-sheet presence: available when the fixture has DPN Summary data', () => {
+    expect(view().provenance.reliability.available).toBe(true)
+  })
+
+  it('reliability provenance is unavailable when none of the reliability source sheets are present', () => {
+    const wb = normalizeWorkbook(
+      makeWorkbook({
+        Details: [
+          ['Project Name', 'AVA-empty'],
+          ['Date', 45000],
+          ['Disclaimer', 'All measurements ... Base 2 units of Measurement.'],
+        ],
+      }),
+    )
+    const v = buildAvamarView(wb)
+    expect(v.provenance.reliability).toEqual({
+      available: false,
+      serversCovered: 0,
+      serversTotal: 1,
+    })
   })
 })

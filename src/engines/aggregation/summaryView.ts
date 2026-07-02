@@ -3,6 +3,7 @@ import type { FrontEndTypeRow, ReportView } from '../../types/reportView'
 import { emptyBand, finalizeBand } from './coverage'
 import { emptyOpsInsights } from './opsInsights'
 import { allUnavailable } from './provenance'
+import { emptyReliability } from './reliability'
 import { cellNum, cellStr, countBy } from './rows'
 
 /** Summary "... Count And Cap" sheet → canonical AGENT_SHEETS name (null = no agent sheet). */
@@ -151,6 +152,7 @@ export function summaryView(wb: RawWorkbook): ReportView {
     policies: { count: policyRows.length, byPurpose: countBy(policyRows, 'Category'), perPolicy },
     frontEnd: { byType: feByType, excludedCount: 0 },
     opsInsights: emptyOpsInsights(),
+    reliability: emptyReliability(),
     provenance: {
       ...allUnavailable(totalAssets),
       frontEnd: {

@@ -13,6 +13,7 @@ import {
   gbToBytes,
 } from '../../utils/format'
 import { FRONT_END_METRICS } from '../aggregation/frontEnd'
+import { RUNTIME_BUCKET_IDS } from '../aggregation/reliability'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
 import {
   appConsistentTone,
@@ -21,6 +22,8 @@ import {
   coverageTone,
   immutableTone,
   jobSuccessTone,
+  queueDelayTone,
+  repeatFailureTone,
   replicatedTone,
   utilizationTone,
 } from './thresholds'
@@ -125,6 +128,7 @@ export function buildExportModel(
     idleAgents,
     frontEnd,
     opsInsights,
+    reliability,
   } = view
 
   const execKpis = [
@@ -346,6 +350,84 @@ export function buildExportModel(
         pal,
       ),
     },
+  }
+
+  const rel = reliability
+  const relFlagged = rel.repeatFailures.total
+  const relHasData = relFlagged > 0 || rel.runtimeTotal > 0 || rel.queue !== undefined
+  const relWindow =
+    rel.windowStart && rel.windowEnd ? { start: rel.windowStart, end: rel.windowEnd } : undefined
+  const relChips: ExportKpi[] = [
+    {
+      label: t('dashboard:reliability.flaggedChip'),
+      value: fmtInt(relFlagged, locale),
+      tone: repeatFailureTone(relFlagged),
+    },
+    ...(rel.queue
+      ? [
+          {
+            label: t('dashboard:reliability.queueChip'),
+            value: fmtPercent(rel.queue.delayedPct, locale),
+            tone: queueDelayTone(rel.queue.delayedPct),
+          },
+        ]
+      : []),
+  ]
+  const reliabilitySection: ExportSection = {
+    id: 'reliability',
+    title: t('dashboard:reliability.title'),
+    table:
+      rel.repeatFailures.items.length > 0
+        ? {
+            columns: [
+              t('dashboard:reliability.col.client'),
+              t('dashboard:reliability.col.failureDays'),
+              t('dashboard:reliability.col.failedJobs'),
+              t('dashboard:reliability.col.lastSuccess'),
+              t('dashboard:reliability.col.successRate'),
+            ],
+            rows: rel.repeatFailures.items.map((c) => [
+              c.host,
+              fmtInt(c.failureDays, locale),
+              fmtInt(c.failedJobs, locale),
+              c.daysSinceSuccess === undefined
+                ? t('dashboard:reliability.noSuccess')
+                : fmtInt(c.daysSinceSuccess, locale),
+              c.successRatePct === undefined ? '–' : fmtPercent(c.successRatePct / 100, locale),
+            ]),
+            caption: relWindow
+              ? t('dashboard:reliability.caption', {
+                  shown: rel.repeatFailures.shown,
+                  total: relFlagged,
+                  start: relWindow.start,
+                  end: relWindow.end,
+                })
+              : undefined,
+          }
+        : undefined,
+    deck: relHasData
+      ? {
+          subtitle: t('dashboard:reliability.takeaway', { count: fmtInt(relFlagged, locale) }),
+          kpiChips: relChips,
+          bars:
+            rel.runtimeTotal > 0
+              ? toBars(
+                  RUNTIME_BUCKET_IDS.map((id) => ({
+                    label: t(`dashboard:reliability.bucket.${id}`),
+                    magnitude: rel.runtime[id],
+                    value: fmtInt(rel.runtime[id], locale),
+                    tone:
+                      id === 'gt8h' && rel.runtime[id] > 0
+                        ? ('bad' as const)
+                        : id === 'h4to8' && rel.runtime[id] > 0
+                          ? ('warn' as const)
+                          : ('muted' as const),
+                  })),
+                  pal,
+                )
+              : [],
+        }
+      : undefined,
   }
 
   const complianceSection: ExportSection = {
@@ -733,6 +815,7 @@ export function buildExportModel(
     volumetry: volumetrySection,
     idle: idleSection,
     jobs: jobsSection,
+    reliability: withCaveat(reliabilitySection, 'reliability', view, t),
     resilience: withCaveat(complianceSection, 'compliance', view, t),
     capacity: withCaveat(capacitySection, 'storageTargets', view, t),
     policies: policiesSection,

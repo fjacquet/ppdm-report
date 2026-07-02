@@ -3,6 +3,7 @@ import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { emptyOpsInsights } from '../aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../aggregation/provenance'
+import { emptyReliability } from '../aggregation/reliability'
 import { buildExportModel } from './buildExportModel'
 
 const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, o) as string
@@ -71,6 +72,7 @@ const view: ReportView = {
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
   frontEnd: { byType: [], excludedCount: 0 },
   opsInsights: emptyOpsInsights(),
+  reliability: emptyReliability(),
   provenance: allAvailable(0),
 }
 
@@ -355,6 +357,17 @@ describe('buildExportModel', () => {
           shown: 1,
         },
       },
+      // non-empty reliability so the reliability section renders and adds no suppression warning
+      reliability: {
+        repeatFailures: {
+          items: [{ host: 'bad-client', failureDays: 3, failedJobs: 3 }],
+          total: 1,
+          shown: 1,
+        },
+        runtime: { le15m: 1, m15to30: 0, m30to60: 0, h1to2: 0, h2to4: 0, h4to8: 0, gt8h: 0 },
+        runtimeTotal: 1,
+        capped: false,
+      },
     }
     const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
     expect(model.warnings).toEqual(['cap note', 'merge note'])
@@ -559,5 +572,42 @@ describe('buildExportModel', () => {
     expect(ids).not.toContain('agentVersions')
     expect(ids).not.toContain('atRisk')
     expect(ids).not.toContain('longestBackups')
+  })
+
+  describe('reliability section', () => {
+    it('renders repeat-failure table, runtime bars, and queue chip', () => {
+      const v = baseView({
+        reliability: {
+          repeatFailures: {
+            items: [{ host: 'bad-client', failureDays: 4, failedJobs: 9, daysSinceSuccess: 2 }],
+            total: 1,
+            shown: 1,
+          },
+          runtime: { le15m: 10, m15to30: 0, m30to60: 0, h1to2: 0, h2to4: 0, h4to8: 0, gt8h: 1 },
+          runtimeTotal: 11,
+          queue: {
+            delayedCount: 2,
+            total: 10,
+            delayedPct: 0.2,
+            top: { items: [{ host: 'slow', queuedHours: 2 }], total: 2, shown: 1 },
+          },
+          windowStart: '2026-06-01',
+          windowEnd: '2026-06-30',
+          capped: false,
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'reliability')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows[0]?.[0]).toBe('bad-client')
+      expect(section?.deck?.kpiChips?.some((k) => k.value === '1')).toBe(true)
+      expect(section?.deck?.bars?.length).toBe(7)
+    })
+
+    it('is suppressed when reliability is empty (e.g. PPDM)', () => {
+      const v = baseView({ reliability: emptyReliability() })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      expect(model.sections.find((s) => s.id === 'reliability')).toBeUndefined()
+    })
   })
 })

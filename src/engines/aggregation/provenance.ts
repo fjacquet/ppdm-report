@@ -14,6 +14,8 @@ export function allAvailable(assetsTotal: number): Record<MetricKey, MetricProve
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
     frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
+    // PPDM reliability wiring is a follow-up — unavailable for now.
+    reliability: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -31,13 +33,17 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
     },
     storageTargets: { available: false, serversCovered: 0, serversTotal: 1 },
     frontEnd: { available: false, serversCovered: 0, serversTotal: 1 },
+    reliability: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
 /** Provenance for a single Avamar server: count-based coverage + node capacity available;
  *  per-type coverage unavailable; replication resilience + front-end volumetry available
- *  via detail sheets. */
-export function avamarProvenance(): Record<MetricKey, MetricProvenance> {
+ *  via detail sheets. `reliabilityAvailable` reflects whether any of the reliability
+ *  source sheets (Avamar DPN Summary / Job List Detailed / Backup Runtime Summary) had rows. */
+export function avamarProvenance(
+  reliabilityAvailable: boolean,
+): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
     gapsList: { available: true, serversCovered: 1, serversTotal: 1 },
@@ -50,12 +56,21 @@ export function avamarProvenance(): Record<MetricKey, MetricProvenance> {
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
     frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
+    reliability: {
+      available: reliabilityAvailable,
+      serversCovered: reliabilityAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
   }
 }
 
 /** Provenance for a single NetWorker server: count-based coverage (no per-type),
- *  but gaps, compliance (immutable/replication computed), and DD capacity are available. */
-export function networkerProvenance(assetsTotal: number): Record<MetricKey, MetricProvenance> {
+ *  but gaps, compliance (immutable/replication computed), and DD capacity are available.
+ *  `reliabilityAvailable` reflects whether the Jobs sheet had rows. */
+export function networkerProvenance(
+  assetsTotal: number,
+  reliabilityAvailable: boolean,
+): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
     gapsList: { available: true, serversCovered: 1, serversTotal: 1 },
@@ -68,5 +83,10 @@ export function networkerProvenance(assetsTotal: number): Record<MetricKey, Metr
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
     frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
+    reliability: {
+      available: reliabilityAvailable,
+      serversCovered: reliabilityAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
   }
 }

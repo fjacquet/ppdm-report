@@ -25,6 +25,30 @@
     "total": "Jobs gesamt",
     "takeaway": "{{pct}} der letzten Sicherungsjobs waren erfolgreich"
   },
+  "reliability": {
+    "title": "Backup-Zuverlässigkeit",
+    "takeaway": "{{count}} Clients an 3 oder mehr Tagen fehlgeschlagen",
+    "flaggedChip": "Clients mit wiederholten Fehlern",
+    "queueChip": "Jobs > 15 Min. in Warteschlange",
+    "col": {
+      "client": "Client",
+      "failureDays": "Tage mit Fehlern",
+      "failedJobs": "Fehlgeschlagene Jobs",
+      "lastSuccess": "Tage seit letztem Erfolg",
+      "successRate": "Erfolgsquote"
+    },
+    "noSuccess": "kein Erfolg im Zeitfenster",
+    "caption": "Top {{shown}} von {{total}} · Zeitfenster {{start}} – {{end}}",
+    "bucket": {
+      "le15m": "≤ 15 Min.",
+      "m15to30": "15–30 Min.",
+      "m30to60": "30–60 Min.",
+      "h1to2": "1–2 Std.",
+      "h2to4": "2–4 Std.",
+      "h4to8": "4–8 Std.",
+      "gt8h": "> 8 Std."
+    }
+  },
   "resilience": {
     "title": "Cyber-Resilienz",
     "appConsistent": "Anwendungskonsistente Sicherungen",

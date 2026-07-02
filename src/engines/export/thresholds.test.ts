@@ -6,6 +6,8 @@ import {
   coverageTone,
   immutableTone,
   jobSuccessTone,
+  queueDelayTone,
+  repeatFailureTone,
   replicatedTone,
   utilizationTone,
 } from './thresholds'
@@ -54,5 +56,18 @@ describe('ops-insight tones', () => {
     expect(backupDurationTone(2)).toBe('ok')
     expect(backupDurationTone(6)).toBe('warn')
     expect(backupDurationTone(20)).toBe('bad')
+  })
+})
+
+describe('reliability tones', () => {
+  it('repeat-failure count: 0 ok, 1–4 warn, ≥5 bad', () => {
+    expect(repeatFailureTone(0)).toBe('ok')
+    expect(repeatFailureTone(1)).toBe('warn')
+    expect(repeatFailureTone(4)).toBe('warn')
+    expect(repeatFailureTone(5)).toBe('bad')
+  })
+  it('queue-delay share: ≤10% ok, >10% warn', () => {
+    expect(queueDelayTone(0.1)).toBe('ok')
+    expect(queueDelayTone(0.11)).toBe('warn')
   })
 })

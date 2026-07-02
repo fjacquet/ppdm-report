@@ -5,6 +5,7 @@ import { DARK } from '../../../theme/palette'
 import type { ReportView } from '../../../types/reportView'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { allAvailable } from '../../aggregation/provenance'
+import { emptyReliability } from '../../aggregation/reliability'
 import { buildExportModel } from '../buildExportModel'
 import { buildPptx } from './builder'
 
@@ -70,6 +71,7 @@ const view: ReportView = {
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
   frontEnd: { byType: [], excludedCount: 0 },
   opsInsights: emptyOpsInsights(),
+  reliability: emptyReliability(),
   provenance: allAvailable(0),
 }
 

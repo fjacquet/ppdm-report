@@ -13,6 +13,7 @@ import { JobsComplianceSection } from './JobsComplianceSection'
 import { LongestBackupsSection } from './LongestBackupsSection'
 import { PerServerSection } from './PerServerSection'
 import { PoliciesSection } from './PoliciesSection'
+import { ReliabilitySection } from './ReliabilitySection'
 import { WarningsBanner } from './WarningsBanner'
 
 interface DashboardProps {
@@ -40,6 +41,8 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return <IdleAgentsSection key={id} view={view} />
       case 'jobs':
         return <JobsComplianceSection key={id} view={view} dark={dark} />
+      case 'reliability':
+        return <ReliabilitySection key={id} view={view} />
       case 'resilience':
         return null
       case 'capacity':

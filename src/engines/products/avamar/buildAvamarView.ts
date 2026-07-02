@@ -7,6 +7,7 @@ import { cellNum, cellStr } from '../../aggregation/rows'
 import { avamarJobs } from './jobs'
 import { computeAvamarOpsInsights } from './opsInsights'
 import { avamarPolicies } from './policies'
+import { avamarReliability } from './reliability'
 import { avamarReplication } from './replication'
 import { avamarWorkloads } from './workloads'
 
@@ -51,6 +52,16 @@ function disabledGroups(wb: RawWorkbook): string[] {
     const domain = cellStr(r, 'Domain')
     return domain && domain !== '/' ? `${name} (${domain})` : name
   })
+}
+
+/** True when any reliability source sheet (DPN Summary, Job List Detailed, or the
+ * pre-aggregated Backup Runtime Summary fallback) actually has rows. */
+function hasReliabilitySource(wb: RawWorkbook): boolean {
+  return (
+    (wb.sheets['Avamar DPN Summary']?.rows.length ?? 0) > 0 ||
+    (wb.sheets['Job List Detailed']?.rows.length ?? 0) > 0 ||
+    (wb.sheets['Backup Runtime Summary']?.rows.length ?? 0) > 0
+  )
 }
 
 /**
@@ -103,6 +114,7 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     policies: avamarPolicies(wb),
     frontEnd: computeAvamarFrontEnd(wb),
     opsInsights: computeAvamarOpsInsights(wb),
-    provenance: avamarProvenance(),
+    reliability: avamarReliability(wb),
+    provenance: avamarProvenance(hasReliabilitySource(wb)),
   }
 }

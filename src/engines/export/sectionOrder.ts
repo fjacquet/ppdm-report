@@ -6,6 +6,7 @@ export type SectionId =
   | 'volumetry'
   | 'idle'
   | 'jobs'
+  | 'reliability'
   | 'resilience'
   | 'capacity'
   | 'policies'
@@ -21,6 +22,7 @@ export const SECTION_ORDER: Record<ExportFlavor, SectionId[]> = {
     'atRisk',
     'idle',
     'jobs',
+    'reliability',
     'resilience',
     'capacity',
     'policies',
@@ -30,6 +32,7 @@ export const SECTION_ORDER: Record<ExportFlavor, SectionId[]> = {
   ops: [
     'perServer',
     'jobs',
+    'reliability',
     'atRisk',
     'longestBackups',
     'resilience',
