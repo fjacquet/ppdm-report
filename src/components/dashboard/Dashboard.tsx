@@ -6,6 +6,7 @@ import { AgentVersionsSection } from './AgentVersionsSection'
 import { AtRiskSection } from './AtRiskSection'
 import { CapacitySection } from './CapacitySection'
 import { CoverageSection } from './CoverageSection'
+import { EfficiencySection } from './EfficiencySection'
 import { ExecutiveKpis } from './ExecutiveKpis'
 import { GapsSection } from './GapsSection'
 import { IdleAgentsSection } from './IdleAgentsSection'
@@ -56,8 +57,7 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
       case 'longestBackups':
         return <LongestBackupsSection key={id} view={view} />
       case 'efficiency':
-        // Task 9 replaces this with an EfficiencySection dashboard component.
-        return null
+        return <EfficiencySection key={id} view={view} />
     }
   }
 
