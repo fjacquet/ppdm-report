@@ -25,6 +25,30 @@
     "total": "Total jobs",
     "takeaway": "{{pct}} of recent backup jobs succeeded"
   },
+  "reliability": {
+    "title": "Backup reliability",
+    "takeaway": "{{count}} clients failed on 3 or more days",
+    "flaggedChip": "Repeat-failure clients",
+    "queueChip": "Jobs queued > 15 min",
+    "col": {
+      "client": "Client",
+      "failureDays": "Days with failures",
+      "failedJobs": "Failed jobs",
+      "lastSuccess": "Days since last success",
+      "successRate": "Success rate"
+    },
+    "noSuccess": "no success in window",
+    "caption": "Top {{shown}} of {{total}} · window {{start}} – {{end}}",
+    "bucket": {
+      "le15m": "≤ 15 min",
+      "m15to30": "15–30 min",
+      "m30to60": "30–60 min",
+      "h1to2": "1–2 h",
+      "h2to4": "2–4 h",
+      "h4to8": "4–8 h",
+      "gt8h": "> 8 h"
+    }
+  },
   "resilience": {
     "title": "Cyber-resilience",
     "appConsistent": "App-consistent backups",

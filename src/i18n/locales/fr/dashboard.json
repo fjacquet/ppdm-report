@@ -25,6 +25,30 @@
     "total": "Total des jobs",
     "takeaway": "{{pct}} des jobs de sauvegarde récents ont réussi"
   },
+  "reliability": {
+    "title": "Fiabilité des sauvegardes",
+    "takeaway": "{{count}} clients en échec sur 3 jours ou plus",
+    "flaggedChip": "Clients en échec répété",
+    "queueChip": "Jobs en attente > 15 min",
+    "col": {
+      "client": "Client",
+      "failureDays": "Jours avec échecs",
+      "failedJobs": "Jobs en échec",
+      "lastSuccess": "Jours depuis le dernier succès",
+      "successRate": "Taux de succès"
+    },
+    "noSuccess": "aucun succès sur la période",
+    "caption": "Top {{shown}} sur {{total}} · période {{start}} – {{end}}",
+    "bucket": {
+      "le15m": "≤ 15 min",
+      "m15to30": "15–30 min",
+      "m30to60": "30–60 min",
+      "h1to2": "1–2 h",
+      "h2to4": "2–4 h",
+      "h4to8": "4–8 h",
+      "gt8h": "> 8 h"
+    }
+  },
   "resilience": {
     "title": "Cyber-résilience",
     "appConsistent": "Sauvegardes cohérentes applicativement",
