@@ -40,6 +40,9 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return <IdleAgentsSection key={id} view={view} />
       case 'jobs':
         return <JobsComplianceSection key={id} view={view} dark={dark} />
+      case 'reliability':
+        // Task 9 wires the dashboard component; export/PPTX already render this section.
+        return null
       case 'resilience':
         return null
       case 'capacity':
