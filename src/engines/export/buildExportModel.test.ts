@@ -3,6 +3,7 @@ import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { emptyOpsInsights } from '../aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../aggregation/provenance'
+import { emptyReliability } from '../aggregation/reliability'
 import { buildExportModel } from './buildExportModel'
 
 const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, o) as string
@@ -71,6 +72,7 @@ const view: ReportView = {
   policies: { count: 32, byPurpose: { CENTRALIZED: 29, EXCLUSION: 3 }, perPolicy: [] },
   frontEnd: { byType: [], excludedCount: 0 },
   opsInsights: emptyOpsInsights(),
+  reliability: emptyReliability(),
   provenance: allAvailable(0),
 }
 

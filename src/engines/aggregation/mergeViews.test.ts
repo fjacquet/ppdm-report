@@ -7,6 +7,7 @@ import { buildNetworkerView } from '../products/networker/buildNetworkerView'
 import { mergeViews } from './mergeViews'
 import { emptyOpsInsights } from './opsInsights'
 import { allAvailable, allUnavailable } from './provenance'
+import { emptyReliability } from './reliability'
 
 function detail(over: Partial<ReportView>): ReportView {
   return {
@@ -41,6 +42,7 @@ function detail(over: Partial<ReportView>): ReportView {
     policies: { count: 0, byPurpose: {}, perPolicy: [] },
     frontEnd: { byType: [], excludedCount: 0 },
     opsInsights: emptyOpsInsights(),
+    reliability: emptyReliability(),
     provenance: allAvailable(0),
     ...over,
   }

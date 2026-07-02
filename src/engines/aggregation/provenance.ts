@@ -14,6 +14,8 @@ export function allAvailable(assetsTotal: number): Record<MetricKey, MetricProve
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
     frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
+    // PPDM reliability wiring is a follow-up — unavailable for now.
+    reliability: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -31,6 +33,7 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
     },
     storageTargets: { available: false, serversCovered: 0, serversTotal: 1 },
     frontEnd: { available: false, serversCovered: 0, serversTotal: 1 },
+    reliability: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -50,6 +53,7 @@ export function avamarProvenance(): Record<MetricKey, MetricProvenance> {
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
     frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
+    reliability: { available: true, serversCovered: 1, serversTotal: 1 },
   }
 }
 
@@ -68,5 +72,6 @@ export function networkerProvenance(assetsTotal: number): Record<MetricKey, Metr
     },
     storageTargets: { available: true, serversCovered: 1, serversTotal: 1 },
     frontEnd: { available: true, serversCovered: 1, serversTotal: 1 },
+    reliability: { available: true, serversCovered: 1, serversTotal: 1 },
   }
 }

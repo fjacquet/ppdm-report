@@ -3,6 +3,7 @@ import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { networkerProvenance } from '../../aggregation/provenance'
+import { emptyReliability } from '../../aggregation/reliability'
 import { cellNum, cellStr, countBy } from '../../aggregation/rows'
 
 const rowsOf = (wb: RawWorkbook, sheet: string) => wb.sheets[sheet]?.rows ?? []
@@ -141,6 +142,7 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     policies: { count: policyNames.size, byPurpose: {}, perPolicy: [] },
     frontEnd,
     opsInsights: emptyOpsInsights(),
+    reliability: emptyReliability(),
     provenance: networkerProvenance(windowSize),
   }
 }

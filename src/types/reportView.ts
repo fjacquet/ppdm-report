@@ -1,6 +1,13 @@
+import type { Reliability } from '../engines/aggregation/reliability'
 import type { CaptureMeta, ProductId } from './ppdm'
 
-export type MetricKey = 'coverageByType' | 'gapsList' | 'compliance' | 'storageTargets' | 'frontEnd'
+export type MetricKey =
+  | 'coverageByType'
+  | 'gapsList'
+  | 'compliance'
+  | 'storageTargets'
+  | 'frontEnd'
+  | 'reliability'
 
 /** Availability of a detail-only metric across the servers in scope. */
 export interface MetricProvenance {
@@ -163,6 +170,7 @@ export interface ReportView {
   policies: Policies
   frontEnd: FrontEnd
   opsInsights: OpsInsights
+  reliability: Reliability
   provenance: Record<MetricKey, MetricProvenance>
 }
 

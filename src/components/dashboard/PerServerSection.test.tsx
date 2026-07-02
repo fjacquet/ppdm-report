@@ -2,6 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { emptyOpsInsights } from '../../engines/aggregation/opsInsights'
 import { allAvailable } from '../../engines/aggregation/provenance'
+import { emptyReliability } from '../../engines/aggregation/reliability'
 import i18n from '../../i18n'
 import type { ReportView, ServerView } from '../../types/reportView'
 import { PerServerSection } from './PerServerSection'
@@ -39,6 +40,7 @@ function view(pct: number, count: number): ReportView {
     policies: { count: 0, byPurpose: {}, perPolicy: [] },
     frontEnd: { byType: [], excludedCount: 0 },
     opsInsights: emptyOpsInsights(),
+    reliability: emptyReliability(),
     provenance: allAvailable(0),
   }
 }

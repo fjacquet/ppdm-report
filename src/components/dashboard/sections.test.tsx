@@ -2,6 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { emptyOpsInsights } from '../../engines/aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../../engines/aggregation/provenance'
+import { emptyReliability } from '../../engines/aggregation/reliability'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { CapacitySection } from './CapacitySection'
@@ -76,6 +77,7 @@ const fixture: ReportView = {
   },
   frontEnd: { byType: [], excludedCount: 0 },
   opsInsights: emptyOpsInsights(),
+  reliability: emptyReliability(),
   provenance: allAvailable(0),
 }
 

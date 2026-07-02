@@ -9,6 +9,7 @@ import { computeJobs } from '../../aggregation/jobs'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { summarizePolicies } from '../../aggregation/policies'
 import { allAvailable } from '../../aggregation/provenance'
+import { emptyReliability } from '../../aggregation/reliability'
 import { summaryView } from '../../aggregation/summaryView'
 import { detectFormat } from '../../parser/detectFormat'
 import { classifyAgents } from '../../parser/detectInUse'
@@ -33,6 +34,7 @@ export function buildPpdmView(wb: RawWorkbook): ReportView {
     policies: summarizePolicies(wb),
     frontEnd: computeFrontEnd(wb, inUse),
     opsInsights: emptyOpsInsights(),
+    reliability: emptyReliability(),
     provenance: allAvailable(totalAssets),
   }
 }

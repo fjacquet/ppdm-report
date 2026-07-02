@@ -4,6 +4,7 @@ import { foldMeta } from '../parser/foldMeta'
 import { emptyBand, finalizeBand } from './coverage'
 import { mergeFrontEnd } from './frontEnd'
 import { mergeOpsInsights } from './opsInsights'
+import { mergeReliability } from './reliability'
 import { topN } from './topN'
 
 const sum = (ns: number[]) => ns.reduce((a, b) => a + b, 0)
@@ -28,6 +29,7 @@ function mergeProvenance(views: ReportView[]): Record<MetricKey, MetricProvenanc
     'compliance',
     'storageTargets',
     'frontEnd',
+    'reliability',
   ]
   const out = {} as Record<MetricKey, MetricProvenance>
   for (const key of keys) {
@@ -134,6 +136,7 @@ export function mergeViews(views: ReportView[]): ReportView {
     },
     frontEnd: mergeFrontEnd(views.map((v) => v.frontEnd)),
     opsInsights: mergeOpsInsights(views.map((v) => v.opsInsights)),
+    reliability: mergeReliability(views.map((v) => v.reliability)),
     provenance: mergeProvenance(views),
   }
 }
