@@ -59,11 +59,18 @@
     "encryptionChip": "Verschlüsselte Kapazität",
     "lowDedupe": {
       "caption": "Clients unter 50 % Gemeinsamkeit — Top {{shown}} von {{total}}",
-      "col": { "client": "Client", "common": "Gemeinsamkeit", "processed": "Verarbeitet" }
+      "col": {
+        "client": "Client",
+        "common": "Gemeinsamkeit",
+        "processed": "Verarbeitet"
+      }
     },
     "retention": {
       "title": "Kapazität nach Aufbewahrung",
-      "col": { "type": "Richtlinientyp", "total": "Gesamt" },
+      "col": {
+        "type": "Richtlinientyp",
+        "total": "Gesamt"
+      },
       "bucket": {
         "r30": "< 30 T",
         "r60": "< 60 T",
@@ -85,7 +92,7 @@
     "count": "Kopien",
     "replicationHealth": "Replikationszustand",
     "replicationIssues": "Fehlgeschlagene oder partielle Replikationen",
-    "replicationTakeaway": "{{issues}} von {{total}} Replikationsaktivitäten fehlgeschlagen oder partiell",
+    "replicationTakeaway": "{{issues}} von {{total}} Replikationsaktivitäten sind fehlgeschlagen oder partiell",
     "outcome": {
       "success": "Erfolgreich",
       "exceptions": "Mit Ausnahmen",
@@ -158,14 +165,24 @@
   },
   "agentVersions": {
     "title": "Agent-Versionsverteilung",
-    "col": { "version": "Agent-Version", "count": "Clients" },
+    "col": {
+      "version": "Agent-Version",
+      "count": "Clients"
+    },
     "takeaway": "{{count}} verschiedene Agent-Versionen im Einsatz",
     "caption": "Client-Agent-Versionen im Bestand."
   },
   "atRisk": {
     "title": "Gefährdete Clients",
-    "col": { "client": "Client", "type": "Typ", "risk": "Risiko" },
-    "risk": { "overtime": "Backup-Fenster überschritten", "stale": "Kein Backup seit 7 Tagen" },
+    "col": {
+      "client": "Client",
+      "type": "Typ",
+      "risk": "Risiko"
+    },
+    "risk": {
+      "overtime": "Backup-Fenster überschritten",
+      "stale": "Kein Backup seit 7 Tagen"
+    },
     "overtimeChip": "Über Fenster",
     "staleChip": "7 Tage verpasst",
     "takeaway": "{{overtime}} über Fenster · {{stale}} in 7 Tagen verpasst",
