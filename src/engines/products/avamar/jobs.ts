@@ -2,9 +2,9 @@ import type { RawWorkbook } from '../../../types/ppdm'
 import type { Jobs } from '../../../types/reportView'
 import { cellNum, cellStr } from '../../aggregation/rows'
 
-const SUCCESS_STATUS = 'Activity completed successfully.'
-const EXCEPTION_STATUS = 'Activity completed with exceptions.'
-const BACKUP_OPS = new Set(['On-Demand Backup', 'Scheduled Backup'])
+export const SUCCESS_STATUS = 'Activity completed successfully.'
+export const EXCEPTION_STATUS = 'Activity completed with exceptions.'
+export const BACKUP_OPS = new Set(['On-Demand Backup', 'Scheduled Backup'])
 
 /** Jobs from the per-backup Avamar DPN Summary (detail); falls back to the
  * pre-aggregated Backup Completion Summary. `capped` is always false — Avamar

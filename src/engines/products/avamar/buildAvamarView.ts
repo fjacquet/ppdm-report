@@ -3,11 +3,11 @@ import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
 import { avamarProvenance } from '../../aggregation/provenance'
-import { emptyReliability } from '../../aggregation/reliability'
 import { cellNum, cellStr } from '../../aggregation/rows'
 import { avamarJobs } from './jobs'
 import { computeAvamarOpsInsights } from './opsInsights'
 import { avamarPolicies } from './policies'
+import { avamarReliability } from './reliability'
 import { avamarReplication } from './replication'
 import { avamarWorkloads } from './workloads'
 
@@ -104,7 +104,7 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     policies: avamarPolicies(wb),
     frontEnd: computeAvamarFrontEnd(wb),
     opsInsights: computeAvamarOpsInsights(wb),
-    reliability: emptyReliability(),
+    reliability: avamarReliability(wb),
     provenance: avamarProvenance(),
   }
 }
