@@ -49,6 +49,31 @@
       "gt8h": "> 8 h"
     }
   },
+  "efficiency": {
+    "title": "Efficienza dello storage",
+    "takeaway": "{{dedupe}} di comunanza di deduplica media",
+    "takeawayNoDedupe": "Profilo di conservazione ed efficienza",
+    "dedupeChip": "Comunanza dedup",
+    "globalChip": "Riduzione dei dati",
+    "changeChip": "Tasso di variazione giornaliero",
+    "encryptionChip": "Capacità cifrata",
+    "lowDedupe": {
+      "caption": "Client sotto il 50% di comunanza — primi {{shown}} di {{total}}",
+      "col": { "client": "Client", "common": "Comunanza", "processed": "Elaborato" }
+    },
+    "retention": {
+      "title": "Capacità per conservazione",
+      "col": { "type": "Tipo di policy", "total": "Totale" },
+      "bucket": {
+        "r30": "< 30 g",
+        "r60": "< 60 g",
+        "r180": "< 180 g",
+        "r1y": "< 1 anno",
+        "r7y": "< 7 anni",
+        "r7yPlus": "≥ 7 anni"
+      }
+    }
+  },
   "resilience": {
     "title": "Cyber-resilienza",
     "appConsistent": "Backup coerenti con l'applicazione",
@@ -57,7 +82,17 @@
     "takeaway": "Resilienza ai ransomware: {{pct}} delle copie è immutabile",
     "backupLevel": "Distribuzione dei livelli di backup",
     "level": "Livello di backup",
-    "count": "Copie"
+    "count": "Copie",
+    "replicationHealth": "Salute della replica",
+    "replicationIssues": "Repliche non riuscite o parziali",
+    "replicationTakeaway": "{{issues}} su {{total}} attività di replica non riuscite o parziali",
+    "outcome": {
+      "success": "Riuscite",
+      "exceptions": "Con eccezioni",
+      "partial": "Parziali",
+      "cancelled": "Annullate",
+      "failed": "Non riuscite"
+    }
   },
   "capacity": {
     "title": "Capacità",
