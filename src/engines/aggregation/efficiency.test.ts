@@ -3,7 +3,9 @@ import {
   classifyReplicationStatus,
   computeDedupeCommon,
   computeReplicationHealth,
+  type Efficiency,
   emptyEfficiency,
+  mergeEfficiency,
 } from './efficiency'
 
 const GIB = 2 ** 30
@@ -73,5 +75,60 @@ describe('replication health', () => {
 describe('emptyEfficiency', () => {
   it('has no sub-metric', () => {
     expect(emptyEfficiency()).toEqual({})
+  })
+})
+
+describe('mergeEfficiency', () => {
+  it('is identity on a single element', () => {
+    const one = { changeRate: { sentBytes: 1, processedBytes: 10 } }
+    expect(mergeEfficiency([one])).toBe(one)
+  })
+
+  it('folds each sub-metric across the servers that have it', () => {
+    const a: Efficiency = {
+      dedupe: {
+        common: { num: 900, den: 10 },
+        lowDedupe: { items: [{ host: 'x', commonPct: 20, processedGb: 2 }], total: 1, shown: 1 },
+      },
+      changeRate: { sentBytes: 5, processedBytes: 100 },
+      retention: {
+        totalGbByBucket: { r30: 10, r60: 0, r180: 0, r1y: 0, r7y: 0, r7yPlus: 0 },
+        perPolicyType: [
+          { type: 'SQL', gbByBucket: { r30: 10, r60: 0, r180: 0, r1y: 0, r7y: 0, r7yPlus: 0 } },
+        ],
+      },
+      replicationHealth: {
+        counts: { success: 10, exceptions: 1, partial: 0, cancelled: 0, failed: 1 },
+        total: 12,
+      },
+    }
+    const b: Efficiency = {
+      dedupe: {
+        common: { num: 100, den: 10 },
+        lowDedupe: { items: [{ host: 'y', commonPct: 40, processedGb: 5 }], total: 1, shown: 1 },
+        global: { logicalGb: 1000, usedGb: 100 },
+      },
+      retention: {
+        totalGbByBucket: { r30: 5, r60: 5, r180: 0, r1y: 0, r7y: 0, r7yPlus: 0 },
+        perPolicyType: [],
+      },
+    }
+    const m = mergeEfficiency([a, b])
+    expect(m.dedupe?.common).toEqual({ num: 1000, den: 20 })
+    expect(m.dedupe?.global).toEqual({ logicalGb: 1000, usedGb: 100 })
+    expect(m.dedupe?.lowDedupe.total).toBe(2)
+    expect(m.dedupe?.lowDedupe.items[0]?.host).toBe('x') // lowest commonality first
+    expect(m.changeRate).toEqual({ sentBytes: 5, processedBytes: 100 }) // only a had it
+    expect(m.retention?.totalGbByBucket).toEqual({
+      r30: 15,
+      r60: 5,
+      r180: 0,
+      r1y: 0,
+      r7y: 0,
+      r7yPlus: 0,
+    })
+    expect(m.retention?.perPolicyType).toHaveLength(1)
+    expect(m.replicationHealth?.total).toBe(12)
+    expect(m.encryption).toBeUndefined() // no server had it
   })
 })

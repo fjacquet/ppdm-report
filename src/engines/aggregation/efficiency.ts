@@ -157,3 +157,88 @@ export function computeReplicationHealth(
   }
   return { counts, total }
 }
+
+function addRatio(
+  a: WeightedRatio | undefined,
+  b: WeightedRatio | undefined,
+): WeightedRatio | undefined {
+  if (!a) return b
+  if (!b) return a
+  return { num: a.num + b.num, den: a.den + b.den }
+}
+
+/** Fold per-server Efficiency into one. Identity on a single element. Pure. */
+export function mergeEfficiency(list: Efficiency[]): Efficiency {
+  const first = list[0]
+  if (!first) return emptyEfficiency()
+  if (list.length === 1) return first
+
+  const out: Efficiency = {}
+
+  const dedupes = list.map((e) => e.dedupe).filter((d): d is Dedupe => d !== undefined)
+  if (dedupes.length > 0) {
+    const lowItems = dedupes.flatMap((d) => d.lowDedupe.items)
+    const lowTotal = dedupes.reduce((a, d) => a + d.lowDedupe.total, 0)
+    const capped = topN(lowItems, TOP_N_DEFAULT, (c) => -c.commonPct)
+    const globals = dedupes
+      .map((d) => d.global)
+      .filter((g): g is NonNullable<Dedupe['global']> => g !== undefined)
+    out.dedupe = {
+      common: dedupes.reduce<WeightedRatio | undefined>((a, d) => addRatio(a, d.common), undefined),
+      lowDedupe: { items: capped.items, total: lowTotal, shown: capped.items.length },
+      global:
+        globals.length > 0
+          ? {
+              logicalGb: globals.reduce((a, g) => a + g.logicalGb, 0),
+              usedGb: globals.reduce((a, g) => a + g.usedGb, 0),
+            }
+          : undefined,
+      jobRatio: dedupes.reduce<WeightedRatio | undefined>(
+        (a, d) => addRatio(a, d.jobRatio),
+        undefined,
+      ),
+    }
+  }
+
+  const rates = list.map((e) => e.changeRate).filter((c): c is ChangeRate => c !== undefined)
+  if (rates.length > 0) {
+    out.changeRate = {
+      sentBytes: rates.reduce((a, c) => a + c.sentBytes, 0),
+      processedBytes: rates.reduce((a, c) => a + c.processedBytes, 0),
+    }
+  }
+
+  const rets = list.map((e) => e.retention).filter((r): r is RetentionProfile => r !== undefined)
+  if (rets.length > 0) {
+    const total = emptyRetentionBuckets()
+    for (const r of rets) for (const id of RETENTION_BUCKET_IDS) total[id] += r.totalGbByBucket[id]
+    out.retention = { totalGbByBucket: total, perPolicyType: rets.flatMap((r) => r.perPolicyType) }
+  }
+
+  const encs = list.map((e) => e.encryption).filter((e): e is EncryptionCoverage => e !== undefined)
+  if (encs.length > 0) {
+    out.encryption = {
+      encryptedJobs: encs.reduce((a, e) => a + e.encryptedJobs, 0),
+      totalJobs: encs.reduce((a, e) => a + e.totalJobs, 0),
+      encryptedGb: encs.reduce((a, e) => a + e.encryptedGb, 0),
+      totalGb: encs.reduce((a, e) => a + e.totalGb, 0),
+    }
+  }
+
+  const reps = list
+    .map((e) => e.replicationHealth)
+    .filter((r): r is ReplicationHealth => r !== undefined)
+  if (reps.length > 0) {
+    const counts: Record<ReplicationOutcomeId, number> = {
+      success: 0,
+      exceptions: 0,
+      partial: 0,
+      cancelled: 0,
+      failed: 0,
+    }
+    for (const r of reps) for (const id of REPLICATION_OUTCOME_IDS) counts[id] += r.counts[id]
+    out.replicationHealth = { counts, total: reps.reduce((a, r) => a + r.total, 0) }
+  }
+
+  return out
+}
