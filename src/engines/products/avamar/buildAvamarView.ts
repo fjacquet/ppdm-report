@@ -1,10 +1,10 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
-import { emptyEfficiency } from '../../aggregation/efficiency'
 import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
 import { avamarProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr } from '../../aggregation/rows'
+import { avamarEfficiency } from './efficiency'
 import { avamarJobs } from './jobs'
 import { computeAvamarOpsInsights } from './opsInsights'
 import { avamarPolicies } from './policies'
@@ -98,6 +98,8 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
   // compute node targets once to avoid double call
   const targets = nodeTargets(wb)
 
+  const efficiency = avamarEfficiency(wb)
+
   return {
     meta: wb.meta,
     inUse: avamarWorkloads(wb),
@@ -116,8 +118,10 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     frontEnd: computeAvamarFrontEnd(wb),
     opsInsights: computeAvamarOpsInsights(wb),
     reliability: avamarReliability(wb),
-    efficiency: emptyEfficiency(),
-    // efficiency wiring lands in the next task
-    provenance: avamarProvenance(hasReliabilitySource(wb), false),
+    efficiency,
+    provenance: avamarProvenance(
+      hasReliabilitySource(wb),
+      Object.values(efficiency).some((v) => v !== undefined),
+    ),
   }
 }
