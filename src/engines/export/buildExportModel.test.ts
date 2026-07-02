@@ -370,6 +370,13 @@ describe('buildExportModel', () => {
         runtimeTotal: 1,
         capped: false,
       },
+      // non-empty efficiency so the efficiency section renders and adds no suppression warning
+      efficiency: {
+        retention: {
+          totalGbByBucket: { r30: 10, r60: 0, r180: 0, r1y: 0, r7y: 0, r7yPlus: 0 },
+          perPolicyType: [],
+        },
+      },
     }
     const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
     expect(model.warnings).toEqual(['cap note', 'merge note'])
@@ -610,6 +617,62 @@ describe('buildExportModel', () => {
       const v = baseView({ reliability: emptyReliability() })
       const model = buildExportModel(v, 'assessment', 'light', t, 'en')
       expect(model.sections.find((s) => s.id === 'reliability')).toBeUndefined()
+    })
+  })
+
+  describe('efficiency section', () => {
+    it('renders dedupe chip, retention table, and bucket bars', () => {
+      const v = baseView({
+        efficiency: {
+          dedupe: {
+            common: { num: 9200, den: 100 },
+            lowDedupe: { items: [], total: 0, shown: 0 },
+          },
+          retention: {
+            totalGbByBucket: { r30: 100, r60: 50, r180: 0, r1y: 0, r7y: 0, r7yPlus: 0 },
+            perPolicyType: [
+              {
+                type: 'SQL',
+                gbByBucket: { r30: 100, r60: 50, r180: 0, r1y: 0, r7y: 0, r7yPlus: 0 },
+              },
+            ],
+          },
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'efficiency')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows.some((r) => r[0] === 'SQL')).toBe(true)
+      expect(section?.deck?.bars?.length).toBe(6)
+    })
+
+    it('is suppressed when efficiency is empty (PPDM) and resilience gains replication health when present', () => {
+      const empty = buildExportModel(
+        baseView({ efficiency: emptyEfficiency() }),
+        'assessment',
+        'light',
+        t,
+        'en',
+      )
+      expect(empty.sections.find((s) => s.id === 'efficiency')).toBeUndefined()
+
+      const withRep = buildExportModel(
+        baseView({
+          efficiency: {
+            replicationHealth: {
+              counts: { success: 90, exceptions: 4, partial: 3, cancelled: 1, failed: 2 },
+              total: 100,
+            },
+          },
+        }),
+        'assessment',
+        'light',
+        t,
+        'en',
+      )
+      const resilience = withRep.sections.find((s) => s.id === 'resilience')
+      expect(resilience?.deck?.bars?.some((b) => b.label.length > 0)).toBe(true)
+      expect(resilience?.deck?.kpiChips?.some((k) => k.value === '5')).toBe(true) // failed+partial
     })
   })
 })

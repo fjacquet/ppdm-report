@@ -55,6 +55,9 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return <AgentVersionsSection key={id} view={view} />
       case 'longestBackups':
         return <LongestBackupsSection key={id} view={view} />
+      case 'efficiency':
+        // Task 9 replaces this with an EfficiencySection dashboard component.
+        return null
     }
   }
 

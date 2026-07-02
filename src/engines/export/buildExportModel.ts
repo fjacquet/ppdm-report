@@ -12,6 +12,7 @@ import {
   formatGbOrUnknown,
   gbToBytes,
 } from '../../utils/format'
+import { REPLICATION_OUTCOME_IDS, RETENTION_BUCKET_IDS } from '../aggregation/efficiency'
 import { FRONT_END_METRICS } from '../aggregation/frontEnd'
 import { RUNTIME_BUCKET_IDS } from '../aggregation/reliability'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
@@ -19,12 +20,15 @@ import {
   appConsistentTone,
   atRiskTone,
   backupDurationTone,
+  changeRateTone,
   coverageTone,
+  dedupeCommonTone,
   immutableTone,
   jobSuccessTone,
   queueDelayTone,
   repeatFailureTone,
   replicatedTone,
+  replicationIssueTone,
   utilizationTone,
 } from './thresholds'
 import { toneHex } from './tone'
@@ -129,6 +133,7 @@ export function buildExportModel(
     frontEnd,
     opsInsights,
     reliability,
+    efficiency,
   } = view
 
   const execKpis = [
@@ -430,6 +435,43 @@ export function buildExportModel(
       : undefined,
   }
 
+  const repHealth = efficiency.replicationHealth
+  const repHasIssues = repHealth !== undefined && repHealth.total > 0
+  const repIssues = repHasIssues ? repHealth.counts.failed + repHealth.counts.partial : 0
+  const repOutcomeTone = (id: (typeof REPLICATION_OUTCOME_IDS)[number], n: number): ExportTone => {
+    if (id === 'success') return 'ok'
+    if (id === 'cancelled') return 'muted'
+    return n > 0 ? (id === 'failed' ? 'bad' : 'warn') : 'ok'
+  }
+  const repBars = repHasIssues
+    ? toBars(
+        REPLICATION_OUTCOME_IDS.map((id) => ({
+          label: t(`dashboard:resilience.outcome.${id}`),
+          magnitude: repHealth.counts[id],
+          value: fmtInt(repHealth.counts[id], locale),
+          tone: repOutcomeTone(id, repHealth.counts[id]),
+        })),
+        pal,
+      )
+    : []
+  const repChips: ExportKpi[] = repHasIssues
+    ? [
+        {
+          label: t('dashboard:resilience.replicationIssues'),
+          value: fmtInt(repIssues, locale),
+          tone: replicationIssueTone(repIssues / repHealth.total),
+        },
+      ]
+    : []
+  const repNotes = repHasIssues
+    ? [
+        t('dashboard:resilience.replicationTakeaway', {
+          issues: fmtInt(repIssues, locale),
+          total: fmtInt(repHealth.total, locale),
+        }),
+      ]
+    : []
+
   const complianceSection: ExportSection = {
     id: 'resilience',
     title: t('dashboard:resilience.title'),
@@ -460,9 +502,12 @@ export function buildExportModel(
             ]),
           }
         : undefined,
-    notes: compliance.capped
-      ? [t('common:capped', { n: fmtInt(compliance.windowSize, locale) })]
-      : [],
+    notes: [
+      ...(compliance.capped
+        ? [t('common:capped', { n: fmtInt(compliance.windowSize, locale) })]
+        : []),
+      ...repNotes,
+    ],
     deck: {
       subtitle: t('dashboard:resilience.takeaway', {
         pct: fmtPercent(compliance.immutablePct, locale),
@@ -470,29 +515,33 @@ export function buildExportModel(
       caveat: compliance.capped
         ? t('common:capped', { n: fmtInt(compliance.windowSize, locale) })
         : undefined,
-      bars: toBars(
-        [
-          {
-            label: t('dashboard:resilience.appConsistent'),
-            magnitude: compliance.appConsistentPct,
-            value: fmtPercent(compliance.appConsistentPct, locale),
-            tone: appConsistentTone(compliance.appConsistentPct),
-          },
-          {
-            label: t('dashboard:resilience.replicated'),
-            magnitude: compliance.replicatedPct,
-            value: fmtPercent(compliance.replicatedPct, locale),
-            tone: replicatedTone(compliance.replicatedPct),
-          },
-          {
-            label: t('dashboard:resilience.immutable'),
-            magnitude: compliance.immutablePct,
-            value: fmtPercent(compliance.immutablePct, locale),
-            tone: immutableTone(compliance.immutablePct),
-          },
-        ],
-        pal,
-      ),
+      ...(repChips.length > 0 ? { kpiChips: repChips } : {}),
+      bars: [
+        ...toBars(
+          [
+            {
+              label: t('dashboard:resilience.appConsistent'),
+              magnitude: compliance.appConsistentPct,
+              value: fmtPercent(compliance.appConsistentPct, locale),
+              tone: appConsistentTone(compliance.appConsistentPct),
+            },
+            {
+              label: t('dashboard:resilience.replicated'),
+              magnitude: compliance.replicatedPct,
+              value: fmtPercent(compliance.replicatedPct, locale),
+              tone: replicatedTone(compliance.replicatedPct),
+            },
+            {
+              label: t('dashboard:resilience.immutable'),
+              magnitude: compliance.immutablePct,
+              value: fmtPercent(compliance.immutablePct, locale),
+              tone: immutableTone(compliance.immutablePct),
+            },
+          ],
+          pal,
+        ),
+        ...repBars,
+      ],
     },
   }
 
@@ -552,6 +601,113 @@ export function buildExportModel(
 
   const b10 = meta.baseTen
   const bytesOf = (gb: number) => formatBytes(gbToBytes(gb, b10), locale, b10)
+
+  const effChips: ExportKpi[] = []
+  if (efficiency.dedupe?.common) {
+    const { num, den } = efficiency.dedupe.common
+    const commonPct = num / den
+    effChips.push({
+      label: t('dashboard:efficiency.dedupeChip'),
+      value: fmtPercent(commonPct / 100, locale),
+      tone: dedupeCommonTone(commonPct),
+    })
+  }
+  if (efficiency.dedupe?.global) {
+    const { logicalGb, usedGb } = efficiency.dedupe.global
+    effChips.push({
+      label: t('dashboard:efficiency.globalChip'),
+      value: `×${fmtNum(logicalGb / usedGb, locale, 1)}`,
+      tone: 'accent',
+    })
+  }
+  if (efficiency.changeRate) {
+    const { sentBytes, processedBytes } = efficiency.changeRate
+    const changePct = sentBytes / processedBytes
+    effChips.push({
+      label: t('dashboard:efficiency.changeChip'),
+      value: fmtPercent(changePct, locale),
+      tone: changeRateTone(changePct),
+    })
+  }
+  if (efficiency.encryption) {
+    const { encryptedGb, totalGb } = efficiency.encryption
+    effChips.push({
+      label: t('dashboard:efficiency.encryptionChip'),
+      value: fmtPercent(encryptedGb / totalGb, locale),
+      tone: 'accent',
+    })
+  }
+
+  const retention = efficiency.retention
+  const retentionTable = retention
+    ? {
+        columns: [
+          t('dashboard:efficiency.retention.col.type'),
+          ...RETENTION_BUCKET_IDS.map((id) => t(`dashboard:efficiency.retention.bucket.${id}`)),
+        ],
+        rows: [
+          ...retention.perPolicyType.map((row) => [
+            row.type,
+            ...RETENTION_BUCKET_IDS.map((id) => bytesOf(row.gbByBucket[id])),
+          ]),
+          [
+            t('dashboard:efficiency.retention.col.total'),
+            ...RETENTION_BUCKET_IDS.map((id) => bytesOf(retention.totalGbByBucket[id])),
+          ],
+        ],
+      }
+    : undefined
+
+  const lowDedupe = efficiency.dedupe?.lowDedupe
+  const lowDedupeTable =
+    !retention && lowDedupe && lowDedupe.items.length > 0
+      ? {
+          columns: [
+            t('dashboard:efficiency.lowDedupe.col.client'),
+            t('dashboard:efficiency.lowDedupe.col.common'),
+            t('dashboard:efficiency.lowDedupe.col.processed'),
+          ],
+          rows: lowDedupe.items.map((c) => [
+            c.host,
+            fmtPercent(c.commonPct / 100, locale),
+            bytesOf(c.processedGb),
+          ]),
+          caption: t('dashboard:efficiency.lowDedupe.caption', {
+            shown: lowDedupe.shown,
+            total: lowDedupe.total,
+          }),
+        }
+      : undefined
+
+  const efficiencyBars = retention
+    ? toBars(
+        RETENTION_BUCKET_IDS.map((id, i) => ({
+          label: t(`dashboard:efficiency.retention.bucket.${id}`),
+          magnitude: retention.totalGbByBucket[id],
+          value: bytesOf(retention.totalGbByBucket[id]),
+          tone: i === 0 ? ('accent' as const) : ('muted' as const),
+        })),
+        pal,
+      )
+    : []
+
+  const efficiencySection: ExportSection = {
+    id: 'efficiency',
+    title: t('dashboard:efficiency.title'),
+    table: retentionTable ?? lowDedupeTable,
+    deck: {
+      subtitle: efficiency.dedupe?.common
+        ? t('dashboard:efficiency.takeaway', {
+            dedupe: fmtPercent(
+              efficiency.dedupe.common.num / efficiency.dedupe.common.den / 100,
+              locale,
+            ),
+          })
+        : t('dashboard:efficiency.takeawayNoDedupe'),
+      kpiChips: effChips,
+      bars: efficiencyBars,
+    },
+  }
 
   const hasAnyPolicies = policies.count > 0
   const policiesKpis: ExportKpi[] = hasAnyPolicies
@@ -818,6 +974,7 @@ export function buildExportModel(
     reliability: withCaveat(reliabilitySection, 'reliability', view, t),
     resilience: withCaveat(complianceSection, 'compliance', view, t),
     capacity: withCaveat(capacitySection, 'storageTargets', view, t),
+    efficiency: withCaveat(efficiencySection, 'efficiency', view, t),
     policies: policiesSection,
     atRisk: atRiskSection,
     agentVersions: agentVersionsSection,
