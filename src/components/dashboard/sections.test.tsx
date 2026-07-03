@@ -137,6 +137,25 @@ describe('ExecutiveKpis', () => {
     expect(screen.getByText('Job success rate')).toBeInTheDocument()
     expect(screen.getByText('Immutable')).toBeInTheDocument()
   })
+
+  it('falls back to the unprotected-asset count and label when the estate carries no gap sizes', () => {
+    const view: ReportView = {
+      ...fixture,
+      gaps: {
+        count: 281,
+        totalCapacityGb: undefined,
+        top: {
+          items: [{ name: 'client01.corp', type: 'Client', sizeGb: undefined }],
+          total: 281,
+          shown: 1,
+        },
+      },
+    }
+    render(<ExecutiveKpis view={view} />)
+    expect(screen.getByText('281')).toBeInTheDocument()
+    expect(screen.getByText('Unprotected assets')).toBeInTheDocument()
+    expect(screen.queryByText('Size unknown')).not.toBeInTheDocument()
+  })
 })
 
 describe('CoverageSection', () => {

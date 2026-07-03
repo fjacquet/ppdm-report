@@ -15,6 +15,7 @@ import {
 } from '../../utils/format'
 import { REPLICATION_OUTCOME_IDS, RETENTION_BUCKET_IDS } from '../aggregation/efficiency'
 import { FRONT_END_METRICS } from '../aggregation/frontEnd'
+import { hasGapSizes } from '../aggregation/gaps'
 import { HYGIENE_KINDS } from '../aggregation/hygiene'
 import { RUNTIME_BUCKET_IDS } from '../aggregation/reliability'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
@@ -151,8 +152,7 @@ export function buildExportModel(
   // Avamar/NetWorker never size never-backed-up clients — showing "unknown" on
   // every row plus a TB KPI is noise, not information. Gate both renderers on
   // this single derived flag rather than faking a size.
-  const hasGapSizes =
-    gaps.totalCapacityGb !== undefined || gaps.top.items.some((a) => a.sizeGb !== undefined)
+  const gapsHaveSizes = hasGapSizes(gaps)
 
   const execKpis = [
     {
@@ -161,7 +161,7 @@ export function buildExportModel(
       detail: t('dashboard:coverage.inclExcluded'),
       tone: coverageTone(coverage.overall.pct),
     },
-    hasGapSizes
+    gapsHaveSizes
       ? {
           label: t('dashboard:kpi.unprotected'),
           value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
@@ -257,7 +257,7 @@ export function buildExportModel(
     },
   }
 
-  const gapsKpis: ExportKpi[] = hasGapSizes
+  const gapsKpis: ExportKpi[] = gapsHaveSizes
     ? [
         {
           label: t('dashboard:exposure.unprotectedTb'),
@@ -273,21 +273,21 @@ export function buildExportModel(
     title: t('dashboard:exposure.title'),
     kpis: gapsKpis,
     table: {
-      columns: hasGapSizes
+      columns: gapsHaveSizes
         ? [t('common:col.name'), t('common:col.type'), t('common:col.size')]
         : [t('common:col.name'), t('common:col.type')],
       rows: gaps.top.items.map((a) =>
-        hasGapSizes
+        gapsHaveSizes
           ? [a.name, a.type, formatGbOrUnknown(a.sizeGb, locale, t('common:sizeUnknown'))]
           : [a.name, a.type],
       ),
       caption: t('common:topOf', { shown: gaps.top.shown, total: gaps.top.total }),
     },
-    notes: hasGapSizes ? undefined : [t('dashboard:exposure.noSizesNote')],
+    notes: gapsHaveSizes ? undefined : [t('dashboard:exposure.noSizesNote')],
     deck: {
       subtitle: t('dashboard:exposure.takeaway', { count: fmtInt(gaps.count, locale) }),
       kpiChips: gapsKpis,
-      caveat: hasGapSizes
+      caveat: gapsHaveSizes
         ? gapsBaseCaveat
         : `${gapsBaseCaveat} · ${t('dashboard:exposure.noSizesNote')}`,
       bars: toBars(

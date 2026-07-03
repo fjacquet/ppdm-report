@@ -1,6 +1,7 @@
 import type { EChartsOption } from 'echarts/types/dist/shared'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { hasGapSizes } from '../../engines/aggregation/gaps'
 import { DARK, LIGHT } from '../../theme/palette'
 import type { ReportView } from '../../types/reportView'
 import { fmtInt, formatBytes, formatGbOrUnknown, gbToBytes } from '../../utils/format'
@@ -21,10 +22,9 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
 
   const { top, count } = view.gaps
   // Avamar/NetWorker never size never-backed-up clients — showing "unknown" on
-  // every row plus a TB KPI is noise, not information. Single derived flag,
-  // shared with buildExportModel's identical gate.
-  const hasGapSizes =
-    view.gaps.totalCapacityGb !== undefined || top.items.some((a) => a.sizeGb !== undefined)
+  // every row plus a TB KPI is noise, not information. Shared with
+  // ExecutiveKpis / buildExportModel / PerServerSection's identical gate.
+  const gapsHaveSizes = hasGapSizes(view.gaps)
 
   const barData: BarDatum[] = useMemo(
     () =>
@@ -53,7 +53,7 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
 
       {/* KPI row */}
       <div className="mb-4 flex gap-8">
-        {hasGapSizes && (
+        {gapsHaveSizes && (
           <div>
             <p className="text-3xl font-bold text-red-500">
               {formatGbOrUnknown(view.gaps.totalCapacityGb, locale, t('common:sizeUnknown'))}
@@ -87,7 +87,7 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
                 <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
                   <th className="pb-2 pr-4 font-medium">{t('common:col.name')}</th>
                   <th className="pb-2 pr-4 font-medium">{t('common:col.type')}</th>
-                  {hasGapSizes && (
+                  {gapsHaveSizes && (
                     <th className="pb-2 font-medium text-right">{t('common:col.size')}</th>
                   )}
                 </tr>
@@ -106,7 +106,7 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
                     >
                       <td className="py-1.5 pr-4">{item?.name}</td>
                       <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{item?.type}</td>
-                      {hasGapSizes && (
+                      {gapsHaveSizes && (
                         <td className="py-1.5 text-right">
                           {formatGbOrUnknown(item?.sizeGb, locale, t('common:sizeUnknown'))}
                         </td>
@@ -119,7 +119,7 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
             <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
               {t('common:topOf', { shown: top.shown, total: top.total })}
             </p>
-            {!hasGapSizes && (
+            {!gapsHaveSizes && (
               <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                 {t('dashboard:exposure.noSizesNote')}
               </p>

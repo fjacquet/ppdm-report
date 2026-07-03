@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { hasGapSizes } from '../../engines/aggregation/gaps'
 import { immutableTone } from '../../engines/export/thresholds'
 import type { ReportView } from '../../types/reportView'
 import { fmtInt, fmtPercent, formatGbOrUnknown } from '../../utils/format'
@@ -15,13 +16,11 @@ export function ExecutiveKpis({ view }: ExecutiveKpisProps) {
   const coverageValue = fmtPercent(view.coverage.overall.pct, locale)
   // Avamar/NetWorker exports never size never-backed-up clients: fall back to the
   // unprotected-asset count instead of a "size unknown" placeholder tile.
-  const hasGapSizes =
-    view.gaps.totalCapacityGb !== undefined ||
-    view.gaps.top.items.some((a) => a.sizeGb !== undefined)
-  const unprotectedValue = hasGapSizes
+  const gapsHaveSizes = hasGapSizes(view.gaps)
+  const unprotectedValue = gapsHaveSizes
     ? formatGbOrUnknown(view.gaps.totalCapacityGb, locale, t('common:sizeUnknown'))
     : fmtInt(view.gaps.count, locale)
-  const unprotectedLabel = hasGapSizes ? t('kpi.unprotected') : t('exposure.assets')
+  const unprotectedLabel = gapsHaveSizes ? t('kpi.unprotected') : t('exposure.assets')
   const jobSuccessValue = fmtPercent(view.jobs.successPct, locale)
   const complianceAvailable = view.provenance.compliance.available
 
