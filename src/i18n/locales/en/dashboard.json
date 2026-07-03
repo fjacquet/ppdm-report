@@ -74,6 +74,23 @@
       }
     }
   },
+  "capacityTrend": {
+    "title": "Capacity growth",
+    "takeaway": "Fastest-growing target: {{target}} at {{slope}} pts/month",
+    "takeawayFlat": "No target shows meaningful growth over the window",
+    "chip": "Fastest growth",
+    "col": {
+      "target": "Target",
+      "current": "Current",
+      "min": "Min",
+      "max": "Max",
+      "slope": "Growth (pts/30 d)",
+      "window": "Window"
+    },
+    "noSlope": "n/a",
+    "observedNote": "Observed trend over the collection window — not a projection.",
+    "chartLabel": "Utilization over time (%)"
+  },
   "resilience": {
     "title": "Cyber-resilience",
     "appConsistent": "App-consistent backups",
