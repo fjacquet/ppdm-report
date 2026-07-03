@@ -13,62 +13,39 @@ function optNum(row: Record<string, Cell>, key: string): number | undefined {
   return cellStr(row, key) === '' ? undefined : cellNum(row, key)
 }
 
-/** Backup-carrying job types (save/vproxysave/backup action) — mirrors networkerReliability's filter. */
-const isBackupJob = (jobType: string) => /save|backup/i.test(jobType)
-
 /**
- * NetWorker activity/sizing merges two row sources into one `ActivityJob[]`, pure.
+ * NetWorker activity/sizing is single-sourced from `Backups` (per-backup detail), pure.
  *
- * `Backups` (per-backup detail) carries workload type + size + file count, but no
- * usable day here (`Backup Created` can be a string in this export; parsing it would
- * risk double-counting daily volume against the `Jobs` source below, so day is left
- * blank for these rows). These rows drive `byType` and `largest`.
+ * Each row carries workload type, size, file count, and `Backup Created` — an Excel
+ * serial (e.g. 46174.33) that converts directly via `serialToIso`. These rows drive
+ * `byType`, `largest`, and `daily` all at once, so a backup can never rank twice in
+ * `largest` by also surfacing through a second sheet. `daily` here means "backups per
+ * day" (a count + summed size per calendar day), not distinct job starts.
  *
- * `Jobs` (filtered to backup-carrying job types) carries the `Start Time` serial but
- * no workload type. These rows drive `daily`.
+ * `Backups` carries no throughput column, so `slowest` stays empty.
  *
- * Both sets are passed to `computeActivity` as ONE combined array: byType/largest key
- * off `type` and skip blank-type rows (the Jobs rows), while daily keys off `day` and
- * skips blank-day rows (the Backups rows) — so the two sources compose without
- * double-counting, with no special-casing needed in the shared aggregator.
- *
- * Neither sheet carries throughput, so `slowest` stays empty.
- *
- * Neither sheet carries an OS column either, so `osSplit` — which `computeActivity`
- * would otherwise derive from job rows' `os` field — is overridden below from the
- * `Clients` sheet's `Client OS Type`, distinct by `Hostname`.
+ * `Backups` carries no OS column either, so `osSplit` — which `computeActivity` would
+ * otherwise derive from job rows' `os` field — is overridden below from the `Clients`
+ * sheet's `Client OS Type`, distinct by `Hostname`.
  */
 export function networkerActivity(wb: RawWorkbook): Activity {
   const backupRows = wb.sheets.Backups?.rows ?? []
-  const fromBackups: ActivityJob[] = backupRows.map((r) => ({
-    host: cellStr(r, 'Client Name'),
-    type: cellStr(r, 'Backup Type'),
-    os: '',
-    day: '',
-    sizeGb: optNum(r, 'Backup Size (GB)'),
-    files: optNum(r, 'Number of Files'),
-    throughputMbSec: undefined,
-    sentBytes: undefined,
-    processedBytes: undefined,
-  }))
-
-  const jobRows = (wb.sheets.Jobs?.rows ?? []).filter((r) => isBackupJob(cellStr(r, 'Job Type')))
-  const fromJobs: ActivityJob[] = jobRows.map((r) => {
-    const start = cellNum(r, 'Start Time')
+  const fromBackups: ActivityJob[] = backupRows.map((r) => {
+    const created = cellNum(r, 'Backup Created')
     return {
       host: cellStr(r, 'Client Name'),
-      type: '',
+      type: cellStr(r, 'Backup Type'),
       os: '',
-      day: start > 0 ? serialToIso(start).slice(0, 10) : '',
-      sizeGb: optNum(r, 'Size (GB)'),
-      files: undefined,
+      day: created > 0 ? serialToIso(created).slice(0, 10) : '',
+      sizeGb: optNum(r, 'Backup Size (GB)'),
+      files: optNum(r, 'Number of Files'),
       throughputMbSec: undefined,
       sentBytes: undefined,
       processedBytes: undefined,
     }
   })
 
-  const computed = computeActivity([...fromBackups, ...fromJobs])
+  const computed = computeActivity(fromBackups)
 
   const clientRows = wb.sheets.Clients?.rows ?? []
   let osSplit: Activity['osSplit']
