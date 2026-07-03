@@ -1,5 +1,6 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
+import { emptyActivity } from '../../aggregation/activity'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
 import { avamarProvenance } from '../../aggregation/provenance'
@@ -127,12 +128,15 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     efficiency,
     capacityTrend: trend,
     hygiene,
+    activity: emptyActivity(),
+    // activity wiring lands in the next tasks
     provenance: avamarProvenance(
       hasReliabilitySource(wb),
       Object.values(efficiency).some((v) => v !== undefined),
       trend.targets.length > 0,
       // zero findings reads as unavailable — nothing to show is suppressed, not zeroed
       hygiene.items.length > 0,
+      false,
     ),
   }
 }

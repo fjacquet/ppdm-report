@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { emptyActivity } from '../../engines/aggregation/activity'
 import type { TrendTarget } from '../../engines/aggregation/capacityTrend'
 import { emptyCapacityTrend } from '../../engines/aggregation/capacityTrend'
 import { emptyEfficiency } from '../../engines/aggregation/efficiency'
@@ -89,6 +90,7 @@ const fixture: ReportView = {
   efficiency: emptyEfficiency(),
   capacityTrend: emptyCapacityTrend(),
   hygiene: emptyHygiene(),
+  activity: emptyActivity(),
   provenance: allAvailable(0),
 }
 

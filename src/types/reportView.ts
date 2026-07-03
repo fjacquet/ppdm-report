@@ -1,3 +1,4 @@
+import type { Activity } from '../engines/aggregation/activity'
 import type { CapacityTrend } from '../engines/aggregation/capacityTrend'
 import type { Efficiency } from '../engines/aggregation/efficiency'
 import type { Hygiene } from '../engines/aggregation/hygiene'
@@ -14,6 +15,7 @@ export type MetricKey =
   | 'efficiency'
   | 'capacityTrend'
   | 'hygiene'
+  | 'activity'
 
 /** Availability of a detail-only metric across the servers in scope. */
 export interface MetricProvenance {
@@ -180,6 +182,7 @@ export interface ReportView {
   efficiency: Efficiency
   capacityTrend: CapacityTrend
   hygiene: Hygiene
+  activity: Activity
   provenance: Record<MetricKey, MetricProvenance>
 }
 
