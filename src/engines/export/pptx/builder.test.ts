@@ -5,6 +5,7 @@ import { DARK } from '../../../theme/palette'
 import type { ReportView } from '../../../types/reportView'
 import { emptyCapacityTrend } from '../../aggregation/capacityTrend'
 import { emptyEfficiency } from '../../aggregation/efficiency'
+import { emptyHygiene } from '../../aggregation/hygiene'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { allAvailable } from '../../aggregation/provenance'
 import { emptyReliability } from '../../aggregation/reliability'
@@ -76,6 +77,7 @@ const view: ReportView = {
   reliability: emptyReliability(),
   efficiency: emptyEfficiency(),
   capacityTrend: emptyCapacityTrend(),
+  hygiene: emptyHygiene(),
   provenance: allAvailable(0),
 }
 

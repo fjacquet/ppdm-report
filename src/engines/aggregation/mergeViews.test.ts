@@ -6,6 +6,7 @@ import { buildAvamarView } from '../products/avamar/buildAvamarView'
 import { buildNetworkerView } from '../products/networker/buildNetworkerView'
 import { emptyCapacityTrend } from './capacityTrend'
 import { emptyEfficiency } from './efficiency'
+import { emptyHygiene } from './hygiene'
 import { mergeViews } from './mergeViews'
 import { emptyOpsInsights } from './opsInsights'
 import { allAvailable, allUnavailable } from './provenance'
@@ -47,6 +48,7 @@ function detail(over: Partial<ReportView>): ReportView {
     reliability: emptyReliability(),
     efficiency: emptyEfficiency(),
     capacityTrend: emptyCapacityTrend(),
+    hygiene: emptyHygiene(),
     provenance: allAvailable(0),
     ...over,
   }

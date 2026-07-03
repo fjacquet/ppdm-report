@@ -1,5 +1,6 @@
 import type { CapacityTrend } from '../engines/aggregation/capacityTrend'
 import type { Efficiency } from '../engines/aggregation/efficiency'
+import type { Hygiene } from '../engines/aggregation/hygiene'
 import type { Reliability } from '../engines/aggregation/reliability'
 import type { CaptureMeta, ProductId } from './ppdm'
 
@@ -12,6 +13,7 @@ export type MetricKey =
   | 'reliability'
   | 'efficiency'
   | 'capacityTrend'
+  | 'hygiene'
 
 /** Availability of a detail-only metric across the servers in scope. */
 export interface MetricProvenance {
@@ -177,6 +179,7 @@ export interface ReportView {
   reliability: Reliability
   efficiency: Efficiency
   capacityTrend: CapacityTrend
+  hygiene: Hygiene
   provenance: Record<MetricKey, MetricProvenance>
 }
 

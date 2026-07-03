@@ -2,6 +2,7 @@ import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../ty
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
+import { emptyHygiene } from '../../aggregation/hygiene'
 import { avamarProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr } from '../../aggregation/rows'
 import { avamarCapacityTrend, utilizationScaleFactor } from './capacityTrend'
@@ -124,10 +125,13 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     reliability: avamarReliability(wb),
     efficiency,
     capacityTrend: trend,
+    hygiene: emptyHygiene(),
+    // hygiene wiring lands in the next tasks
     provenance: avamarProvenance(
       hasReliabilitySource(wb),
       Object.values(efficiency).some((v) => v !== undefined),
       trend.targets.length > 0,
+      false,
     ),
   }
 }

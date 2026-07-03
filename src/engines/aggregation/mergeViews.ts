@@ -5,6 +5,7 @@ import { mergeCapacityTrend } from './capacityTrend'
 import { emptyBand, finalizeBand } from './coverage'
 import { mergeEfficiency } from './efficiency'
 import { mergeFrontEnd } from './frontEnd'
+import { mergeHygiene } from './hygiene'
 import { mergeOpsInsights } from './opsInsights'
 import { mergeReliability } from './reliability'
 import { topN } from './topN'
@@ -34,6 +35,7 @@ function mergeProvenance(views: ReportView[]): Record<MetricKey, MetricProvenanc
     'reliability',
     'efficiency',
     'capacityTrend',
+    'hygiene',
   ]
   const out = {} as Record<MetricKey, MetricProvenance>
   for (const key of keys) {
@@ -143,6 +145,7 @@ export function mergeViews(views: ReportView[]): ReportView {
     reliability: mergeReliability(views.map((v) => v.reliability)),
     efficiency: mergeEfficiency(views.map((v) => v.efficiency)),
     capacityTrend: mergeCapacityTrend(views.map((v) => v.capacityTrend)),
+    hygiene: mergeHygiene(views.map((v) => v.hygiene)),
     provenance: mergeProvenance(views),
   }
 }
