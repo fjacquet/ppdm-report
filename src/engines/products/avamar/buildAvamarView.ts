@@ -1,10 +1,10 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
-import { emptyCapacityTrend } from '../../aggregation/capacityTrend'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
 import { avamarProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr } from '../../aggregation/rows'
+import { avamarCapacityTrend, utilizationScaleFactor } from './capacityTrend'
 import { avamarEfficiency } from './efficiency'
 import { avamarJobs } from './jobs'
 import { computeAvamarOpsInsights } from './opsInsights'
@@ -29,12 +29,14 @@ function sumTotal(wb: RawWorkbook, sheet: string): number {
 /** Latest-date Max Utilization (%) per node → storage targets. */
 function nodeTargets(wb: RawWorkbook): StorageTarget[] {
   const rows = wb.sheets['Node Utilization']?.rows ?? []
+  // Raw column is a 0..1 ratio in some exports (e.g. 0.92 = 92%) and a plain
+  // percent in others (e.g. 5.85 … 27.69) — scale per sheet, not unconditionally.
+  const scale = utilizationScaleFactor(rows)
   const latest = new Map<string, { date: number; util: number }>()
   for (const r of rows) {
     const node = cellStr(r, 'Node')
     const date = cellNum(r, 'Date')
-    // Raw column is a 0..1 ratio (e.g. 0.92 = 92%); multiply by 100 to get pct scale.
-    const util = cellNum(r, 'Max Utilization (%)') * 100
+    const util = cellNum(r, 'Max Utilization (%)') * scale
     const prev = latest.get(node)
     if (!prev || date >= prev.date) latest.set(node, { date, util })
   }
@@ -100,6 +102,7 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
   const targets = nodeTargets(wb)
 
   const efficiency = avamarEfficiency(wb)
+  const trend = avamarCapacityTrend(wb)
 
   return {
     meta: wb.meta,
@@ -120,12 +123,11 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     opsInsights: computeAvamarOpsInsights(wb),
     reliability: avamarReliability(wb),
     efficiency,
-    capacityTrend: emptyCapacityTrend(),
-    // capacity-trend wiring lands in the next task
+    capacityTrend: trend,
     provenance: avamarProvenance(
       hasReliabilitySource(wb),
       Object.values(efficiency).some((v) => v !== undefined),
-      false,
+      trend.targets.length > 0,
     ),
   }
 }
