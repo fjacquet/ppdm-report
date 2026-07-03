@@ -124,6 +124,76 @@
     },
     "caption": "Top {{shown}} von {{total}}."
   },
+  "activity": {
+    "title": "Backup-Aktivität",
+    "takeaway": "{{gb}} übertragen über {{jobs}} Jobs im Zeitfenster",
+    "perType": {
+      "title": "Nach Workload-Typ",
+      "col": {
+        "type": "Richtlinientyp",
+        "capacity": "Kapazität",
+        "clients": "Clients",
+        "files": "Dateien"
+      }
+    },
+    "largest": {
+      "title": "Top 10 größte Backups",
+      "col": {
+        "client": "Client",
+        "type": "Typ",
+        "size": "Größe",
+        "files": "Dateien"
+      }
+    },
+    "slowest": {
+      "title": "Top 5 langsamste Backups",
+      "col": {
+        "client": "Client",
+        "type": "Typ",
+        "throughput": "Durchsatz (MB/s)",
+        "size": "Größe"
+      },
+      "floorNote": "Nur Backups ≥ 1 GiB werden nach Durchsatz eingestuft."
+    },
+    "daily": {
+      "title": "Täglicher Datentransfer",
+      "col": {
+        "week": "Woche vom",
+        "gb": "Übertragen",
+        "jobs": "Jobs"
+      }
+    },
+    "os": {
+      "title": "Client-Betriebssysteme"
+    },
+    "caption": "Top {{shown}} von {{total}}"
+  },
+  "sizing": {
+    "title": "Dimensionierungs-Eingaben",
+    "subtitle": "Gemessene Eingabewerte zur Dimensionierung einer Nachfolge-Infrastruktur — keine Projektionen.",
+    "col": {
+      "metric": "Kennzahl",
+      "value": "Wert",
+      "basis": "Grundlage"
+    },
+    "rows": {
+      "fetb": "Geschützte Front-End-Kapazität",
+      "change": "Tägliche Änderungsrate",
+      "dedupe": "Dedup-Gemeinsamkeit",
+      "reduction": "Datenreduktion (DD)",
+      "retentionShort": "Kapazität mit Aufbewahrung < 60 Tagen",
+      "retentionLong": "Kapazität mit Aufbewahrung ≥ 1 Jahr",
+      "growth": "Schnellstes Nutzungswachstum",
+      "window": "Backup-Fenster-Druck",
+      "inactive": "Inaktive Clients (ggf. herausrechnen)"
+    },
+    "basis": {
+      "measured": "gemessen",
+      "observed": "beobachtet"
+    },
+    "windowValue": "{{pct}} der Jobs > 15 Min. in Warteschlange · {{count}} Jobs > 8 Std.",
+    "growthValue": "{{slope}} Pkt./30 T bei {{target}}"
+  },
   "resilience": {
     "title": "Cyber-Resilienz",
     "appConsistent": "Anwendungskonsistente Sicherungen",

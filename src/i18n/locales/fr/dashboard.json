@@ -124,6 +124,76 @@
     },
     "caption": "Top {{shown}} sur {{total}}."
   },
+  "activity": {
+    "title": "Activité de sauvegarde",
+    "takeaway": "{{gb}} transférés sur {{jobs}} jobs dans la période",
+    "perType": {
+      "title": "Par type de charge de travail",
+      "col": {
+        "type": "Type de politique",
+        "capacity": "Capacité",
+        "clients": "Clients",
+        "files": "Fichiers"
+      }
+    },
+    "largest": {
+      "title": "Top 10 des plus grosses sauvegardes",
+      "col": {
+        "client": "Client",
+        "type": "Type",
+        "size": "Taille",
+        "files": "Fichiers"
+      }
+    },
+    "slowest": {
+      "title": "Top 5 des sauvegardes les plus lentes",
+      "col": {
+        "client": "Client",
+        "type": "Type",
+        "throughput": "Débit (Mo/s)",
+        "size": "Taille"
+      },
+      "floorNote": "Seules les sauvegardes ≥ 1 Gio sont classées par débit."
+    },
+    "daily": {
+      "title": "Transfert de données quotidien",
+      "col": {
+        "week": "Semaine du",
+        "gb": "Transféré",
+        "jobs": "Jobs"
+      }
+    },
+    "os": {
+      "title": "Systèmes d'exploitation des clients"
+    },
+    "caption": "Top {{shown}} sur {{total}}"
+  },
+  "sizing": {
+    "title": "Paramètres de dimensionnement",
+    "subtitle": "Données mesurées pour dimensionner une infrastructure de remplacement — aucune projection.",
+    "col": {
+      "metric": "Indicateur",
+      "value": "Valeur",
+      "basis": "Base"
+    },
+    "rows": {
+      "fetb": "Capacité front-end protégée",
+      "change": "Taux de changement quotidien",
+      "dedupe": "Communalité de déduplication",
+      "reduction": "Réduction de données (DD)",
+      "retentionShort": "Capacité retenue < 60 jours",
+      "retentionLong": "Capacité retenue ≥ 1 an",
+      "growth": "Croissance d'utilisation la plus rapide",
+      "window": "Pression sur la fenêtre de sauvegarde",
+      "inactive": "Clients inactifs (à exclure éventuellement)"
+    },
+    "basis": {
+      "measured": "mesuré",
+      "observed": "observé"
+    },
+    "windowValue": "{{pct}} des jobs en attente > 15 min · {{count}} jobs > 8 h",
+    "growthValue": "{{slope}} pts/30 j sur {{target}}"
+  },
   "resilience": {
     "title": "Cyber-résilience",
     "appConsistent": "Sauvegardes cohérentes applicativement",
