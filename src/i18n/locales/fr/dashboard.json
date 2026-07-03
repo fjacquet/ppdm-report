@@ -153,7 +153,7 @@
         "throughput": "Débit (Mo/s)",
         "size": "Taille"
       },
-      "floorNote": "Seules les sauvegardes ≥ 1 Gio sont classées par débit."
+      "floorNote": "Seules les sauvegardes ≥ 1 GiB sont classées par débit."
     },
     "daily": {
       "title": "Transfert de données quotidien",
