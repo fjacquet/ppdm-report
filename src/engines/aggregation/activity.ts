@@ -73,7 +73,9 @@ export function emptyActivity(): Activity {
   }
 }
 
-function osFamily(os: string): 'Windows' | 'Linux' | 'Other' {
+/** Map a free-text OS string to its family bucket. Exported for adapters (e.g. NetWorker)
+ * that derive OS split from a different sheet than the one that feeds job rows. */
+export function osFamily(os: string): 'Windows' | 'Linux' | 'Other' {
   const lower = os.toLowerCase()
   if (lower.includes('windows')) return 'Windows'
   if (lower.includes('linux')) return 'Linux'
