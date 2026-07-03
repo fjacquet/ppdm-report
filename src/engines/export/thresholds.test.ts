@@ -7,8 +7,10 @@ import {
   changeRateTone,
   coverageTone,
   dedupeCommonTone,
+  hygieneTone,
   immutableTone,
   jobSuccessTone,
+  licenseTone,
   queueDelayTone,
   repeatFailureTone,
   replicatedTone,
@@ -97,5 +99,20 @@ describe('capacityTrendTone', () => {
     expect(capacityTrendTone(0.9, 90)).toBe('ok')
     expect(capacityTrendTone(1, 59.9)).toBe('warn')
     expect(capacityTrendTone(1, 60)).toBe('bad')
+  })
+})
+
+describe('hygieneTone', () => {
+  it('0 ok, any nonzero warn', () => {
+    expect(hygieneTone(0)).toBe('ok')
+    expect(hygieneTone(1)).toBe('warn')
+  })
+})
+
+describe('licenseTone', () => {
+  it('expired>0 bad, expiring>0 warn, else ok', () => {
+    expect(licenseTone(1, 0)).toBe('bad')
+    expect(licenseTone(0, 1)).toBe('warn')
+    expect(licenseTone(0, 0)).toBe('ok')
   })
 })
