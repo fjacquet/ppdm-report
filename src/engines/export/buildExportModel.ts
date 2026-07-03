@@ -19,6 +19,7 @@ import { FRONT_END_METRICS } from '../aggregation/frontEnd'
 import { HYGIENE_KINDS } from '../aggregation/hygiene'
 import { RUNTIME_BUCKET_IDS } from '../aggregation/reliability'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
+import { buildSizingRows } from './sizingRows'
 import {
   appConsistentTone,
   atRiskTone,
@@ -1248,6 +1249,62 @@ export function buildExportModel(
       : {}),
   }
 
+  // Render-only sizing-input summary (Task 7): every row is read from families already
+  // built above (frontEnd/efficiency/capacityTrend/reliability/hygiene) — no new metric.
+  const sizingRows = buildSizingRows(view, t, locale)
+  const sizingByKey = new Map(sizingRows.map((r) => [r.key, r] as const))
+  const sizingChips: ExportKpi[] = []
+  const sizingFetb = sizingByKey.get('fetb')
+  if (sizingFetb) {
+    sizingChips.push({ label: sizingFetb.label, value: sizingFetb.value, tone: 'accent' })
+  }
+  const sizingChange = sizingByKey.get('change')
+  if (sizingChange && efficiency.changeRate && efficiency.changeRate.processedBytes > 0) {
+    const changePct = efficiency.changeRate.sentBytes / efficiency.changeRate.processedBytes
+    sizingChips.push({
+      label: sizingChange.label,
+      value: sizingChange.value,
+      tone: changeRateTone(changePct),
+    })
+  }
+  const sizingReduction = sizingByKey.get('reduction')
+  if (sizingReduction) {
+    sizingChips.push({ label: sizingReduction.label, value: sizingReduction.value, tone: 'accent' })
+  } else {
+    const sizingDedupe = sizingByKey.get('dedupe')
+    if (sizingDedupe && efficiency.dedupe?.common) {
+      const { num, den } = efficiency.dedupe.common
+      sizingChips.push({
+        label: sizingDedupe.label,
+        value: sizingDedupe.value,
+        tone: dedupeCommonTone(num / den),
+      })
+    }
+  }
+
+  const sizingSection: ExportSection = {
+    id: 'sizing',
+    title: t('dashboard:sizing.title'),
+    table:
+      sizingRows.length > 0
+        ? {
+            columns: [
+              t('dashboard:sizing.col.metric'),
+              t('dashboard:sizing.col.value'),
+              t('dashboard:sizing.col.basis'),
+            ],
+            rows: sizingRows.map((r) => [r.label, r.value, r.basis]),
+          }
+        : undefined,
+    deck:
+      sizingRows.length > 0
+        ? {
+            subtitle: t('dashboard:sizing.subtitle'),
+            kpiChips: sizingChips,
+          }
+        : undefined,
+  }
+
   const byId: Record<SectionId, ExportSection | null> = {
     perServer: perServerSection,
     coverage: withCaveat(coverageSection, 'coverageByType', view, t),
@@ -1268,6 +1325,7 @@ export function buildExportModel(
     activity: withCaveat(activitySection, 'activity', view, t),
     largestBackups: withCaveat(largestBackupsSection, 'activity', view, t),
     slowestBackups: withCaveat(slowestBackupsSection, 'activity', view, t),
+    sizing: sizingSection,
   }
   const allSections = SECTION_ORDER[flavor]
     .map((id) => byId[id])

@@ -990,4 +990,197 @@ describe('buildExportModel', () => {
       ])
     })
   })
+
+  describe('sizing section', () => {
+    const fullyAvailableProvenance = {
+      ...allAvailable(0),
+      reliability: { available: true, serversCovered: 1, serversTotal: 1 },
+      efficiency: { available: true, serversCovered: 1, serversTotal: 1 },
+      capacityTrend: { available: true, serversCovered: 1, serversTotal: 1 },
+      hygiene: { available: true, serversCovered: 1, serversTotal: 1 },
+    }
+
+    const fullSizingView = baseView({
+      provenance: fullyAvailableProvenance,
+      frontEnd: {
+        byType: [
+          { type: 'SQL', protectedFetbGb: 100 },
+          { type: 'FILESYSTEM', protectedFetbGb: 50 },
+        ],
+        excludedCount: 0,
+      },
+      efficiency: {
+        changeRate: { sentBytes: 10, processedBytes: 100 },
+        dedupe: {
+          common: { num: 9200, den: 100 },
+          lowDedupe: { items: [], total: 0, shown: 0 },
+          global: { logicalGb: 300, usedGb: 100 },
+        },
+        retention: {
+          totalGbByBucket: { r30: 10, r60: 20, r180: 999, r1y: 5, r7y: 3, r7yPlus: 2 },
+          perPolicyType: [],
+        },
+      },
+      capacityTrend: {
+        targets: [
+          {
+            target: 'dd1',
+            currentPct: 70,
+            minPct: 40,
+            maxPct: 70,
+            windowStart: '2026-05-01',
+            windowEnd: '2026-06-30',
+            sampleCount: 60,
+            slopePer30d: 2.5,
+            series: [],
+          },
+          {
+            target: 'dd2',
+            currentPct: 30,
+            minPct: 25,
+            maxPct: 32,
+            windowStart: '2026-05-01',
+            windowEnd: '2026-06-30',
+            sampleCount: 60,
+            slopePer30d: 5.1,
+            series: [],
+          },
+        ],
+      },
+      reliability: {
+        repeatFailures: { items: [], total: 0, shown: 0 },
+        runtime: { le15m: 0, m15to30: 0, m30to60: 0, h1to2: 0, h2to4: 0, h4to8: 0, gt8h: 4 },
+        runtimeTotal: 4,
+        queue: {
+          delayedCount: 20,
+          total: 100,
+          delayedPct: 0.2,
+          top: { items: [], total: 0, shown: 0 },
+        },
+        capped: false,
+      },
+      hygiene: computeHygiene([
+        { kind: 'clientInactive', name: 'c1' },
+        { kind: 'clientInactive', name: 'c2' },
+        { kind: 'datasetUnused', name: 'd1' },
+      ]),
+    })
+
+    it('renders all 9 rows with correct labels, values, and basis when every family is populated', () => {
+      const model = buildExportModel(fullSizingView, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      expect(section).toBeDefined()
+      expect(section?.table?.columns).toEqual([
+        t('dashboard:sizing.col.metric'),
+        t('dashboard:sizing.col.value'),
+        t('dashboard:sizing.col.basis'),
+      ])
+      expect(section?.table?.rows).toEqual([
+        [t('dashboard:sizing.rows.fetb'), '150.0 GB', t('dashboard:sizing.basis.measured')],
+        [t('dashboard:sizing.rows.change'), '10%', t('dashboard:sizing.basis.observed')],
+        [t('dashboard:sizing.rows.dedupe'), '92%', t('dashboard:sizing.basis.observed')],
+        [t('dashboard:sizing.rows.reduction'), '×3', t('dashboard:sizing.basis.observed')],
+        [
+          t('dashboard:sizing.rows.retentionShort'),
+          '30.0 GB',
+          t('dashboard:sizing.basis.measured'),
+        ],
+        [t('dashboard:sizing.rows.retentionLong'), '10.0 GB', t('dashboard:sizing.basis.measured')],
+        [
+          t('dashboard:sizing.rows.growth'),
+          t('dashboard:sizing.growthValue', { slope: '5.1', target: 'dd2' }),
+          t('dashboard:sizing.basis.observed'),
+        ],
+        [
+          t('dashboard:sizing.rows.window'),
+          t('dashboard:sizing.windowValue', { pct: '20%', count: '4' }),
+          t('dashboard:sizing.basis.observed'),
+        ],
+        [t('dashboard:sizing.rows.inactive'), '2', t('dashboard:sizing.basis.observed')],
+      ])
+    })
+
+    it('builds FETB + change-rate + reduction deck chips (reduction present, so no dedupe chip)', () => {
+      const model = buildExportModel(fullSizingView, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const chipLabels = section?.deck?.kpiChips?.map((c) => c.label)
+      expect(chipLabels).toEqual([
+        t('dashboard:sizing.rows.fetb'),
+        t('dashboard:sizing.rows.change'),
+        t('dashboard:sizing.rows.reduction'),
+      ])
+    })
+
+    it('falls back to a dedupe chip when no reduction figure is available', () => {
+      const v = baseView({
+        provenance: fullyAvailableProvenance,
+        efficiency: {
+          dedupe: {
+            common: { num: 9200, den: 100 },
+            lowDedupe: { items: [], total: 0, shown: 0 },
+          },
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const chipLabels = section?.deck?.kpiChips?.map((c) => c.label)
+      expect(chipLabels).toEqual([t('dashboard:sizing.rows.dedupe')])
+    })
+
+    it('renders only the available rows for a sparse view (efficiency change+dedupe only)', () => {
+      const v = baseView({
+        provenance: {
+          ...allAvailable(0),
+          efficiency: { available: true, serversCovered: 1, serversTotal: 1 },
+        },
+        efficiency: {
+          changeRate: { sentBytes: 10, processedBytes: 100 },
+          dedupe: { common: { num: 9200, den: 100 }, lowDedupe: { items: [], total: 0, shown: 0 } },
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows).toEqual([
+        [t('dashboard:sizing.rows.change'), '10%', t('dashboard:sizing.basis.observed')],
+        [t('dashboard:sizing.rows.dedupe'), '92%', t('dashboard:sizing.basis.observed')],
+      ])
+    })
+
+    it('drops rows whose source family is unavailable even when the data exists', () => {
+      const v = baseView({
+        provenance: allAvailable(0), // efficiency/capacityTrend/reliability/hygiene all unavailable here
+        efficiency: fullSizingView.efficiency,
+        capacityTrend: fullSizingView.capacityTrend,
+        reliability: fullSizingView.reliability,
+        hygiene: fullSizingView.hygiene,
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      // frontEnd IS available in allAvailable(0), but byType is empty here, so no fetb row either.
+      expect(section).toBeUndefined()
+    })
+
+    it('is suppressed when nothing is available', () => {
+      const model = buildExportModel(baseView({}), 'assessment', 'light', t, 'en')
+      expect(model.sections.find((s) => s.id === 'sizing')).toBeUndefined()
+    })
+
+    it('is placed right after perServer in assessment and near the end in ops', () => {
+      const assessmentIds = buildExportModel(
+        fullSizingView,
+        'assessment',
+        'light',
+        t,
+        'en',
+      ).sections.map((s) => s.id)
+      expect(assessmentIds[0]).toBe('sizing')
+
+      const opsIds = buildExportModel(fullSizingView, 'ops', 'light', t, 'en').sections.map(
+        (s) => s.id,
+      )
+      // 'sizing' sits right before the PPDM-classic tail (coverage/exposure/idle/…) in ops.
+      expect(opsIds[opsIds.indexOf('coverage') - 1]).toBe('sizing')
+    })
+  })
 })

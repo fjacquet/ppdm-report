@@ -18,6 +18,7 @@ import { LongestBackupsSection } from './LongestBackupsSection'
 import { PerServerSection } from './PerServerSection'
 import { PoliciesSection } from './PoliciesSection'
 import { ReliabilitySection } from './ReliabilitySection'
+import { SizingSection } from './SizingSection'
 import { WarningsBanner } from './WarningsBanner'
 
 interface DashboardProps {
@@ -65,6 +66,8 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return <EfficiencySection key={id} view={view} />
       case 'hygiene':
         return <HygieneSection key={id} view={view} />
+      case 'sizing':
+        return <SizingSection key={id} view={view} />
       case 'activity':
         return <ActivitySection key={id} view={view} dark={dark} />
       // Largest/slowest backups render inside ActivitySection (one component, per

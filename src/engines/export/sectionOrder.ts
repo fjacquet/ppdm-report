@@ -19,9 +19,11 @@ export type SectionId =
   | 'activity'
   | 'largestBackups'
   | 'slowestBackups'
+  | 'sizing'
 export const SECTION_ORDER: Record<ExportFlavor, SectionId[]> = {
   assessment: [
     'perServer',
+    'sizing',
     'coverage',
     'exposure',
     'volumetry',
@@ -56,6 +58,7 @@ export const SECTION_ORDER: Record<ExportFlavor, SectionId[]> = {
     'efficiency',
     'hygiene',
     'agentVersions',
+    'sizing',
     'coverage',
     'exposure',
     'idle',

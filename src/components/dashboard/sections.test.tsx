@@ -22,6 +22,7 @@ import { IdleAgentsSection } from './IdleAgentsSection'
 import { JobsComplianceSection } from './JobsComplianceSection'
 import { PoliciesSection } from './PoliciesSection'
 import { ReliabilitySection } from './ReliabilitySection'
+import { SizingSection } from './SizingSection'
 
 const fixture: ReportView = {
   meta: {
@@ -791,5 +792,110 @@ describe('ActivitySection', () => {
     })
     render(<ActivitySection view={view} dark={false} />)
     expect(screen.queryByTestId('activity-os-bars')).toBeNull()
+  })
+})
+
+describe('SizingSection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  const fullyAvailableProvenance = {
+    ...allAvailable(0),
+    reliability: { available: true, serversCovered: 1, serversTotal: 1 },
+    efficiency: { available: true, serversCovered: 1, serversTotal: 1 },
+    capacityTrend: { available: true, serversCovered: 1, serversTotal: 1 },
+    hygiene: { available: true, serversCovered: 1, serversTotal: 1 },
+  }
+
+  it('renders the metric/value/basis table when every family is populated', () => {
+    const view = makeView({
+      provenance: fullyAvailableProvenance,
+      frontEnd: { byType: [{ type: 'SQL', protectedFetbGb: 100 }], excludedCount: 0 },
+      efficiency: {
+        changeRate: { sentBytes: 10, processedBytes: 100 },
+        dedupe: { common: { num: 9200, den: 100 }, lowDedupe: { items: [], total: 0, shown: 0 } },
+        retention: {
+          totalGbByBucket: { r30: 10, r60: 20, r180: 0, r1y: 5, r7y: 3, r7yPlus: 2 },
+          perPolicyType: [],
+        },
+      },
+      capacityTrend: {
+        targets: [
+          {
+            target: 'dd1',
+            currentPct: 70,
+            minPct: 40,
+            maxPct: 70,
+            windowStart: '2026-05-01',
+            windowEnd: '2026-06-30',
+            sampleCount: 60,
+            slopePer30d: 2.5,
+            series: [],
+          },
+        ],
+      },
+      reliability: {
+        repeatFailures: { items: [], total: 0, shown: 0 },
+        runtime: { le15m: 0, m15to30: 0, m30to60: 0, h1to2: 0, h2to4: 0, h4to8: 0, gt8h: 4 },
+        runtimeTotal: 4,
+        queue: {
+          delayedCount: 20,
+          total: 100,
+          delayedPct: 0.2,
+          top: { items: [], total: 0, shown: 0 },
+        },
+        capped: false,
+      },
+      hygiene: {
+        items: [{ kind: 'clientInactive', name: 'c1' }],
+        countByKind: {
+          datasetUnused: 0,
+          retentionUnused: 0,
+          scheduleUnused: 0,
+          clientInactive: 1,
+          clientOvertime: 0,
+          license: 0,
+        },
+        cleanupTotal: 1,
+        expiredLicenses: 0,
+        expiringLicenses: 0,
+      },
+    })
+    render(<SizingSection view={view} />)
+    expect(screen.getByText('Sizing inputs')).toBeInTheDocument()
+    expect(screen.getByText('Protected front-end capacity')).toBeInTheDocument()
+    expect(screen.getByText('100.0 GB')).toBeInTheDocument()
+    expect(screen.getByText('Daily change rate')).toBeInTheDocument()
+    expect(screen.getByText('10%')).toBeInTheDocument()
+    expect(screen.getByText('Dedupe commonality')).toBeInTheDocument()
+    expect(screen.getByText('Inactive clients (consider netting out)')).toBeInTheDocument()
+    expect(screen.getAllByText('measured').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('observed').length).toBeGreaterThan(0)
+  })
+
+  it('renders nothing when no sizing family is available', () => {
+    const view = makeView({ provenance: allUnavailable(0) })
+    const { container } = render(<SizingSection view={view} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders only the rows backed by populated families (sparse view)', () => {
+    const view = makeView({
+      provenance: {
+        ...allAvailable(0),
+        efficiency: { available: true, serversCovered: 1, serversTotal: 1 },
+      },
+      efficiency: {
+        changeRate: { sentBytes: 10, processedBytes: 100 },
+      },
+    })
+    render(<SizingSection view={view} />)
+    expect(screen.getByText('Daily change rate')).toBeInTheDocument()
+    expect(screen.queryByText('Protected front-end capacity')).toBeNull()
+    expect(screen.queryByText('Dedupe commonality')).toBeNull()
+    expect(screen.queryByText('Fastest utilization growth')).toBeNull()
+    expect(screen.queryByText('Inactive clients (consider netting out)')).toBeNull()
   })
 })
