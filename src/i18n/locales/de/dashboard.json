@@ -104,7 +104,7 @@
     "cleanupChip": "Aufräum-Möglichkeiten",
     "licenseChip": "Lizenzprobleme",
     "col": {
-      "kind": "Type",
+      "kind": "Typ",
       "name": "Name",
       "detail": "Detail",
       "status": "Status"

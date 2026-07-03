@@ -104,7 +104,7 @@
     "cleanupChip": "Opportunità di pulizia",
     "licenseChip": "Problemi di licenza",
     "col": {
-      "kind": "Type",
+      "kind": "Tipo",
       "name": "Nome",
       "detail": "Dettaglio",
       "status": "Stato"
