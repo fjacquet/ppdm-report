@@ -3,6 +3,7 @@ import {
   appConsistentTone,
   atRiskTone,
   backupDurationTone,
+  capacityTrendTone,
   changeRateTone,
   coverageTone,
   dedupeCommonTone,
@@ -88,5 +89,13 @@ describe('efficiency tones', () => {
     expect(replicationIssueTone(0)).toBe('ok')
     expect(replicationIssueTone(0.01)).toBe('warn')
     expect(replicationIssueTone(0.05)).toBe('bad')
+  })
+})
+
+describe('capacityTrendTone', () => {
+  it('slope <1 ok, ≥1 warn unless current ≥60 then bad', () => {
+    expect(capacityTrendTone(0.9, 90)).toBe('ok')
+    expect(capacityTrendTone(1, 59.9)).toBe('warn')
+    expect(capacityTrendTone(1, 60)).toBe('bad')
   })
 })

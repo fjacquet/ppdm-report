@@ -81,3 +81,10 @@ export function replicationIssueTone(pct: number): ExportTone {
   if (pct > 0) return 'warn'
   return 'ok'
 }
+
+/** Observed utilization growth: slope in pts per 30 days, paired with current level (0..100). */
+export function capacityTrendTone(slopePer30d: number, currentPct: number): ExportTone {
+  if (slopePer30d >= 1 && currentPct >= 60) return 'bad'
+  if (slopePer30d >= 1) return 'warn'
+  return 'ok'
+}
