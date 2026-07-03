@@ -4,6 +4,7 @@ import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
 import { avamarProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr } from '../../aggregation/rows'
+import { avamarActivity } from './activity'
 import { avamarCapacityTrend, utilizationScaleFactor } from './capacityTrend'
 import { avamarEfficiency } from './efficiency'
 import { avamarHygiene } from './hygiene'
@@ -105,6 +106,7 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
   const efficiency = avamarEfficiency(wb)
   const trend = avamarCapacityTrend(wb)
   const hygiene = avamarHygiene(wb)
+  const activity = avamarActivity(wb)
 
   return {
     meta: wb.meta,
@@ -127,12 +129,14 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     efficiency,
     capacityTrend: trend,
     hygiene,
+    activity,
     provenance: avamarProvenance(
       hasReliabilitySource(wb),
       Object.values(efficiency).some((v) => v !== undefined),
       trend.targets.length > 0,
       // zero findings reads as unavailable — nothing to show is suppressed, not zeroed
       hygiene.items.length > 0,
+      activity.byType.length > 0 || activity.daily.length > 0,
     ),
   }
 }

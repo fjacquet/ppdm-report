@@ -22,6 +22,8 @@ export function allAvailable(assetsTotal: number): Record<MetricKey, MetricProve
     capacityTrend: { available: false, serversCovered: 0, serversTotal: 1 },
     // PPDM hygiene wiring is a follow-up — unavailable for now.
     hygiene: { available: false, serversCovered: 0, serversTotal: 1 },
+    // PPDM activity wiring is a follow-up — unavailable for now.
+    activity: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -46,6 +48,8 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
     capacityTrend: { available: false, serversCovered: 0, serversTotal: 1 },
     // PPDM hygiene wiring is a follow-up — unavailable for now.
     hygiene: { available: false, serversCovered: 0, serversTotal: 1 },
+    // PPDM activity wiring is a follow-up — unavailable for now.
+    activity: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -58,6 +62,7 @@ export function avamarProvenance(
   efficiencyAvailable: boolean,
   capacityTrendAvailable: boolean,
   hygieneAvailable: boolean,
+  activityAvailable: boolean,
 ): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
@@ -91,6 +96,11 @@ export function avamarProvenance(
       serversCovered: hygieneAvailable ? 1 : 0,
       serversTotal: 1,
     },
+    activity: {
+      available: activityAvailable,
+      serversCovered: activityAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
   }
 }
 
@@ -103,6 +113,7 @@ export function networkerProvenance(
   efficiencyAvailable: boolean,
   capacityTrendAvailable: boolean,
   hygieneAvailable: boolean,
+  activityAvailable: boolean,
 ): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
@@ -134,6 +145,11 @@ export function networkerProvenance(
     hygiene: {
       available: hygieneAvailable,
       serversCovered: hygieneAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
+    activity: {
+      available: activityAvailable,
+      serversCovered: activityAvailable ? 1 : 0,
       serversTotal: 1,
     },
   }

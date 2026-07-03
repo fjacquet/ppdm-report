@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import i18n from '../../../i18n'
 import type { ReportView } from '../../../types/reportView'
+import { emptyActivity } from '../../aggregation/activity'
 import { emptyCapacityTrend } from '../../aggregation/capacityTrend'
 import { emptyEfficiency } from '../../aggregation/efficiency'
 import { emptyHygiene } from '../../aggregation/hygiene'
@@ -76,6 +77,7 @@ const view: ReportView = {
   efficiency: emptyEfficiency(),
   capacityTrend: emptyCapacityTrend(),
   hygiene: emptyHygiene(),
+  activity: emptyActivity(),
   provenance: allAvailable(0),
 }
 

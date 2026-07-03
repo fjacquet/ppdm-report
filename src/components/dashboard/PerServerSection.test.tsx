@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { emptyActivity } from '../../engines/aggregation/activity'
 import { emptyCapacityTrend } from '../../engines/aggregation/capacityTrend'
 import { emptyEfficiency } from '../../engines/aggregation/efficiency'
 import { emptyHygiene } from '../../engines/aggregation/hygiene'
@@ -47,6 +48,7 @@ function view(pct: number, count: number, totalCapacityGb: number | undefined): 
     efficiency: emptyEfficiency(),
     capacityTrend: emptyCapacityTrend(),
     hygiene: emptyHygiene(),
+    activity: emptyActivity(),
     provenance: allAvailable(0),
   }
 }

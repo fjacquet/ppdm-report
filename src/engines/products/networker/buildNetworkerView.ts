@@ -5,6 +5,7 @@ import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { networkerProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr, countBy } from '../../aggregation/rows'
+import { networkerActivity } from './activity'
 import { networkerEfficiency } from './efficiency'
 import { networkerHygiene } from './hygiene'
 import { networkerReliability } from './reliability'
@@ -134,6 +135,7 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
 
   const efficiency = networkerEfficiency(wb)
   const hygiene = networkerHygiene(wb)
+  const activity = networkerActivity(wb)
 
   return {
     meta: wb.meta,
@@ -177,6 +179,7 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     capacityTrend: emptyCapacityTrend(),
     // NetWorker has no utilization time series — snapshot only.
     hygiene,
+    activity,
     provenance: networkerProvenance(
       windowSize,
       jobRows.length > 0,
@@ -184,6 +187,7 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
       false,
       // zero findings reads as unavailable — nothing to show is suppressed, not zeroed
       hygiene.items.length > 0,
+      activity.byType.length > 0 || activity.daily.length > 0,
     ),
   }
 }

@@ -1,5 +1,6 @@
 import type { RawWorkbook } from '../../../types/ppdm'
 import type { ReportView } from '../../../types/reportView'
+import { emptyActivity } from '../../aggregation/activity'
 import { computeCapacity } from '../../aggregation/capacity'
 import { emptyCapacityTrend } from '../../aggregation/capacityTrend'
 import { computeCompliance } from '../../aggregation/compliance'
@@ -41,6 +42,7 @@ export function buildPpdmView(wb: RawWorkbook): ReportView {
     efficiency: emptyEfficiency(),
     capacityTrend: emptyCapacityTrend(),
     hygiene: emptyHygiene(),
+    activity: emptyActivity(),
     provenance: allAvailable(totalAssets),
   }
 }

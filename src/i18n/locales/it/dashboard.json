@@ -125,6 +125,80 @@
     },
     "caption": "Primi {{shown}} di {{total}}."
   },
+  "activity": {
+    "title": "Attività di backup",
+    "takeaway": "{{gb}} trasferiti su {{jobs}} job nel periodo",
+    "perType": {
+      "title": "Per tipo di workload",
+      "col": {
+        "type": "Tipo di policy",
+        "capacity": "Capacità",
+        "clients": "Client",
+        "files": "File",
+        "changeRate": "Tasso di variazione"
+      }
+    },
+    "largest": {
+      "title": "Primi 10 backup più grandi",
+      "col": {
+        "client": "Client",
+        "type": "Tipo",
+        "size": "Dimensione",
+        "files": "File"
+      }
+    },
+    "slowest": {
+      "title": "Primi 5 backup più lenti",
+      "col": {
+        "client": "Client",
+        "type": "Tipo",
+        "throughput": "Throughput (MB/s)",
+        "size": "Dimensione"
+      },
+      "floorNote": "Solo i backup ≥ 1 GiB sono classificati per throughput."
+    },
+    "daily": {
+      "title": "Trasferimento dati giornaliero",
+      "col": {
+        "week": "Settimana del",
+        "gb": "Trasferito",
+        "jobs": "Job"
+      }
+    },
+    "os": {
+      "title": "Sistemi operativi dei client",
+      "windows": "Windows",
+      "linux": "Linux",
+      "other": "Altro"
+    },
+    "caption": "Primi {{shown}} di {{total}}"
+  },
+  "sizing": {
+    "title": "Parametri di dimensionamento",
+    "subtitle": "Dati misurati per dimensionare un'infrastruttura sostitutiva — nessuna proiezione.",
+    "col": {
+      "metric": "Metrica",
+      "value": "Valore",
+      "basis": "Base"
+    },
+    "rows": {
+      "fetb": "Capacità front-end protetta",
+      "change": "Tasso di variazione giornaliero",
+      "dedupe": "Comunanza di deduplica",
+      "reduction": "Riduzione dei dati (DD)",
+      "retentionShort": "Capacità con retention < 60 giorni",
+      "retentionLong": "Capacità con retention ≥ 1 anno",
+      "growth": "Crescita di utilizzo più rapida",
+      "window": "Pressione sulla finestra di backup",
+      "inactive": "Client inattivi (da considerare in esclusione)"
+    },
+    "basis": {
+      "measured": "misurato",
+      "observed": "osservato"
+    },
+    "windowValue": "{{pct}} dei job in coda > 15 min · {{count}} job > 8 h",
+    "growthValue": "{{slope}} pt/30 g su {{target}}"
+  },
   "resilience": {
     "title": "Cyber-resilienza",
     "appConsistent": "Backup coerenti con l'applicazione",

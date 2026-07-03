@@ -125,6 +125,80 @@
     },
     "caption": "Top {{shown}} of {{total}}."
   },
+  "activity": {
+    "title": "Backup activity",
+    "takeaway": "{{gb}} transferred across {{jobs}} jobs in the window",
+    "perType": {
+      "title": "Per workload type",
+      "col": {
+        "type": "Policy type",
+        "capacity": "Capacity",
+        "clients": "Clients",
+        "files": "Files",
+        "changeRate": "Change rate"
+      }
+    },
+    "largest": {
+      "title": "Top 10 largest backups",
+      "col": {
+        "client": "Client",
+        "type": "Type",
+        "size": "Size",
+        "files": "Files"
+      }
+    },
+    "slowest": {
+      "title": "Top 5 slowest backups",
+      "col": {
+        "client": "Client",
+        "type": "Type",
+        "throughput": "Throughput (MB/s)",
+        "size": "Size"
+      },
+      "floorNote": "Only backups ≥ 1 GiB rank for throughput."
+    },
+    "daily": {
+      "title": "Daily data transfer",
+      "col": {
+        "week": "Week of",
+        "gb": "Transferred",
+        "jobs": "Jobs"
+      }
+    },
+    "os": {
+      "title": "Client operating systems",
+      "windows": "Windows",
+      "linux": "Linux",
+      "other": "Other"
+    },
+    "caption": "Top {{shown}} of {{total}}"
+  },
+  "sizing": {
+    "title": "Sizing inputs",
+    "subtitle": "Measured inputs for sizing a successor infrastructure — no projections.",
+    "col": {
+      "metric": "Metric",
+      "value": "Value",
+      "basis": "Basis"
+    },
+    "rows": {
+      "fetb": "Protected front-end capacity",
+      "change": "Daily change rate",
+      "dedupe": "Dedupe commonality",
+      "reduction": "Data reduction (DD)",
+      "retentionShort": "Capacity retained < 60 days",
+      "retentionLong": "Capacity retained ≥ 1 year",
+      "growth": "Fastest utilization growth",
+      "window": "Backup-window pressure",
+      "inactive": "Inactive clients (consider netting out)"
+    },
+    "basis": {
+      "measured": "measured",
+      "observed": "observed"
+    },
+    "windowValue": "{{pct}} of jobs queued > 15 min · {{count}} jobs > 8 h",
+    "growthValue": "{{slope}} pts/30 d on {{target}}"
+  },
   "resilience": {
     "title": "Cyber-resilience",
     "appConsistent": "App-consistent backups",

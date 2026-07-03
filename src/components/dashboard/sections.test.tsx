@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { emptyActivity } from '../../engines/aggregation/activity'
 import type { TrendTarget } from '../../engines/aggregation/capacityTrend'
 import { emptyCapacityTrend } from '../../engines/aggregation/capacityTrend'
 import { emptyEfficiency } from '../../engines/aggregation/efficiency'
@@ -9,6 +10,7 @@ import { allAvailable, allUnavailable } from '../../engines/aggregation/provenan
 import { emptyReliability } from '../../engines/aggregation/reliability'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
+import { ActivitySection } from './ActivitySection'
 import { CapacitySection } from './CapacitySection'
 import { CapacityTrendSection } from './CapacityTrendSection'
 import { CoverageSection } from './CoverageSection'
@@ -20,6 +22,7 @@ import { IdleAgentsSection } from './IdleAgentsSection'
 import { JobsComplianceSection } from './JobsComplianceSection'
 import { PoliciesSection } from './PoliciesSection'
 import { ReliabilitySection } from './ReliabilitySection'
+import { SizingSection } from './SizingSection'
 
 const fixture: ReportView = {
   meta: {
@@ -89,6 +92,7 @@ const fixture: ReportView = {
   efficiency: emptyEfficiency(),
   capacityTrend: emptyCapacityTrend(),
   hygiene: emptyHygiene(),
+  activity: emptyActivity(),
   provenance: allAvailable(0),
 }
 
@@ -761,5 +765,194 @@ describe('JobsComplianceSection — replication health', () => {
     expect(
       screen.getByText('7 of 50 replication activities failed or were partial'),
     ).toBeInTheDocument()
+  })
+})
+
+const populatedActivity = {
+  byType: [
+    { type: 'FILESYSTEM', capacityGb: 100, clients: 3, files: 900 },
+    {
+      type: 'VIRTUAL_MACHINES',
+      capacityGb: 40,
+      clients: 1,
+      files: 10,
+      changeRate: { num: 5, den: 50 },
+    },
+  ],
+  largest: {
+    items: [
+      { host: 'big1', type: 'FILESYSTEM', sizeGb: 80, files: 500 },
+      { host: 'big2', type: 'VIRTUAL_MACHINES', sizeGb: 40 },
+    ],
+    total: 2,
+    shown: 2,
+  },
+  slowest: {
+    items: [{ host: 'slow1', type: 'FILESYSTEM', throughputMbSec: 3.2, sizeGb: 12 }],
+    total: 1,
+    shown: 1,
+  },
+  daily: [
+    { day: '2026-06-15', gb: 10, jobs: 2 },
+    { day: '2026-06-17', gb: 5, jobs: 1 },
+    { day: '2026-06-22', gb: 8, jobs: 3 },
+  ],
+  osSplit: { counts: { Windows: 4, Linux: 2, Other: 1 } },
+}
+
+const activityProvenance = {
+  ...allAvailable(0),
+  activity: { available: true, serversCovered: 1, serversTotal: 1 },
+}
+
+describe('ActivitySection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('renders nothing when the activity metric is unavailable', () => {
+    const view = makeView({ activity: populatedActivity, provenance: allAvailable(0) })
+    const { container } = render(<ActivitySection view={view} dark={false} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing when activity is available but empty', () => {
+    const view = makeView({ activity: emptyActivity(), provenance: activityProvenance })
+    const { container } = render(<ActivitySection view={view} dark={false} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders the takeaway, per-type table, and largest/slowest tables', () => {
+    const view = makeView({ activity: populatedActivity, provenance: activityProvenance })
+    render(<ActivitySection view={view} dark={false} />)
+    expect(screen.getByText('23.0 GB transferred across 6 jobs in the window')).toBeInTheDocument()
+    expect(screen.getAllByText('FILESYSTEM').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('VIRTUAL_MACHINES').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('10%').length).toBeGreaterThan(0) // change rate for VIRTUAL_MACHINES
+    expect(screen.getByText('big1')).toBeInTheDocument()
+    expect(screen.getByText('slow1')).toBeInTheDocument()
+    expect(screen.getByText(/Only backups ≥ 1 GiB rank for throughput/)).toBeInTheDocument()
+  })
+
+  it('renders the daily trend chart and OS split bars', () => {
+    const view = makeView({ activity: populatedActivity, provenance: activityProvenance })
+    render(<ActivitySection view={view} dark={false} />)
+    expect(screen.getByTestId('activity-daily-chart')).toBeInTheDocument()
+    expect(screen.getByTestId('activity-os-bars')).toBeInTheDocument()
+  })
+
+  it('omits the OS bars when osSplit is absent', () => {
+    const view = makeView({
+      activity: { ...populatedActivity, osSplit: undefined },
+      provenance: activityProvenance,
+    })
+    render(<ActivitySection view={view} dark={false} />)
+    expect(screen.queryByTestId('activity-os-bars')).toBeNull()
+  })
+})
+
+describe('SizingSection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  const fullyAvailableProvenance = {
+    ...allAvailable(0),
+    reliability: { available: true, serversCovered: 1, serversTotal: 1 },
+    efficiency: { available: true, serversCovered: 1, serversTotal: 1 },
+    capacityTrend: { available: true, serversCovered: 1, serversTotal: 1 },
+    hygiene: { available: true, serversCovered: 1, serversTotal: 1 },
+  }
+
+  it('renders the metric/value/basis table when every family is populated', () => {
+    const view = makeView({
+      provenance: fullyAvailableProvenance,
+      frontEnd: { byType: [{ type: 'SQL', protectedFetbGb: 100 }], excludedCount: 0 },
+      efficiency: {
+        changeRate: { sentBytes: 10, processedBytes: 100 },
+        dedupe: { common: { num: 9200, den: 100 }, lowDedupe: { items: [], total: 0, shown: 0 } },
+        retention: {
+          totalGbByBucket: { r30: 10, r60: 20, r180: 0, r1y: 5, r7y: 3, r7yPlus: 2 },
+          perPolicyType: [],
+        },
+      },
+      capacityTrend: {
+        targets: [
+          {
+            target: 'dd1',
+            currentPct: 70,
+            minPct: 40,
+            maxPct: 70,
+            windowStart: '2026-05-01',
+            windowEnd: '2026-06-30',
+            sampleCount: 60,
+            slopePer30d: 2.5,
+            series: [],
+          },
+        ],
+      },
+      reliability: {
+        repeatFailures: { items: [], total: 0, shown: 0 },
+        runtime: { le15m: 0, m15to30: 0, m30to60: 0, h1to2: 0, h2to4: 0, h4to8: 0, gt8h: 4 },
+        runtimeTotal: 4,
+        queue: {
+          delayedCount: 20,
+          total: 100,
+          delayedPct: 0.2,
+          top: { items: [], total: 0, shown: 0 },
+        },
+        capped: false,
+      },
+      hygiene: {
+        items: [{ kind: 'clientInactive', name: 'c1' }],
+        countByKind: {
+          datasetUnused: 0,
+          retentionUnused: 0,
+          scheduleUnused: 0,
+          clientInactive: 1,
+          clientOvertime: 0,
+          license: 0,
+        },
+        cleanupTotal: 1,
+        expiredLicenses: 0,
+        expiringLicenses: 0,
+      },
+    })
+    render(<SizingSection view={view} />)
+    expect(screen.getByText('Sizing inputs')).toBeInTheDocument()
+    expect(screen.getByText('Protected front-end capacity')).toBeInTheDocument()
+    expect(screen.getByText('100.0 GB')).toBeInTheDocument()
+    expect(screen.getByText('Daily change rate')).toBeInTheDocument()
+    expect(screen.getByText('10%')).toBeInTheDocument()
+    expect(screen.getByText('Dedupe commonality')).toBeInTheDocument()
+    expect(screen.getByText('Inactive clients (consider netting out)')).toBeInTheDocument()
+    expect(screen.getAllByText('measured').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('observed').length).toBeGreaterThan(0)
+  })
+
+  it('renders nothing when no sizing family is available', () => {
+    const view = makeView({ provenance: allUnavailable(0) })
+    const { container } = render(<SizingSection view={view} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders only the rows backed by populated families (sparse view)', () => {
+    const view = makeView({
+      provenance: {
+        ...allAvailable(0),
+        efficiency: { available: true, serversCovered: 1, serversTotal: 1 },
+      },
+      efficiency: {
+        changeRate: { sentBytes: 10, processedBytes: 100 },
+      },
+    })
+    render(<SizingSection view={view} />)
+    expect(screen.getByText('Daily change rate')).toBeInTheDocument()
+    expect(screen.queryByText('Protected front-end capacity')).toBeNull()
+    expect(screen.queryByText('Dedupe commonality')).toBeNull()
+    expect(screen.queryByText('Fastest utilization growth')).toBeNull()
+    expect(screen.queryByText('Inactive clients (consider netting out)')).toBeNull()
   })
 })

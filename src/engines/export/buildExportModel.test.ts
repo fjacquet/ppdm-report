@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
+import { emptyActivity } from '../aggregation/activity'
 import { emptyCapacityTrend } from '../aggregation/capacityTrend'
 import { emptyEfficiency } from '../aggregation/efficiency'
 import { computeHygiene, emptyHygiene } from '../aggregation/hygiene'
@@ -79,6 +80,7 @@ const view: ReportView = {
   efficiency: emptyEfficiency(),
   capacityTrend: emptyCapacityTrend(),
   hygiene: emptyHygiene(),
+  activity: emptyActivity(),
   provenance: allAvailable(0),
 }
 
@@ -439,6 +441,17 @@ describe('buildExportModel', () => {
       },
       // non-empty hygiene so the hygiene section renders and adds no suppression warning
       hygiene: computeHygiene([{ kind: 'datasetUnused', name: 'ds1' }]),
+      // non-empty activity so activity/largestBackups/slowestBackups render and add no suppression warnings
+      activity: {
+        byType: [{ type: 'FILESYSTEM', capacityGb: 10, clients: 1, files: 5 }],
+        largest: { items: [{ host: 'h1', type: 'FILESYSTEM', sizeGb: 10 }], total: 1, shown: 1 },
+        slowest: {
+          items: [{ host: 'h1', type: 'FILESYSTEM', throughputMbSec: 5, sizeGb: 10 }],
+          total: 1,
+          shown: 1,
+        },
+        daily: [{ day: '2026-06-15', gb: 10, jobs: 1 }],
+      },
     }
     const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
     expect(model.warnings).toEqual(['cap note', 'merge note'])
@@ -880,6 +893,426 @@ describe('buildExportModel', () => {
         'en',
       )
       expect(model.sections.find((s) => s.id === 'hygiene')).toBeUndefined()
+    })
+  })
+
+  describe('activity family sections', () => {
+    const populatedActivity = {
+      byType: [
+        { type: 'FILESYSTEM', capacityGb: 100, clients: 3, files: 900 },
+        {
+          type: 'VIRTUAL_MACHINES',
+          capacityGb: 40,
+          clients: 1,
+          files: 10,
+          changeRate: { num: 5, den: 50 },
+        },
+      ],
+      largest: {
+        items: [
+          { host: 'big1', type: 'FILESYSTEM', sizeGb: 80, files: 500 },
+          { host: 'big2', type: 'VIRTUAL_MACHINES', sizeGb: 40 },
+        ],
+        total: 2,
+        shown: 2,
+      },
+      slowest: {
+        items: [{ host: 'slow1', type: 'FILESYSTEM', throughputMbSec: 3.2, sizeGb: 12 }],
+        total: 1,
+        shown: 1,
+      },
+      daily: [
+        { day: '2026-06-15', gb: 10, jobs: 2 }, // week of 2026-06-15
+        { day: '2026-06-17', gb: 5, jobs: 1 }, // week of 2026-06-15
+        { day: '2026-06-22', gb: 8, jobs: 3 }, // week of 2026-06-22
+      ],
+      osSplit: { counts: { Windows: 4, Linux: 2, Other: 1 } },
+    }
+
+    it('renders the per-type table, weekly + OS deck bars, and the takeaway', () => {
+      const v = baseView({ activity: populatedActivity })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'activity')
+      expect(section).toBeDefined()
+      expect(section?.table?.columns).toEqual([
+        'Policy type',
+        'Capacity',
+        'Clients',
+        'Files',
+        'Change rate',
+      ])
+      expect(section?.table?.rows).toEqual([
+        ['FILESYSTEM', '100.0 GB', '3', '900', '–'],
+        ['VIRTUAL_MACHINES', '40.0 GB', '1', '10', '10%'],
+      ])
+      // Two weekly buckets (2026-06-15, 2026-06-22) + 3 OS bars
+      expect(section?.deck?.bars?.length).toBe(5)
+      expect(section?.deck?.subtitle).toBe(
+        t('dashboard:activity.takeaway', { gb: '23.0 GB', jobs: '6' }),
+      )
+    })
+
+    it('is suppressed entirely when activity is empty', () => {
+      const model = buildExportModel(baseView({}), 'assessment', 'light', t, 'en')
+      const ids = model.sections.map((s) => s.id)
+      expect(ids).not.toContain('activity')
+      expect(ids).not.toContain('largestBackups')
+      expect(ids).not.toContain('slowestBackups')
+    })
+
+    it('renders the largest-backups table sorted by size, sizes formatted per baseTen', () => {
+      const v = baseView({ activity: populatedActivity, meta: { ...view.meta, baseTen: false } })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'largestBackups')
+      expect(section).toBeDefined()
+      expect(section?.table?.columns).toEqual(['Client', 'Type', 'Size', 'Files'])
+      expect(section?.table?.rows).toEqual([
+        ['big1', 'FILESYSTEM', '80.0 GiB', '500'],
+        ['big2', 'VIRTUAL_MACHINES', '40.0 GiB', '–'],
+      ])
+      expect(section?.table?.caption).toBe(t('dashboard:activity.caption', { shown: 2, total: 2 }))
+    })
+
+    it('renders the slowest-backups table with the throughput floor note in the caption', () => {
+      const v = baseView({ activity: populatedActivity })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'slowestBackups')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows).toEqual([['slow1', 'FILESYSTEM', '3.2', '12.0 GB']])
+      expect(section?.table?.caption).toContain(t('dashboard:activity.slowest.floorNote'))
+    })
+
+    it('suppresses slowestBackups alone when there are no throughput rows (e.g. NetWorker)', () => {
+      const v = baseView({
+        activity: { ...populatedActivity, slowest: { items: [], total: 0, shown: 0 } },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const ids = model.sections.map((s) => s.id)
+      expect(ids).toContain('activity')
+      expect(ids).toContain('largestBackups')
+      expect(ids).not.toContain('slowestBackups')
+    })
+
+    it('places activity/largestBackups/slowestBackups adjacent to longestBackups in both flavors', () => {
+      const v = baseView({
+        activity: populatedActivity,
+        opsInsights: {
+          agentVersions: [],
+          atRisk: {
+            overtime: { items: [], total: 0, shown: 0 },
+            staleBackups: { items: [], total: 0, shown: 0 },
+          },
+          longestBackups: {
+            items: [{ server: 's1', policyType: 'FS', durationHr: 2 }],
+            total: 1,
+            shown: 1,
+          },
+        },
+      })
+      const assessmentIds = buildExportModel(v, 'assessment', 'light', t, 'en').sections.map(
+        (s) => s.id,
+      )
+      const assessmentTail = assessmentIds.slice(-4)
+      expect(assessmentTail).toEqual([
+        'longestBackups',
+        'activity',
+        'largestBackups',
+        'slowestBackups',
+      ])
+
+      const opsIds = buildExportModel(v, 'ops', 'light', t, 'en').sections.map((s) => s.id)
+      const jobsIdx = opsIds.indexOf('jobs')
+      expect(opsIds[jobsIdx + 1]).toBe('activity')
+      const longestIdx = opsIds.indexOf('longestBackups')
+      expect(opsIds.slice(longestIdx, longestIdx + 3)).toEqual([
+        'longestBackups',
+        'largestBackups',
+        'slowestBackups',
+      ])
+    })
+  })
+
+  describe('sizing section', () => {
+    const fullyAvailableProvenance = {
+      ...allAvailable(0),
+      reliability: { available: true, serversCovered: 1, serversTotal: 1 },
+      efficiency: { available: true, serversCovered: 1, serversTotal: 1 },
+      capacityTrend: { available: true, serversCovered: 1, serversTotal: 1 },
+      hygiene: { available: true, serversCovered: 1, serversTotal: 1 },
+    }
+
+    const fullSizingView = baseView({
+      provenance: fullyAvailableProvenance,
+      frontEnd: {
+        byType: [
+          { type: 'SQL', protectedFetbGb: 100 },
+          { type: 'FILESYSTEM', protectedFetbGb: 50 },
+        ],
+        excludedCount: 0,
+      },
+      efficiency: {
+        changeRate: { sentBytes: 10, processedBytes: 100 },
+        dedupe: {
+          common: { num: 9200, den: 100 },
+          lowDedupe: { items: [], total: 0, shown: 0 },
+          global: { logicalGb: 300, usedGb: 100 },
+        },
+        retention: {
+          totalGbByBucket: { r30: 10, r60: 20, r180: 999, r1y: 5, r7y: 3, r7yPlus: 2 },
+          perPolicyType: [],
+        },
+      },
+      capacityTrend: {
+        targets: [
+          {
+            target: 'dd1',
+            currentPct: 70,
+            minPct: 40,
+            maxPct: 70,
+            windowStart: '2026-05-01',
+            windowEnd: '2026-06-30',
+            sampleCount: 60,
+            slopePer30d: 2.5,
+            series: [],
+          },
+          {
+            target: 'dd2',
+            currentPct: 30,
+            minPct: 25,
+            maxPct: 32,
+            windowStart: '2026-05-01',
+            windowEnd: '2026-06-30',
+            sampleCount: 60,
+            slopePer30d: 5.1,
+            series: [],
+          },
+        ],
+      },
+      reliability: {
+        repeatFailures: { items: [], total: 0, shown: 0 },
+        runtime: { le15m: 0, m15to30: 0, m30to60: 0, h1to2: 0, h2to4: 0, h4to8: 0, gt8h: 4 },
+        runtimeTotal: 4,
+        queue: {
+          delayedCount: 20,
+          total: 100,
+          delayedPct: 0.2,
+          top: { items: [], total: 0, shown: 0 },
+        },
+        capped: false,
+      },
+      hygiene: computeHygiene([
+        { kind: 'clientInactive', name: 'c1' },
+        { kind: 'clientInactive', name: 'c2' },
+        { kind: 'datasetUnused', name: 'd1' },
+      ]),
+    })
+
+    it('renders all 9 rows with correct labels, values, and basis when every family is populated', () => {
+      const model = buildExportModel(fullSizingView, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      expect(section).toBeDefined()
+      expect(section?.table?.columns).toEqual([
+        t('dashboard:sizing.col.metric'),
+        t('dashboard:sizing.col.value'),
+        t('dashboard:sizing.col.basis'),
+      ])
+      expect(section?.table?.rows).toEqual([
+        [t('dashboard:sizing.rows.fetb'), '150.0 GB', t('dashboard:sizing.basis.measured')],
+        [t('dashboard:sizing.rows.change'), '10%', t('dashboard:sizing.basis.observed')],
+        [t('dashboard:sizing.rows.dedupe'), '92%', t('dashboard:sizing.basis.observed')],
+        [t('dashboard:sizing.rows.reduction'), '×3', t('dashboard:sizing.basis.observed')],
+        [
+          t('dashboard:sizing.rows.retentionShort'),
+          '30.0 GB',
+          t('dashboard:sizing.basis.measured'),
+        ],
+        [t('dashboard:sizing.rows.retentionLong'), '10.0 GB', t('dashboard:sizing.basis.measured')],
+        [
+          t('dashboard:sizing.rows.growth'),
+          t('dashboard:sizing.growthValue', { slope: '+5.1', target: 'dd2' }),
+          t('dashboard:sizing.basis.observed'),
+        ],
+        [
+          t('dashboard:sizing.rows.window'),
+          t('dashboard:sizing.windowValue', { pct: '20%', count: '4' }),
+          t('dashboard:sizing.basis.observed'),
+        ],
+        [t('dashboard:sizing.rows.inactive'), '2', t('dashboard:sizing.basis.observed')],
+      ])
+    })
+
+    it('omits the fetb row entirely when no byType row has a defined protectedFetbGb', () => {
+      const v = baseView({
+        provenance: fullyAvailableProvenance,
+        frontEnd: {
+          byType: [
+            { type: 'SQL', protectedFetbGb: undefined },
+            { type: 'FILESYSTEM', protectedFetbGb: undefined },
+          ],
+          excludedCount: 0,
+        },
+        efficiency: fullSizingView.efficiency,
+        capacityTrend: fullSizingView.capacityTrend,
+        reliability: fullSizingView.reliability,
+        hygiene: fullSizingView.hygiene,
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const rowKeys = section?.table?.rows.map((r) => r[0])
+      expect(rowKeys).not.toContain(t('dashboard:sizing.rows.fetb'))
+    })
+
+    it('prefixes the fetb sum with "≥" when only some byType rows have a defined protectedFetbGb', () => {
+      const v = baseView({
+        provenance: fullyAvailableProvenance,
+        frontEnd: {
+          byType: [
+            { type: 'SQL', protectedFetbGb: 100 },
+            { type: 'FILESYSTEM', protectedFetbGb: undefined },
+          ],
+          excludedCount: 0,
+        },
+        efficiency: fullSizingView.efficiency,
+        capacityTrend: fullSizingView.capacityTrend,
+        reliability: fullSizingView.reliability,
+        hygiene: fullSizingView.hygiene,
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const fetbRow = section?.table?.rows.find((r) => r[0] === t('dashboard:sizing.rows.fetb'))
+      expect(fetbRow?.[1]).toBe('≥ 100.0 GB')
+    })
+
+    it('omits the growth row when every target slope is flat or shrinking', () => {
+      const v = baseView({
+        provenance: fullyAvailableProvenance,
+        frontEnd: fullSizingView.frontEnd,
+        efficiency: fullSizingView.efficiency,
+        reliability: fullSizingView.reliability,
+        hygiene: fullSizingView.hygiene,
+        capacityTrend: {
+          targets: [
+            {
+              target: 'dd1',
+              currentPct: 70,
+              minPct: 40,
+              maxPct: 70,
+              windowStart: '2026-05-01',
+              windowEnd: '2026-06-30',
+              sampleCount: 60,
+              slopePer30d: 0,
+              series: [],
+            },
+            {
+              target: 'dd2',
+              currentPct: 30,
+              minPct: 25,
+              maxPct: 32,
+              windowStart: '2026-05-01',
+              windowEnd: '2026-06-30',
+              sampleCount: 60,
+              slopePer30d: -1.2,
+              series: [],
+            },
+          ],
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const rowKeys = section?.table?.rows.map((r) => r[0])
+      expect(rowKeys).not.toContain(t('dashboard:sizing.rows.growth'))
+    })
+
+    it('renders the growth row with a "+"-signed slope when the fastest target is genuinely growing', () => {
+      const model = buildExportModel(fullSizingView, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const growthRow = section?.table?.rows.find((r) => r[0] === t('dashboard:sizing.rows.growth'))
+      expect(growthRow?.[1]).toBe(
+        t('dashboard:sizing.growthValue', { slope: '+5.1', target: 'dd2' }),
+      )
+    })
+
+    it('builds FETB + change-rate + reduction deck chips (reduction present, so no dedupe chip)', () => {
+      const model = buildExportModel(fullSizingView, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const chipLabels = section?.deck?.kpiChips?.map((c) => c.label)
+      expect(chipLabels).toEqual([
+        t('dashboard:sizing.rows.fetb'),
+        t('dashboard:sizing.rows.change'),
+        t('dashboard:sizing.rows.reduction'),
+      ])
+    })
+
+    it('falls back to a dedupe chip when no reduction figure is available', () => {
+      const v = baseView({
+        provenance: fullyAvailableProvenance,
+        efficiency: {
+          dedupe: {
+            common: { num: 9200, den: 100 },
+            lowDedupe: { items: [], total: 0, shown: 0 },
+          },
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const chipLabels = section?.deck?.kpiChips?.map((c) => c.label)
+      expect(chipLabels).toEqual([t('dashboard:sizing.rows.dedupe')])
+    })
+
+    it('renders only the available rows for a sparse view (efficiency change+dedupe only)', () => {
+      const v = baseView({
+        provenance: {
+          ...allAvailable(0),
+          efficiency: { available: true, serversCovered: 1, serversTotal: 1 },
+        },
+        efficiency: {
+          changeRate: { sentBytes: 10, processedBytes: 100 },
+          dedupe: { common: { num: 9200, den: 100 }, lowDedupe: { items: [], total: 0, shown: 0 } },
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows).toEqual([
+        [t('dashboard:sizing.rows.change'), '10%', t('dashboard:sizing.basis.observed')],
+        [t('dashboard:sizing.rows.dedupe'), '92%', t('dashboard:sizing.basis.observed')],
+      ])
+    })
+
+    it('drops rows whose source family is unavailable even when the data exists', () => {
+      const v = baseView({
+        provenance: allAvailable(0), // efficiency/capacityTrend/reliability/hygiene all unavailable here
+        efficiency: fullSizingView.efficiency,
+        capacityTrend: fullSizingView.capacityTrend,
+        reliability: fullSizingView.reliability,
+        hygiene: fullSizingView.hygiene,
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      // frontEnd IS available in allAvailable(0), but byType is empty here, so no fetb row either.
+      expect(section).toBeUndefined()
+    })
+
+    it('is suppressed when nothing is available', () => {
+      const model = buildExportModel(baseView({}), 'assessment', 'light', t, 'en')
+      expect(model.sections.find((s) => s.id === 'sizing')).toBeUndefined()
+    })
+
+    it('is placed right after perServer in assessment and near the end in ops', () => {
+      const assessmentIds = buildExportModel(
+        fullSizingView,
+        'assessment',
+        'light',
+        t,
+        'en',
+      ).sections.map((s) => s.id)
+      expect(assessmentIds[0]).toBe('sizing')
+
+      const opsIds = buildExportModel(fullSizingView, 'ops', 'light', t, 'en').sections.map(
+        (s) => s.id,
+      )
+      // 'sizing' sits right before the PPDM-classic tail (coverage/exposure/idle/…) in ops.
+      expect(opsIds[opsIds.indexOf('coverage') - 1]).toBe('sizing')
     })
   })
 })

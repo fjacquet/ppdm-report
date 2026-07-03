@@ -13,6 +13,8 @@ const FULLWIDTH: Record<string, 'single' | 'table'> = {
   atRisk: 'table',
   agentVersions: 'table',
   longestBackups: 'table',
+  largestBackups: 'table',
+  slowestBackups: 'table',
 }
 
 /**

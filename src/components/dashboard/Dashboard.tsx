@@ -2,6 +2,7 @@ import { SECTION_ORDER, type SectionId } from '../../engines/export/sectionOrder
 import { useTheme } from '../../hooks/useTheme'
 import { useReportStore } from '../../store/reportStore'
 import type { ReportView, ServerView } from '../../types/reportView'
+import { ActivitySection } from './ActivitySection'
 import { AgentVersionsSection } from './AgentVersionsSection'
 import { AtRiskSection } from './AtRiskSection'
 import { CapacitySection } from './CapacitySection'
@@ -17,6 +18,7 @@ import { LongestBackupsSection } from './LongestBackupsSection'
 import { PerServerSection } from './PerServerSection'
 import { PoliciesSection } from './PoliciesSection'
 import { ReliabilitySection } from './ReliabilitySection'
+import { SizingSection } from './SizingSection'
 import { WarningsBanner } from './WarningsBanner'
 
 interface DashboardProps {
@@ -64,6 +66,15 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return <EfficiencySection key={id} view={view} />
       case 'hygiene':
         return <HygieneSection key={id} view={view} />
+      case 'sizing':
+        return <SizingSection key={id} view={view} />
+      case 'activity':
+        return <ActivitySection key={id} view={view} dark={dark} />
+      // Largest/slowest backups render inside ActivitySection (one component, per
+      // the activity family's design) — no separate dashboard section here.
+      case 'largestBackups':
+      case 'slowestBackups':
+        return null
     }
   }
 
