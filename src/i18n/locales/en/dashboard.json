@@ -13,7 +13,8 @@
     "title": "Recovery exposure",
     "unprotectedTb": "Unprotected data (TB)",
     "assets": "Unprotected assets",
-    "takeaway": "{{count}} assets are completely unprotected"
+    "takeaway": "{{count}} assets are completely unprotected",
+    "noSizesNote": "Live Optics does not size clients that have never been backed up."
   },
   "idle": {
     "title": "Idle agents",

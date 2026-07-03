@@ -134,6 +134,47 @@ describe('buildExportModel', () => {
     expect(gaps?.table?.rows[0]?.[0]).toBe('HR_PAYROLL')
   })
 
+  it('keeps the size column and TB KPIs when the estate carries gap sizes', () => {
+    const model = buildExportModel(view, 'assessment', 'light', t, 'en')
+    const gaps = model.sections.find((s) => s.id === 'exposure')
+    expect(gaps?.table?.columns).toEqual(['Name', 'Type', 'Size'])
+    expect(gaps?.table?.rows[0]?.slice(0, 2)).toEqual(['HR_PAYROLL', 'MSSQL'])
+    expect(gaps?.table?.rows[0]?.[2]).not.toBe('Size unknown')
+    expect(gaps?.kpis?.map((k) => k.label)).toEqual([
+      t('dashboard:exposure.unprotectedTb'),
+      t('dashboard:exposure.assets'),
+    ])
+    const unprotected = model.kpis.find((k) => k.label === t('dashboard:kpi.unprotected'))
+    expect(unprotected?.value).toBe('263.0 TB')
+    expect(gaps?.notes ?? []).not.toContain(t('dashboard:exposure.noSizesNote'))
+  })
+
+  it('suppresses the size column and TB KPIs when the estate carries no gap sizes (Avamar/NetWorker)', () => {
+    const noSizes: ReportView = {
+      ...view,
+      gaps: {
+        count: 281,
+        totalCapacityGb: undefined,
+        top: {
+          items: [{ name: 'client01.corp', type: 'Client', sizeGb: undefined }],
+          total: 281,
+          shown: 1,
+        },
+      },
+    }
+    const model = buildExportModel(noSizes, 'assessment', 'light', t, 'en')
+    const gaps = model.sections.find((s) => s.id === 'exposure')
+    expect(gaps?.table?.columns).toEqual(['Name', 'Type'])
+    expect(gaps?.table?.rows[0]).toEqual(['client01.corp', 'Client'])
+    expect(gaps?.kpis?.map((k) => k.label)).toEqual([t('dashboard:exposure.assets')])
+    const unprotected = model.kpis.find((k) => k.label === t('dashboard:kpi.unprotected'))
+    expect(unprotected).toBeUndefined()
+    const assetsExecKpi = model.kpis.find((k) => k.label === t('dashboard:exposure.assets'))
+    expect(assetsExecKpi?.value).toBe('281')
+    expect(gaps?.notes).toContain(t('dashboard:exposure.noSizesNote'))
+    expect(gaps?.deck?.caveat).toContain(t('dashboard:exposure.noSizesNote'))
+  })
+
   it('renders capped-window caveats for jobs and compliance (no silent caps)', () => {
     const model = buildExportModel(view, 'assessment', 'light', t, 'en')
     const jobs = model.sections.find((s) => s.id === 'jobs')

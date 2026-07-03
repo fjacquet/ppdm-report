@@ -13,7 +13,8 @@
     "title": "Wiederherstellungsrisiko",
     "unprotectedTb": "Ungeschützte Daten (TB)",
     "assets": "Ungeschützte Assets",
-    "takeaway": "{{count}} Assets sind völlig ungeschützt"
+    "takeaway": "{{count}} Assets sind völlig ungeschützt",
+    "noSizesNote": "Live Optics erfasst keine Größen für Clients, die nie gesichert wurden."
   },
   "idle": {
     "title": "Inaktive Agenten",

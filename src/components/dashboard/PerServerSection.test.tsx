@@ -10,7 +10,7 @@ import i18n from '../../i18n'
 import type { ReportView, ServerView } from '../../types/reportView'
 import { PerServerSection } from './PerServerSection'
 
-function view(pct: number, count: number): ReportView {
+function view(pct: number, count: number, totalCapacityGb: number | undefined): ReportView {
   return {
     meta: {
       projectId: '',
@@ -26,7 +26,7 @@ function view(pct: number, count: number): ReportView {
       byType: {},
       overall: { protected: 1, unprotected: 1, excluded: 0, pct, pctInclExcluded: pct },
     },
-    gaps: { count, totalCapacityGb: 1000, top: { items: [], total: count, shown: 0 } },
+    gaps: { count, totalCapacityGb, top: { items: [], total: count, shown: 0 } },
     jobs: { counts: {}, total: 10, successPct: 0.9, capped: false, windowSize: 10 },
     compliance: {
       appConsistentPct: 0,
@@ -51,8 +51,8 @@ function view(pct: number, count: number): ReportView {
   }
 }
 const servers: ServerView[] = [
-  { label: 'ppdm-paris', version: '19.22', view: view(0.91, 12) },
-  { label: 'ppdm-lyon', version: '19.21', view: view(0.82, 19) },
+  { label: 'ppdm-paris', version: '19.22', view: view(0.91, 12, 1000) },
+  { label: 'ppdm-lyon', version: '19.21', view: view(0.82, 19, 1000) },
 ]
 
 describe('PerServerSection', () => {
@@ -74,5 +74,24 @@ describe('PerServerSection', () => {
   it('renders the comparison chart', () => {
     render(<PerServerSection servers={servers} dark={false} />)
     expect(screen.getByTestId('per-server-bars')).toBeInTheDocument()
+  })
+
+  it('renders the TB column when servers carry gap sizes', () => {
+    render(<PerServerSection servers={servers} dark={false} />)
+    expect(screen.getAllByText('Unprotected data (TB)').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Size unknown')).not.toBeInTheDocument()
+  })
+
+  it('falls back to an assets-count column when no server carries gap sizes', () => {
+    const sizelessServers: ServerView[] = [
+      { label: 'ppdm-paris', version: '19.22', view: view(0.91, 12, undefined) },
+      { label: 'ppdm-lyon', version: '19.21', view: view(0.82, 19, undefined) },
+    ]
+    render(<PerServerSection servers={sizelessServers} dark={false} />)
+    expect(screen.queryByText('Unprotected data (TB)')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Unprotected assets').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('12').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('19').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Size unknown')).not.toBeInTheDocument()
   })
 })
