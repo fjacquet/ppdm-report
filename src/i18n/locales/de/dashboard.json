@@ -133,7 +133,8 @@
         "type": "Richtlinientyp",
         "capacity": "Kapazität",
         "clients": "Clients",
-        "files": "Dateien"
+        "files": "Dateien",
+        "changeRate": "Änderungsrate"
       }
     },
     "largest": {
@@ -164,7 +165,10 @@
       }
     },
     "os": {
-      "title": "Client-Betriebssysteme"
+      "title": "Client-Betriebssysteme",
+      "windows": "Windows",
+      "linux": "Linux",
+      "other": "Andere"
     },
     "caption": "Top {{shown}} von {{total}}"
   },

@@ -10,6 +10,7 @@ import { allAvailable, allUnavailable } from '../../engines/aggregation/provenan
 import { emptyReliability } from '../../engines/aggregation/reliability'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
+import { ActivitySection } from './ActivitySection'
 import { CapacitySection } from './CapacitySection'
 import { CapacityTrendSection } from './CapacityTrendSection'
 import { CoverageSection } from './CoverageSection'
@@ -706,5 +707,89 @@ describe('JobsComplianceSection — replication health', () => {
     expect(
       screen.getByText('7 of 50 replication activities failed or were partial'),
     ).toBeInTheDocument()
+  })
+})
+
+const populatedActivity = {
+  byType: [
+    { type: 'FILESYSTEM', capacityGb: 100, clients: 3, files: 900 },
+    {
+      type: 'VIRTUAL_MACHINES',
+      capacityGb: 40,
+      clients: 1,
+      files: 10,
+      changeRate: { num: 5, den: 50 },
+    },
+  ],
+  largest: {
+    items: [
+      { host: 'big1', type: 'FILESYSTEM', sizeGb: 80, files: 500 },
+      { host: 'big2', type: 'VIRTUAL_MACHINES', sizeGb: 40 },
+    ],
+    total: 2,
+    shown: 2,
+  },
+  slowest: {
+    items: [{ host: 'slow1', type: 'FILESYSTEM', throughputMbSec: 3.2, sizeGb: 12 }],
+    total: 1,
+    shown: 1,
+  },
+  daily: [
+    { day: '2026-06-15', gb: 10, jobs: 2 },
+    { day: '2026-06-17', gb: 5, jobs: 1 },
+    { day: '2026-06-22', gb: 8, jobs: 3 },
+  ],
+  osSplit: { counts: { Windows: 4, Linux: 2, Other: 1 } },
+}
+
+const activityProvenance = {
+  ...allAvailable(0),
+  activity: { available: true, serversCovered: 1, serversTotal: 1 },
+}
+
+describe('ActivitySection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('renders nothing when the activity metric is unavailable', () => {
+    const view = makeView({ activity: populatedActivity, provenance: allAvailable(0) })
+    const { container } = render(<ActivitySection view={view} dark={false} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing when activity is available but empty', () => {
+    const view = makeView({ activity: emptyActivity(), provenance: activityProvenance })
+    const { container } = render(<ActivitySection view={view} dark={false} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders the takeaway, per-type table, and largest/slowest tables', () => {
+    const view = makeView({ activity: populatedActivity, provenance: activityProvenance })
+    render(<ActivitySection view={view} dark={false} />)
+    expect(screen.getByText('23.0 GB transferred across 6 jobs in the window')).toBeInTheDocument()
+    expect(screen.getAllByText('FILESYSTEM').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('VIRTUAL_MACHINES').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('10%').length).toBeGreaterThan(0) // change rate for VIRTUAL_MACHINES
+    expect(screen.getByText('big1')).toBeInTheDocument()
+    expect(screen.getByText('slow1')).toBeInTheDocument()
+    expect(screen.getByText(/Only backups ≥ 1 GiB rank for throughput/)).toBeInTheDocument()
+  })
+
+  it('renders the daily trend chart and OS split bars', () => {
+    const view = makeView({ activity: populatedActivity, provenance: activityProvenance })
+    render(<ActivitySection view={view} dark={false} />)
+    expect(screen.getByTestId('activity-daily-chart')).toBeInTheDocument()
+    expect(screen.getByTestId('activity-os-bars')).toBeInTheDocument()
+  })
+
+  it('omits the OS bars when osSplit is absent', () => {
+    const view = makeView({
+      activity: { ...populatedActivity, osSplit: undefined },
+      provenance: activityProvenance,
+    })
+    render(<ActivitySection view={view} dark={false} />)
+    expect(screen.queryByTestId('activity-os-bars')).toBeNull()
   })
 })

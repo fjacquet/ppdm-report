@@ -133,7 +133,8 @@
         "type": "Tipo di policy",
         "capacity": "Capacità",
         "clients": "Client",
-        "files": "File"
+        "files": "File",
+        "changeRate": "Tasso di variazione"
       }
     },
     "largest": {
@@ -164,7 +165,10 @@
       }
     },
     "os": {
-      "title": "Sistemi operativi dei client"
+      "title": "Sistemi operativi dei client",
+      "windows": "Windows",
+      "linux": "Linux",
+      "other": "Altro"
     },
     "caption": "Primi {{shown}} di {{total}}"
   },

@@ -133,7 +133,8 @@
         "type": "Policy type",
         "capacity": "Capacity",
         "clients": "Clients",
-        "files": "Files"
+        "files": "Files",
+        "changeRate": "Change rate"
       }
     },
     "largest": {
@@ -164,7 +165,10 @@
       }
     },
     "os": {
-      "title": "Client operating systems"
+      "title": "Client operating systems",
+      "windows": "Windows",
+      "linux": "Linux",
+      "other": "Other"
     },
     "caption": "Top {{shown}} of {{total}}"
   },

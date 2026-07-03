@@ -400,6 +400,17 @@ describe('buildExportModel', () => {
       },
       // non-empty hygiene so the hygiene section renders and adds no suppression warning
       hygiene: computeHygiene([{ kind: 'datasetUnused', name: 'ds1' }]),
+      // non-empty activity so activity/largestBackups/slowestBackups render and add no suppression warnings
+      activity: {
+        byType: [{ type: 'FILESYSTEM', capacityGb: 10, clients: 1, files: 5 }],
+        largest: { items: [{ host: 'h1', type: 'FILESYSTEM', sizeGb: 10 }], total: 1, shown: 1 },
+        slowest: {
+          items: [{ host: 'h1', type: 'FILESYSTEM', throughputMbSec: 5, sizeGb: 10 }],
+          total: 1,
+          shown: 1,
+        },
+        daily: [{ day: '2026-06-15', gb: 10, jobs: 1 }],
+      },
     }
     const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
     expect(model.warnings).toEqual(['cap note', 'merge note'])
@@ -841,6 +852,142 @@ describe('buildExportModel', () => {
         'en',
       )
       expect(model.sections.find((s) => s.id === 'hygiene')).toBeUndefined()
+    })
+  })
+
+  describe('activity family sections', () => {
+    const populatedActivity = {
+      byType: [
+        { type: 'FILESYSTEM', capacityGb: 100, clients: 3, files: 900 },
+        {
+          type: 'VIRTUAL_MACHINES',
+          capacityGb: 40,
+          clients: 1,
+          files: 10,
+          changeRate: { num: 5, den: 50 },
+        },
+      ],
+      largest: {
+        items: [
+          { host: 'big1', type: 'FILESYSTEM', sizeGb: 80, files: 500 },
+          { host: 'big2', type: 'VIRTUAL_MACHINES', sizeGb: 40 },
+        ],
+        total: 2,
+        shown: 2,
+      },
+      slowest: {
+        items: [{ host: 'slow1', type: 'FILESYSTEM', throughputMbSec: 3.2, sizeGb: 12 }],
+        total: 1,
+        shown: 1,
+      },
+      daily: [
+        { day: '2026-06-15', gb: 10, jobs: 2 }, // week of 2026-06-15
+        { day: '2026-06-17', gb: 5, jobs: 1 }, // week of 2026-06-15
+        { day: '2026-06-22', gb: 8, jobs: 3 }, // week of 2026-06-22
+      ],
+      osSplit: { counts: { Windows: 4, Linux: 2, Other: 1 } },
+    }
+
+    it('renders the per-type table, weekly + OS deck bars, and the takeaway', () => {
+      const v = baseView({ activity: populatedActivity })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'activity')
+      expect(section).toBeDefined()
+      expect(section?.table?.columns).toEqual([
+        'Policy type',
+        'Capacity',
+        'Clients',
+        'Files',
+        'Change rate',
+      ])
+      expect(section?.table?.rows).toEqual([
+        ['FILESYSTEM', '100.0 GB', '3', '900', '–'],
+        ['VIRTUAL_MACHINES', '40.0 GB', '1', '10', '10%'],
+      ])
+      // Two weekly buckets (2026-06-15, 2026-06-22) + 3 OS bars
+      expect(section?.deck?.bars?.length).toBe(5)
+      expect(section?.deck?.subtitle).toBe(
+        t('dashboard:activity.takeaway', { gb: '23.0 GB', jobs: '6' }),
+      )
+    })
+
+    it('is suppressed entirely when activity is empty', () => {
+      const model = buildExportModel(baseView({}), 'assessment', 'light', t, 'en')
+      const ids = model.sections.map((s) => s.id)
+      expect(ids).not.toContain('activity')
+      expect(ids).not.toContain('largestBackups')
+      expect(ids).not.toContain('slowestBackups')
+    })
+
+    it('renders the largest-backups table sorted by size, sizes formatted per baseTen', () => {
+      const v = baseView({ activity: populatedActivity, meta: { ...view.meta, baseTen: false } })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'largestBackups')
+      expect(section).toBeDefined()
+      expect(section?.table?.columns).toEqual(['Client', 'Type', 'Size', 'Files'])
+      expect(section?.table?.rows).toEqual([
+        ['big1', 'FILESYSTEM', '80.0 GiB', '500'],
+        ['big2', 'VIRTUAL_MACHINES', '40.0 GiB', '–'],
+      ])
+      expect(section?.table?.caption).toBe(t('dashboard:activity.caption', { shown: 2, total: 2 }))
+    })
+
+    it('renders the slowest-backups table with the throughput floor note in the caption', () => {
+      const v = baseView({ activity: populatedActivity })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'slowestBackups')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows).toEqual([['slow1', 'FILESYSTEM', '3.2', '12.0 GB']])
+      expect(section?.table?.caption).toContain(t('dashboard:activity.slowest.floorNote'))
+    })
+
+    it('suppresses slowestBackups alone when there are no throughput rows (e.g. NetWorker)', () => {
+      const v = baseView({
+        activity: { ...populatedActivity, slowest: { items: [], total: 0, shown: 0 } },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const ids = model.sections.map((s) => s.id)
+      expect(ids).toContain('activity')
+      expect(ids).toContain('largestBackups')
+      expect(ids).not.toContain('slowestBackups')
+    })
+
+    it('places activity/largestBackups/slowestBackups adjacent to longestBackups in both flavors', () => {
+      const v = baseView({
+        activity: populatedActivity,
+        opsInsights: {
+          agentVersions: [],
+          atRisk: {
+            overtime: { items: [], total: 0, shown: 0 },
+            staleBackups: { items: [], total: 0, shown: 0 },
+          },
+          longestBackups: {
+            items: [{ server: 's1', policyType: 'FS', durationHr: 2 }],
+            total: 1,
+            shown: 1,
+          },
+        },
+      })
+      const assessmentIds = buildExportModel(v, 'assessment', 'light', t, 'en').sections.map(
+        (s) => s.id,
+      )
+      const assessmentTail = assessmentIds.slice(-4)
+      expect(assessmentTail).toEqual([
+        'longestBackups',
+        'activity',
+        'largestBackups',
+        'slowestBackups',
+      ])
+
+      const opsIds = buildExportModel(v, 'ops', 'light', t, 'en').sections.map((s) => s.id)
+      const jobsIdx = opsIds.indexOf('jobs')
+      expect(opsIds[jobsIdx + 1]).toBe('activity')
+      const longestIdx = opsIds.indexOf('longestBackups')
+      expect(opsIds.slice(longestIdx, longestIdx + 3)).toEqual([
+        'longestBackups',
+        'largestBackups',
+        'slowestBackups',
+      ])
     })
   })
 })

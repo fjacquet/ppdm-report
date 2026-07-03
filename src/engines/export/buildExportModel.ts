@@ -4,6 +4,7 @@ import type { ProductId } from '../../types/ppdm'
 import { TOP_N_DEFAULT } from '../../types/ppdm'
 import type { MetricKey, MetricProvenance, ReportView, ServerView } from '../../types/reportView'
 import {
+  fmtDate,
   fmtInt,
   fmtNum,
   fmtPercent,
@@ -46,6 +47,7 @@ import type {
   ExportTheme,
   ExportTone,
 } from './types'
+import { bucketWeekly } from './weeklyBucket'
 
 /** Minimal translator surface (i18next TFunction, resolving `ns:key`). */
 type TFn = (key: string, opts?: Record<string, unknown>) => string
@@ -146,6 +148,7 @@ export function buildExportModel(
     efficiency,
     capacityTrend,
     hygiene,
+    activity,
   } = view
 
   const execKpis = [
@@ -1042,6 +1045,123 @@ export function buildExportModel(
         : undefined,
   }
 
+  // Deck bars for the last 8 ISO (Monday-start) weeks of transfer, plus an OS-split
+  // group when available — each toBars() call normalizes within its own group
+  // (same pattern as the resilience section's percent + outcome-count bars).
+  const weeklyActivity = bucketWeekly(activity.daily, 8)
+  const activityTotalGb = activity.daily.reduce((acc, d) => acc + d.gb, 0)
+  const activityTotalJobs = activity.daily.reduce((acc, d) => acc + d.jobs, 0)
+  const activityWeeklyBars = toBars(
+    weeklyActivity.map((w) => ({
+      label: fmtDate(w.day, locale),
+      magnitude: w.gb,
+      value: bytesOf(w.gb),
+      tone: 'accent' as const,
+    })),
+    pal,
+  )
+  const activityOsBars = activity.osSplit
+    ? toBars(
+        Object.entries(activity.osSplit.counts).map(([os, n]) => ({
+          label: t(`dashboard:activity.os.${os.toLowerCase()}`),
+          magnitude: n,
+          value: fmtInt(n, locale),
+          tone: 'muted' as const,
+        })),
+        pal,
+      )
+    : []
+  const activityBars = [...activityWeeklyBars, ...activityOsBars]
+
+  const activitySection: ExportSection = {
+    id: 'activity',
+    title: t('dashboard:activity.title'),
+    table:
+      activity.byType.length > 0
+        ? {
+            columns: [
+              t('dashboard:activity.perType.col.type'),
+              t('dashboard:activity.perType.col.capacity'),
+              t('dashboard:activity.perType.col.clients'),
+              t('dashboard:activity.perType.col.files'),
+              t('dashboard:activity.perType.col.changeRate'),
+            ],
+            rows: activity.byType.map((ts) => [
+              ts.type,
+              bytesOf(ts.capacityGb),
+              fmtInt(ts.clients, locale),
+              fmtInt(ts.files, locale),
+              ts.changeRate === undefined
+                ? '–'
+                : fmtPercent(ts.changeRate.num / ts.changeRate.den, locale),
+            ]),
+          }
+        : undefined,
+    deck:
+      activityBars.length > 0
+        ? {
+            subtitle: t('dashboard:activity.takeaway', {
+              gb: bytesOf(activityTotalGb),
+              jobs: fmtInt(activityTotalJobs, locale),
+            }),
+            bars: activityBars,
+          }
+        : undefined,
+  }
+
+  // Table-first sections (like longestBackups): full-width in the deck (see
+  // pptx/slidePlan.ts FULLWIDTH), no deck bars/chips needed here.
+  const largestBackupsSection: ExportSection = {
+    id: 'largestBackups',
+    title: t('dashboard:activity.largest.title'),
+    table: {
+      columns: [
+        t('dashboard:activity.largest.col.client'),
+        t('dashboard:activity.largest.col.type'),
+        t('dashboard:activity.largest.col.size'),
+        t('dashboard:activity.largest.col.files'),
+      ],
+      rows: activity.largest.items.map((b) => [
+        b.host,
+        b.type,
+        bytesOf(b.sizeGb),
+        b.files === undefined ? '–' : fmtInt(b.files, locale),
+      ]),
+      caption: t('dashboard:activity.caption', {
+        shown: activity.largest.shown,
+        total: activity.largest.total,
+      }),
+    },
+  }
+
+  const slowestBackupsSection: ExportSection = {
+    id: 'slowestBackups',
+    title: t('dashboard:activity.slowest.title'),
+    table: {
+      columns: [
+        t('dashboard:activity.slowest.col.client'),
+        t('dashboard:activity.slowest.col.type'),
+        t('dashboard:activity.slowest.col.throughput'),
+        t('dashboard:activity.slowest.col.size'),
+      ],
+      rows: activity.slowest.items.map((b) => [
+        b.host,
+        b.type,
+        fmtNum(b.throughputMbSec, locale, 1),
+        bytesOf(b.sizeGb),
+      ]),
+      caption: [
+        t('dashboard:activity.caption', {
+          shown: activity.slowest.shown,
+          total: activity.slowest.total,
+        }),
+        t('dashboard:activity.slowest.floorNote'),
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    },
+  }
+
   const feBytes = (gb: number) => formatBytes(gbToBytes(gb, b10), locale, b10)
   const feCell = (gb: number | undefined) =>
     formatGbOrUnknown(gb, locale, t('common:sizeUnknown'), b10)
@@ -1140,6 +1260,9 @@ export function buildExportModel(
     atRisk: atRiskSection,
     agentVersions: agentVersionsSection,
     longestBackups: longestBackupsSection,
+    activity: withCaveat(activitySection, 'activity', view, t),
+    largestBackups: withCaveat(largestBackupsSection, 'activity', view, t),
+    slowestBackups: withCaveat(slowestBackupsSection, 'activity', view, t),
   }
   const allSections = SECTION_ORDER[flavor]
     .map((id) => byId[id])

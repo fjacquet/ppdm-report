@@ -133,7 +133,8 @@
         "type": "Type de politique",
         "capacity": "Capacité",
         "clients": "Clients",
-        "files": "Fichiers"
+        "files": "Fichiers",
+        "changeRate": "Taux de variation"
       }
     },
     "largest": {
@@ -164,7 +165,10 @@
       }
     },
     "os": {
-      "title": "Systèmes d'exploitation des clients"
+      "title": "Systèmes d'exploitation des clients",
+      "windows": "Windows",
+      "linux": "Linux",
+      "other": "Autre"
     },
     "caption": "Top {{shown}} sur {{total}}"
   },
