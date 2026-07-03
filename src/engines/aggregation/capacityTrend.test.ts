@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { computeCapacityTrend, emptyCapacityTrend, type UtilizationSample } from './capacityTrend'
+import {
+  computeCapacityTrend,
+  emptyCapacityTrend,
+  mergeCapacityTrend,
+  type UtilizationSample,
+} from './capacityTrend'
 
 /** n daily samples from 2026-01-01, pct via fn(i). */
 const daily = (target: string, n: number, pct: (i: number) => number): UtilizationSample[] =>
@@ -70,5 +75,16 @@ describe('computeCapacityTrend', () => {
     expect(t?.currentPct).toBe(3)
     expect(emptyCapacityTrend().targets).toEqual([])
     expect(computeCapacityTrend([]).targets).toEqual([])
+  })
+})
+
+describe('mergeCapacityTrend', () => {
+  it('identity on one element; concat + resort across servers', () => {
+    const a = computeCapacityTrend(daily('serverB/0', 40, () => 10))
+    const b = computeCapacityTrend(daily('serverA/0', 40, () => 20))
+    expect(mergeCapacityTrend([a])).toBe(a)
+    const m = mergeCapacityTrend([a, b])
+    expect(m.targets.map((t) => t.target)).toEqual(['serverA/0', 'serverB/0'])
+    expect(mergeCapacityTrend([]).targets).toEqual([])
   })
 })

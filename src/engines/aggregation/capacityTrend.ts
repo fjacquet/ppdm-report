@@ -95,3 +95,13 @@ export function computeCapacityTrend(samples: UtilizationSample[]): CapacityTren
     .sort((a, b) => a.target.localeCompare(b.target))
   return { targets }
 }
+
+/** Fold per-server trends: targets are server-prefixed, so a plain concat + resort suffices. */
+export function mergeCapacityTrend(list: CapacityTrend[]): CapacityTrend {
+  const first = list[0]
+  if (!first) return emptyCapacityTrend()
+  if (list.length === 1) return first
+  return {
+    targets: list.flatMap((c) => c.targets).sort((a, b) => a.target.localeCompare(b.target)),
+  }
+}
