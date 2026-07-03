@@ -2,7 +2,8 @@ import type { ExportTone } from './types'
 
 /**
  * Value → tone bands — the single source of truth for "what color is this number?"
- * (the CTO test). All *Pct inputs are 0..1 ratios EXCEPT utilizationTone (0..100).
+ * (the CTO test). All *Pct inputs are 0..1 ratios EXCEPT utilizationTone,
+ * dedupeCommonTone, and capacityTrendTone's currentPct (0..100).
  */
 export function coverageTone(pct: number): ExportTone {
   if (pct >= 0.95) return 'ok'

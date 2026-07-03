@@ -95,8 +95,7 @@
       "window": "Zeitfenster"
     },
     "noSlope": "k. A.",
-    "observedNote": "Beobachteter Trend im Erfassungszeitraum — keine Projektion.",
-    "chartLabel": "Auslastung im Zeitverlauf (%)"
+    "observedNote": "Beobachteter Trend im Erfassungszeitraum — keine Projektion."
   },
   "resilience": {
     "title": "Cyber-Resilienz",

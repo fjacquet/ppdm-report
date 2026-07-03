@@ -95,8 +95,7 @@
       "window": "Periodo"
     },
     "noSlope": "n/d",
-    "observedNote": "Tendenza osservata nel periodo di raccolta — non una proiezione.",
-    "chartLabel": "Utilizzo nel tempo (%)"
+    "observedNote": "Tendenza osservata nel periodo di raccolta — non una proiezione."
   },
   "resilience": {
     "title": "Cyber-resilienza",
