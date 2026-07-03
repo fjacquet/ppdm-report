@@ -54,6 +54,25 @@ describe('buildAvamarView', () => {
     ])
   })
 
+  it('capacity: percent-scale Node Utilization is used as-is, not multiplied by 100 again', () => {
+    const wb = normalizeWorkbook(
+      makeWorkbook({
+        Details: [
+          ['Project Name', 'AVA-pct'],
+          ['Date', 45000],
+          ['Disclaimer', 'All measurements ... Base 2 units of Measurement.'],
+        ],
+        'Node Utilization': [
+          ['Date', 'Node', 'Max Utilization (%)'],
+          [45839, 0, 5.85],
+          [45840, 0, 10.62],
+        ],
+      }),
+    )
+    const v = buildAvamarView(wb)
+    expect(v.capacity.targets[0]?.utilizationPct).toBeCloseTo(10.62, 6)
+  })
+
   it('inUse = detail Policy Types (GC + No Plug-in excluded)', () => {
     expect(view().inUse).toEqual(['Linux VMware Image', 'Windows File System'])
   })

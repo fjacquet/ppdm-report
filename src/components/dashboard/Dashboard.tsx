@@ -5,6 +5,7 @@ import type { ReportView, ServerView } from '../../types/reportView'
 import { AgentVersionsSection } from './AgentVersionsSection'
 import { AtRiskSection } from './AtRiskSection'
 import { CapacitySection } from './CapacitySection'
+import { CapacityTrendSection } from './CapacityTrendSection'
 import { CoverageSection } from './CoverageSection'
 import { EfficiencySection } from './EfficiencySection'
 import { ExecutiveKpis } from './ExecutiveKpis'
@@ -48,6 +49,8 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return null
       case 'capacity':
         return <CapacitySection key={id} view={view} dark={dark} />
+      case 'capacityTrend':
+        return <CapacityTrendSection key={id} view={view} dark={dark} />
       case 'policies':
         return <PoliciesSection key={id} view={view} dark={dark} />
       case 'atRisk':

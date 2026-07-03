@@ -1,6 +1,7 @@
 import type { RawWorkbook } from '../../../types/ppdm'
 import type { ReportView } from '../../../types/reportView'
 import { computeCapacity } from '../../aggregation/capacity'
+import { emptyCapacityTrend } from '../../aggregation/capacityTrend'
 import { computeCompliance } from '../../aggregation/compliance'
 import { computeCoverage } from '../../aggregation/coverage'
 import { emptyEfficiency } from '../../aggregation/efficiency'
@@ -37,6 +38,7 @@ export function buildPpdmView(wb: RawWorkbook): ReportView {
     opsInsights: emptyOpsInsights(),
     reliability: emptyReliability(),
     efficiency: emptyEfficiency(),
+    capacityTrend: emptyCapacityTrend(),
     provenance: allAvailable(totalAssets),
   }
 }

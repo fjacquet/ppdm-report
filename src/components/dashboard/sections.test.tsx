@@ -1,5 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import type { TrendTarget } from '../../engines/aggregation/capacityTrend'
+import { emptyCapacityTrend } from '../../engines/aggregation/capacityTrend'
 import { emptyEfficiency } from '../../engines/aggregation/efficiency'
 import { emptyOpsInsights } from '../../engines/aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../../engines/aggregation/provenance'
@@ -7,6 +9,7 @@ import { emptyReliability } from '../../engines/aggregation/reliability'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { CapacitySection } from './CapacitySection'
+import { CapacityTrendSection } from './CapacityTrendSection'
 import { CoverageSection } from './CoverageSection'
 import { EfficiencySection } from './EfficiencySection'
 import { ExecutiveKpis } from './ExecutiveKpis'
@@ -82,6 +85,7 @@ const fixture: ReportView = {
   opsInsights: emptyOpsInsights(),
   reliability: emptyReliability(),
   efficiency: emptyEfficiency(),
+  capacityTrend: emptyCapacityTrend(),
   provenance: allAvailable(0),
 }
 
@@ -549,6 +553,64 @@ describe('EfficiencySection', () => {
     const { container } = render(
       <EfficiencySection view={makeView({ efficiency: emptyEfficiency() })} />,
     )
+    expect(container).toBeEmptyDOMElement()
+  })
+})
+
+const trendTargets: TrendTarget[] = [
+  {
+    target: 'dd-grid-01',
+    currentPct: 78,
+    minPct: 60,
+    maxPct: 78,
+    windowStart: '2026-05-01',
+    windowEnd: '2026-06-30',
+    sampleCount: 45,
+    slopePer30d: 2.5,
+    series: [
+      ['2026-05-01', 60],
+      ['2026-06-01', 69],
+      ['2026-06-30', 78],
+    ],
+  },
+  {
+    target: 'dd-grid-02',
+    currentPct: 42,
+    minPct: 40,
+    maxPct: 43,
+    windowStart: '2026-05-01',
+    windowEnd: '2026-06-30',
+    sampleCount: 45,
+    slopePer30d: undefined,
+    series: [
+      ['2026-05-01', 40],
+      ['2026-06-30', 42],
+    ],
+  },
+]
+
+describe('CapacityTrendSection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('renders the fastest-growing target name and its slope in the takeaway', () => {
+    const view = makeView({ capacityTrend: { targets: trendTargets } })
+    render(<CapacityTrendSection view={view} dark={false} />)
+    expect(screen.getAllByText(/dd-grid-01/).length).toBeGreaterThan(0)
+    expect(screen.getByText(/Fastest-growing target.*2\.5/)).toBeInTheDocument()
+  })
+
+  it('renders "n/a" for a target with no computed slope', () => {
+    const view = makeView({ capacityTrend: { targets: trendTargets } })
+    render(<CapacityTrendSection view={view} dark={false} />)
+    expect(screen.getByText('n/a')).toBeInTheDocument()
+  })
+
+  it('renders nothing when capacityTrend has no targets', () => {
+    const view = makeView({ capacityTrend: emptyCapacityTrend() })
+    const { container } = render(<CapacityTrendSection view={view} dark={false} />)
     expect(container).toBeEmptyDOMElement()
   })
 })

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import i18n from '../../../i18n'
 import { DARK } from '../../../theme/palette'
 import type { ReportView } from '../../../types/reportView'
+import { emptyCapacityTrend } from '../../aggregation/capacityTrend'
 import { emptyEfficiency } from '../../aggregation/efficiency'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { allAvailable } from '../../aggregation/provenance'
@@ -74,6 +75,7 @@ const view: ReportView = {
   opsInsights: emptyOpsInsights(),
   reliability: emptyReliability(),
   efficiency: emptyEfficiency(),
+  capacityTrend: emptyCapacityTrend(),
   provenance: allAvailable(0),
 }
 

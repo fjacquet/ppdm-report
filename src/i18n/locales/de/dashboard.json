@@ -81,6 +81,22 @@
       }
     }
   },
+  "capacityTrend": {
+    "title": "Kapazitätswachstum",
+    "takeaway": "Am schnellsten wachsendes Ziel: {{target}} mit {{slope}} Pkt./Monat",
+    "takeawayFlat": "Kein Ziel zeigt nennenswertes Wachstum im Zeitfenster",
+    "chip": "Schnellstes Wachstum",
+    "col": {
+      "target": "Ziel",
+      "current": "Aktuell",
+      "min": "Min",
+      "max": "Max",
+      "slope": "Wachstum (Pkt./30 T)",
+      "window": "Zeitfenster"
+    },
+    "noSlope": "k. A.",
+    "observedNote": "Beobachteter Trend im Erfassungszeitraum — keine Projektion."
+  },
   "resilience": {
     "title": "Cyber-Resilienz",
     "appConsistent": "Anwendungskonsistente Sicherungen",

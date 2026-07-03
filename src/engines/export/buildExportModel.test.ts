@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
+import { emptyCapacityTrend } from '../aggregation/capacityTrend'
 import { emptyEfficiency } from '../aggregation/efficiency'
 import { emptyOpsInsights } from '../aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../aggregation/provenance'
@@ -75,6 +76,7 @@ const view: ReportView = {
   opsInsights: emptyOpsInsights(),
   reliability: emptyReliability(),
   efficiency: emptyEfficiency(),
+  capacityTrend: emptyCapacityTrend(),
   provenance: allAvailable(0),
 }
 
@@ -377,6 +379,21 @@ describe('buildExportModel', () => {
           perPolicyType: [],
         },
       },
+      // non-empty capacityTrend so the capacityTrend section renders and adds no suppression warning
+      capacityTrend: {
+        targets: [
+          {
+            target: 'dd1',
+            currentPct: 50,
+            minPct: 40,
+            maxPct: 50,
+            windowStart: '2026-05-01',
+            windowEnd: '2026-06-30',
+            sampleCount: 60,
+            series: [],
+          },
+        ],
+      },
     }
     const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
     expect(model.warnings).toEqual(['cap note', 'merge note'])
@@ -673,6 +690,91 @@ describe('buildExportModel', () => {
       const resilience = withRep.sections.find((s) => s.id === 'resilience')
       expect(resilience?.deck?.bars?.some((b) => b.label.length > 0)).toBe(true)
       expect(resilience?.deck?.kpiChips?.some((k) => k.value === '5')).toBe(true) // failed+partial
+    })
+  })
+
+  describe('capacityTrend section', () => {
+    it('renders a growth table row per target, utilization bars, and a fastest-growth chip', () => {
+      const v = baseView({
+        capacityTrend: {
+          targets: [
+            {
+              target: 'dd1',
+              currentPct: 70,
+              minPct: 40,
+              maxPct: 70,
+              windowStart: '2026-05-01',
+              windowEnd: '2026-06-30',
+              sampleCount: 60,
+              slopePer30d: 2.5,
+              series: [],
+            },
+            {
+              target: 'dd2',
+              currentPct: 30,
+              minPct: 25,
+              maxPct: 32,
+              windowStart: '2026-05-01',
+              windowEnd: '2026-06-30',
+              sampleCount: 60,
+              series: [],
+            },
+          ],
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'capacityTrend')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows.length).toBe(2)
+      expect(section?.deck?.bars?.length).toBe(2)
+      const chip = section?.deck?.kpiChips?.find(
+        (k) => k.label === t('dashboard:capacityTrend.chip'),
+      )
+      expect(chip?.value).toBe('+2.5')
+      expect(chip?.tone).toBe('bad')
+    })
+
+    it('renders a declining target with a signed-minus slope, no growth chip, and no leading plus', () => {
+      const v = baseView({
+        capacityTrend: {
+          targets: [
+            {
+              target: 'dd1',
+              currentPct: 40,
+              minPct: 40,
+              maxPct: 55,
+              windowStart: '2026-05-01',
+              windowEnd: '2026-06-30',
+              sampleCount: 60,
+              slopePer30d: -3,
+              series: [],
+            },
+          ],
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'capacityTrend')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows.length).toBe(1)
+      expect(section?.deck?.bars?.length).toBe(1)
+      const chip = section?.deck?.kpiChips?.find(
+        (k) => k.label === t('dashboard:capacityTrend.chip'),
+      )
+      expect(chip).toBeUndefined()
+      const barValue = section?.deck?.bars?.[0]?.value ?? ''
+      expect(barValue).not.toContain('+-')
+      expect(barValue).toContain('-3')
+    })
+
+    it('is suppressed when capacityTrend is empty', () => {
+      const model = buildExportModel(
+        baseView({ capacityTrend: emptyCapacityTrend() }),
+        'assessment',
+        'light',
+        t,
+        'en',
+      )
+      expect(model.sections.find((s) => s.id === 'capacityTrend')).toBeUndefined()
     })
   })
 })

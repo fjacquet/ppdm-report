@@ -1,5 +1,6 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
+import { emptyCapacityTrend } from '../../aggregation/capacityTrend'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { networkerProvenance } from '../../aggregation/provenance'
@@ -147,10 +148,13 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     opsInsights: emptyOpsInsights(),
     reliability: networkerReliability(wb),
     efficiency,
+    capacityTrend: emptyCapacityTrend(),
+    // NetWorker has no utilization time series — snapshot only.
     provenance: networkerProvenance(
       windowSize,
       jobRows.length > 0,
       Object.values(efficiency).some((v) => v !== undefined),
+      false,
     ),
   }
 }

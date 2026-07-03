@@ -20,6 +20,7 @@ import {
   appConsistentTone,
   atRiskTone,
   backupDurationTone,
+  capacityTrendTone,
   changeRateTone,
   coverageTone,
   dedupeCommonTone,
@@ -134,6 +135,7 @@ export function buildExportModel(
     opsInsights,
     reliability,
     efficiency,
+    capacityTrend,
   } = view
 
   const execKpis = [
@@ -599,6 +601,81 @@ export function buildExportModel(
     },
   }
 
+  const trendTargets = capacityTrend.targets
+  // Fastest-growing target: highest defined slopePer30d wins the chip/takeaway (same as the dashboard section).
+  const fastestTrend = trendTargets.reduce<(typeof trendTargets)[number] | undefined>(
+    (best, tg) => {
+      if (tg.slopePer30d === undefined) return best
+      if (best === undefined || best.slopePer30d === undefined) return tg
+      return tg.slopePer30d > best.slopePer30d ? tg : best
+    },
+    undefined,
+  )
+  // Only prepend '+' for genuine growth; fmtNum already carries the locale minus sign for declines.
+  const signedSlope = (s: number) => (s > 0 ? `+${fmtNum(s, locale, 1)}` : fmtNum(s, locale, 1))
+  const capacityTrendSection: ExportSection = {
+    id: 'capacityTrend',
+    title: t('dashboard:capacityTrend.title'),
+    table:
+      trendTargets.length > 0
+        ? {
+            columns: [
+              t('dashboard:capacityTrend.col.target'),
+              t('dashboard:capacityTrend.col.current'),
+              t('dashboard:capacityTrend.col.min'),
+              t('dashboard:capacityTrend.col.max'),
+              t('dashboard:capacityTrend.col.slope'),
+              t('dashboard:capacityTrend.col.window'),
+            ],
+            rows: trendTargets.map((tg) => [
+              tg.target,
+              fmtPercentValue(tg.currentPct, locale),
+              fmtPercentValue(tg.minPct, locale),
+              fmtPercentValue(tg.maxPct, locale),
+              tg.slopePer30d === undefined
+                ? t('dashboard:capacityTrend.noSlope')
+                : fmtNum(tg.slopePer30d, locale, 1),
+              `${tg.windowStart} – ${tg.windowEnd}`,
+            ]),
+            caption: t('dashboard:capacityTrend.observedNote'),
+          }
+        : undefined,
+    ...(trendTargets.length > 0
+      ? {
+          deck: {
+            subtitle:
+              fastestTrend?.slopePer30d !== undefined && fastestTrend.slopePer30d >= 1
+                ? t('dashboard:capacityTrend.takeaway', {
+                    target: fastestTrend.target,
+                    slope: fmtNum(fastestTrend.slopePer30d, locale, 1),
+                  })
+                : t('dashboard:capacityTrend.takeawayFlat'),
+            kpiChips:
+              fastestTrend?.slopePer30d !== undefined && fastestTrend.slopePer30d > 0
+                ? [
+                    {
+                      label: t('dashboard:capacityTrend.chip'),
+                      value: signedSlope(fastestTrend.slopePer30d),
+                      tone: capacityTrendTone(fastestTrend.slopePer30d, fastestTrend.currentPct),
+                    },
+                  ]
+                : [],
+            bars: toBars(
+              trendTargets.map((tg) => ({
+                label: tg.target,
+                magnitude: tg.currentPct / 100,
+                value:
+                  fmtPercentValue(tg.currentPct, locale) +
+                  (tg.slopePer30d === undefined ? '' : ` · ${signedSlope(tg.slopePer30d)}/30d`),
+                tone: utilizationTone(tg.currentPct),
+              })),
+              pal,
+            ),
+          },
+        }
+      : {}),
+  }
+
   const b10 = meta.baseTen
   const bytesOf = (gb: number) => formatBytes(gbToBytes(gb, b10), locale, b10)
 
@@ -975,6 +1052,7 @@ export function buildExportModel(
     reliability: withCaveat(reliabilitySection, 'reliability', view, t),
     resilience: withCaveat(complianceSection, 'compliance', view, t),
     capacity: withCaveat(capacitySection, 'storageTargets', view, t),
+    capacityTrend: withCaveat(capacityTrendSection, 'capacityTrend', view, t),
     efficiency: withCaveat(efficiencySection, 'efficiency', view, t),
     policies: policiesSection,
     atRisk: atRiskSection,

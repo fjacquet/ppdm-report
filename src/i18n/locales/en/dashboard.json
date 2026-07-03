@@ -59,11 +59,18 @@
     "encryptionChip": "Encrypted capacity",
     "lowDedupe": {
       "caption": "Clients under 50% commonality — top {{shown}} of {{total}}",
-      "col": { "client": "Client", "common": "Commonality", "processed": "Processed" }
+      "col": {
+        "client": "Client",
+        "common": "Commonality",
+        "processed": "Processed"
+      }
     },
     "retention": {
       "title": "Capacity by retention",
-      "col": { "type": "Policy type", "total": "Total" },
+      "col": {
+        "type": "Policy type",
+        "total": "Total"
+      },
       "bucket": {
         "r30": "< 30 d",
         "r60": "< 60 d",
@@ -73,6 +80,22 @@
         "r7yPlus": "≥ 7 y"
       }
     }
+  },
+  "capacityTrend": {
+    "title": "Capacity growth",
+    "takeaway": "Fastest-growing target: {{target}} at {{slope}} pts/month",
+    "takeawayFlat": "No target shows meaningful growth over the window",
+    "chip": "Fastest growth",
+    "col": {
+      "target": "Target",
+      "current": "Current",
+      "min": "Min",
+      "max": "Max",
+      "slope": "Growth (pts/30 d)",
+      "window": "Window"
+    },
+    "noSlope": "n/a",
+    "observedNote": "Observed trend over the collection window — not a projection."
   },
   "resilience": {
     "title": "Cyber-resilience",
@@ -158,14 +181,24 @@
   },
   "agentVersions": {
     "title": "Agent version spread",
-    "col": { "version": "Agent version", "count": "Clients" },
+    "col": {
+      "version": "Agent version",
+      "count": "Clients"
+    },
     "takeaway": "{{count}} distinct agent versions in use",
     "caption": "Client agent versions across the estate."
   },
   "atRisk": {
     "title": "At-risk clients",
-    "col": { "client": "Client", "type": "Type", "risk": "Risk" },
-    "risk": { "overtime": "Backup window breach", "stale": "No backup in 7 days" },
+    "col": {
+      "client": "Client",
+      "type": "Type",
+      "risk": "Risk"
+    },
+    "risk": {
+      "overtime": "Backup window breach",
+      "stale": "No backup in 7 days"
+    },
     "overtimeChip": "Over window",
     "staleChip": "Missed 7 days",
     "takeaway": "{{overtime}} over window · {{stale}} missed in 7 days",

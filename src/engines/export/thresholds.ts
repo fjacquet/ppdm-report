@@ -2,7 +2,8 @@ import type { ExportTone } from './types'
 
 /**
  * Value → tone bands — the single source of truth for "what color is this number?"
- * (the CTO test). All *Pct inputs are 0..1 ratios EXCEPT utilizationTone (0..100).
+ * (the CTO test). All *Pct inputs are 0..1 ratios EXCEPT utilizationTone,
+ * dedupeCommonTone, and capacityTrendTone's currentPct (0..100).
  */
 export function coverageTone(pct: number): ExportTone {
   if (pct >= 0.95) return 'ok'
@@ -79,5 +80,12 @@ export function changeRateTone(pct: number): ExportTone {
 export function replicationIssueTone(pct: number): ExportTone {
   if (pct >= 0.05) return 'bad'
   if (pct > 0) return 'warn'
+  return 'ok'
+}
+
+/** Observed utilization growth: slope in pts per 30 days, paired with current level (0..100). */
+export function capacityTrendTone(slopePer30d: number, currentPct: number): ExportTone {
+  if (slopePer30d >= 1 && currentPct >= 60) return 'bad'
+  if (slopePer30d >= 1) return 'warn'
   return 'ok'
 }

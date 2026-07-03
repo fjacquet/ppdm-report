@@ -9,6 +9,7 @@ export type SectionId =
   | 'reliability'
   | 'resilience'
   | 'capacity'
+  | 'capacityTrend'
   | 'policies'
   | 'atRisk'
   | 'agentVersions'
@@ -26,6 +27,7 @@ export const SECTION_ORDER: Record<ExportFlavor, SectionId[]> = {
     'reliability',
     'resilience',
     'capacity',
+    'capacityTrend',
     'efficiency',
     'policies',
     'agentVersions',
@@ -39,6 +41,7 @@ export const SECTION_ORDER: Record<ExportFlavor, SectionId[]> = {
     'longestBackups',
     'resilience',
     'capacity',
+    'capacityTrend',
     'efficiency',
     'agentVersions',
     'coverage',

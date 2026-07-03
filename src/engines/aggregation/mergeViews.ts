@@ -1,6 +1,7 @@
 import { AGENT_SHEETS, TOP_N_DEFAULT } from '../../types/ppdm'
 import type { CoverageBand, MetricKey, MetricProvenance, ReportView } from '../../types/reportView'
 import { foldMeta } from '../parser/foldMeta'
+import { mergeCapacityTrend } from './capacityTrend'
 import { emptyBand, finalizeBand } from './coverage'
 import { mergeEfficiency } from './efficiency'
 import { mergeFrontEnd } from './frontEnd'
@@ -32,6 +33,7 @@ function mergeProvenance(views: ReportView[]): Record<MetricKey, MetricProvenanc
     'frontEnd',
     'reliability',
     'efficiency',
+    'capacityTrend',
   ]
   const out = {} as Record<MetricKey, MetricProvenance>
   for (const key of keys) {
@@ -140,6 +142,7 @@ export function mergeViews(views: ReportView[]): ReportView {
     opsInsights: mergeOpsInsights(views.map((v) => v.opsInsights)),
     reliability: mergeReliability(views.map((v) => v.reliability)),
     efficiency: mergeEfficiency(views.map((v) => v.efficiency)),
+    capacityTrend: mergeCapacityTrend(views.map((v) => v.capacityTrend)),
     provenance: mergeProvenance(views),
   }
 }
