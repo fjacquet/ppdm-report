@@ -1100,10 +1100,15 @@ export function buildExportModel(
     deck:
       activityBars.length > 0
         ? {
-            subtitle: t('dashboard:activity.takeaway', {
-              gb: bytesOf(activityTotalGb),
-              jobs: fmtInt(activityTotalJobs, locale),
-            }),
+            // Takeaway only when daily data exists — OS-bars-only decks would
+            // otherwise read "0 GB across 0 jobs" (dashboard gates the same way).
+            subtitle:
+              activity.daily.length > 0
+                ? t('dashboard:activity.takeaway', {
+                    gb: bytesOf(activityTotalGb),
+                    jobs: fmtInt(activityTotalJobs, locale),
+                  })
+                : undefined,
             bars: activityBars,
           }
         : undefined,
