@@ -61,6 +61,8 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return <LongestBackupsSection key={id} view={view} />
       case 'efficiency':
         return <EfficiencySection key={id} view={view} />
+      case 'hygiene':
+        return null // HygieneSection lands in the next task
     }
   }
 

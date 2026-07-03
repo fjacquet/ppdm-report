@@ -1,6 +1,7 @@
 import type { Palette } from '../../theme/palette'
 import { DARK, LIGHT } from '../../theme/palette'
 import type { ProductId } from '../../types/ppdm'
+import { TOP_N_DEFAULT } from '../../types/ppdm'
 import type { MetricKey, MetricProvenance, ReportView, ServerView } from '../../types/reportView'
 import {
   fmtInt,
@@ -14,6 +15,7 @@ import {
 } from '../../utils/format'
 import { REPLICATION_OUTCOME_IDS, RETENTION_BUCKET_IDS } from '../aggregation/efficiency'
 import { FRONT_END_METRICS } from '../aggregation/frontEnd'
+import { HYGIENE_KINDS } from '../aggregation/hygiene'
 import { RUNTIME_BUCKET_IDS } from '../aggregation/reliability'
 import { type ExportFlavor, SECTION_ORDER, type SectionId } from './sectionOrder'
 import {
@@ -24,8 +26,10 @@ import {
   changeRateTone,
   coverageTone,
   dedupeCommonTone,
+  hygieneTone,
   immutableTone,
   jobSuccessTone,
+  licenseTone,
   queueDelayTone,
   repeatFailureTone,
   replicatedTone,
@@ -136,6 +140,7 @@ export function buildExportModel(
     reliability,
     efficiency,
     capacityTrend,
+    hygiene,
   } = view
 
   const execKpis = [
@@ -787,6 +792,77 @@ export function buildExportModel(
     },
   }
 
+  const hasHygieneItems = hygiene.items.length > 0
+  const hygieneChips: ExportKpi[] = hasHygieneItems
+    ? [
+        {
+          label: t('dashboard:hygiene.cleanupChip'),
+          value: fmtInt(hygiene.cleanupTotal, locale),
+          tone: hygieneTone(hygiene.cleanupTotal),
+        },
+        ...(hygiene.countByKind.license > 0
+          ? [
+              {
+                label: t('dashboard:hygiene.licenseChip'),
+                value: fmtInt(hygiene.expiredLicenses + hygiene.expiringLicenses, locale),
+                tone: licenseTone(hygiene.expiredLicenses, hygiene.expiringLicenses),
+              },
+            ]
+          : []),
+      ]
+    : []
+  const hygieneBars = hasHygieneItems
+    ? toBars(
+        HYGIENE_KINDS.filter((kind) => hygiene.countByKind[kind] > 0).map((kind) => ({
+          label: t(`dashboard:hygiene.kind.${kind}`),
+          magnitude: hygiene.countByKind[kind],
+          value: fmtInt(hygiene.countByKind[kind], locale),
+          tone: (kind === 'clientInactive'
+            ? 'warn'
+            : kind === 'license' && hygiene.expiredLicenses > 0
+              ? 'bad'
+              : 'muted') as ExportTone,
+        })),
+        pal,
+      )
+    : []
+  const hygieneSection: ExportSection = {
+    id: 'hygiene',
+    title: t('dashboard:hygiene.title'),
+    table: hasHygieneItems
+      ? {
+          columns: [
+            t('dashboard:hygiene.col.kind'),
+            t('dashboard:hygiene.col.name'),
+            t('dashboard:hygiene.col.detail'),
+            t('dashboard:hygiene.col.status'),
+          ],
+          rows: hygiene.items
+            .slice(0, TOP_N_DEFAULT)
+            .map((item) => [
+              t(`dashboard:hygiene.kind.${item.kind}`),
+              item.name,
+              item.detail ?? '',
+              item.licenseStatus ? t(`dashboard:hygiene.licenseStatus.${item.licenseStatus}`) : '',
+            ]),
+          caption: t('dashboard:hygiene.caption', {
+            shown: Math.min(hygiene.items.length, TOP_N_DEFAULT),
+            total: hygiene.items.length,
+          }),
+        }
+      : undefined,
+    deck: hasHygieneItems
+      ? {
+          subtitle:
+            hygiene.cleanupTotal > 0
+              ? t('dashboard:hygiene.takeaway', { count: fmtInt(hygiene.cleanupTotal, locale) })
+              : t('dashboard:hygiene.takeawayClean'),
+          kpiChips: hygieneChips,
+          bars: hygieneBars,
+        }
+      : undefined,
+  }
+
   const hasAnyPolicies = policies.count > 0
   const policiesKpis: ExportKpi[] = hasAnyPolicies
     ? [
@@ -1054,6 +1130,7 @@ export function buildExportModel(
     capacity: withCaveat(capacitySection, 'storageTargets', view, t),
     capacityTrend: withCaveat(capacityTrendSection, 'capacityTrend', view, t),
     efficiency: withCaveat(efficiencySection, 'efficiency', view, t),
+    hygiene: withCaveat(hygieneSection, 'hygiene', view, t),
     policies: policiesSection,
     atRisk: atRiskSection,
     agentVersions: agentVersionsSection,
