@@ -2,11 +2,11 @@ import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../ty
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
-import { emptyHygiene } from '../../aggregation/hygiene'
 import { avamarProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr } from '../../aggregation/rows'
 import { avamarCapacityTrend, utilizationScaleFactor } from './capacityTrend'
 import { avamarEfficiency } from './efficiency'
+import { avamarHygiene } from './hygiene'
 import { avamarJobs } from './jobs'
 import { computeAvamarOpsInsights } from './opsInsights'
 import { avamarPolicies } from './policies'
@@ -104,6 +104,7 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
 
   const efficiency = avamarEfficiency(wb)
   const trend = avamarCapacityTrend(wb)
+  const hygiene = avamarHygiene(wb)
 
   return {
     meta: wb.meta,
@@ -125,13 +126,13 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     reliability: avamarReliability(wb),
     efficiency,
     capacityTrend: trend,
-    hygiene: emptyHygiene(),
-    // hygiene wiring lands in the next tasks
+    hygiene,
     provenance: avamarProvenance(
       hasReliabilitySource(wb),
       Object.values(efficiency).some((v) => v !== undefined),
       trend.targets.length > 0,
-      false,
+      // zero findings reads as unavailable — nothing to show is suppressed, not zeroed
+      hygiene.items.length > 0,
     ),
   }
 }
