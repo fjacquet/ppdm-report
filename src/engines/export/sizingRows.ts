@@ -41,8 +41,17 @@ export function buildSizingRows(view: ReportView, t: TFn, locale: string): Sizin
   const rows: SizingRow[] = []
 
   if (provenance.frontEnd.available && frontEnd.byType.length > 0) {
-    const fetbGb = frontEnd.byType.reduce((a, r) => a + (r.protectedFetbGb ?? 0), 0)
-    rows.push({ key: 'fetb', label: label('fetb'), value: bytesOf(fetbGb), basis: measured })
+    // Mirrors the volumetry section's feTotalCell (buildExportModel.ts): sum only the
+    // per-type rows that actually carry a protectedFetbGb figure. Omit the row entirely
+    // when none do (nothing honest to sum), and prefix the sum with '≥' when some types
+    // are undefined (partial lower bound) — never silently treat unknown as 0.
+    const defined = frontEnd.byType.filter((r) => r.protectedFetbGb !== undefined)
+    if (defined.length > 0) {
+      const sum = defined.reduce((a, r) => a + (r.protectedFetbGb ?? 0), 0)
+      const cell = bytesOf(sum)
+      const value = defined.length < frontEnd.byType.length ? `≥ ${cell}` : cell
+      rows.push({ key: 'fetb', label: label('fetb'), value, basis: measured })
+    }
   }
 
   if (provenance.efficiency.available) {
@@ -106,12 +115,18 @@ export function buildSizingRows(view: ReportView, t: TFn, locale: string): Sizin
       if (best === undefined || best.slopePer30d === undefined) return tg
       return tg.slopePer30d > best.slopePer30d ? tg : best
     }, undefined)
-    if (fastest?.slopePer30d !== undefined) {
+    // Only surface growth when the fastest target is actually growing — same guard as the
+    // capacityTrend section's chip (buildExportModel.ts: slopePer30d > 0). A flat/shrinking
+    // estate gets no "fastest growth" row.
+    if (fastest?.slopePer30d !== undefined && fastest.slopePer30d > 0) {
+      // Same signed formatting as capacityTrend's signedSlope helper; the positivity guard
+      // above guarantees the '+' prefix always applies here.
+      const signedSlope = (s: number) => (s > 0 ? `+${fmtNum(s, locale, 1)}` : fmtNum(s, locale, 1))
       rows.push({
         key: 'growth',
         label: label('growth'),
         value: t('dashboard:sizing.growthValue', {
-          slope: fmtNum(fastest.slopePer30d, locale, 1),
+          slope: signedSlope(fastest.slopePer30d),
           target: fastest.target,
         }),
         basis: observed,

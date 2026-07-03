@@ -1088,7 +1088,7 @@ describe('buildExportModel', () => {
         [t('dashboard:sizing.rows.retentionLong'), '10.0 GB', t('dashboard:sizing.basis.measured')],
         [
           t('dashboard:sizing.rows.growth'),
-          t('dashboard:sizing.growthValue', { slope: '5.1', target: 'dd2' }),
+          t('dashboard:sizing.growthValue', { slope: '+5.1', target: 'dd2' }),
           t('dashboard:sizing.basis.observed'),
         ],
         [
@@ -1098,6 +1098,97 @@ describe('buildExportModel', () => {
         ],
         [t('dashboard:sizing.rows.inactive'), '2', t('dashboard:sizing.basis.observed')],
       ])
+    })
+
+    it('omits the fetb row entirely when no byType row has a defined protectedFetbGb', () => {
+      const v = baseView({
+        provenance: fullyAvailableProvenance,
+        frontEnd: {
+          byType: [
+            { type: 'SQL', protectedFetbGb: undefined },
+            { type: 'FILESYSTEM', protectedFetbGb: undefined },
+          ],
+          excludedCount: 0,
+        },
+        efficiency: fullSizingView.efficiency,
+        capacityTrend: fullSizingView.capacityTrend,
+        reliability: fullSizingView.reliability,
+        hygiene: fullSizingView.hygiene,
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const rowKeys = section?.table?.rows.map((r) => r[0])
+      expect(rowKeys).not.toContain(t('dashboard:sizing.rows.fetb'))
+    })
+
+    it('prefixes the fetb sum with "≥" when only some byType rows have a defined protectedFetbGb', () => {
+      const v = baseView({
+        provenance: fullyAvailableProvenance,
+        frontEnd: {
+          byType: [
+            { type: 'SQL', protectedFetbGb: 100 },
+            { type: 'FILESYSTEM', protectedFetbGb: undefined },
+          ],
+          excludedCount: 0,
+        },
+        efficiency: fullSizingView.efficiency,
+        capacityTrend: fullSizingView.capacityTrend,
+        reliability: fullSizingView.reliability,
+        hygiene: fullSizingView.hygiene,
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const fetbRow = section?.table?.rows.find((r) => r[0] === t('dashboard:sizing.rows.fetb'))
+      expect(fetbRow?.[1]).toBe('≥ 100.0 GB')
+    })
+
+    it('omits the growth row when every target slope is flat or shrinking', () => {
+      const v = baseView({
+        provenance: fullyAvailableProvenance,
+        frontEnd: fullSizingView.frontEnd,
+        efficiency: fullSizingView.efficiency,
+        reliability: fullSizingView.reliability,
+        hygiene: fullSizingView.hygiene,
+        capacityTrend: {
+          targets: [
+            {
+              target: 'dd1',
+              currentPct: 70,
+              minPct: 40,
+              maxPct: 70,
+              windowStart: '2026-05-01',
+              windowEnd: '2026-06-30',
+              sampleCount: 60,
+              slopePer30d: 0,
+              series: [],
+            },
+            {
+              target: 'dd2',
+              currentPct: 30,
+              minPct: 25,
+              maxPct: 32,
+              windowStart: '2026-05-01',
+              windowEnd: '2026-06-30',
+              sampleCount: 60,
+              slopePer30d: -1.2,
+              series: [],
+            },
+          ],
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const rowKeys = section?.table?.rows.map((r) => r[0])
+      expect(rowKeys).not.toContain(t('dashboard:sizing.rows.growth'))
+    })
+
+    it('renders the growth row with a "+"-signed slope when the fastest target is genuinely growing', () => {
+      const model = buildExportModel(fullSizingView, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'sizing')
+      const growthRow = section?.table?.rows.find((r) => r[0] === t('dashboard:sizing.rows.growth'))
+      expect(growthRow?.[1]).toBe(
+        t('dashboard:sizing.growthValue', { slope: '+5.1', target: 'dd2' }),
+      )
     })
 
     it('builds FETB + change-rate + reduction deck chips (reduction present, so no dedupe chip)', () => {
