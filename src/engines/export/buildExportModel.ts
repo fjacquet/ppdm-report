@@ -629,7 +629,8 @@ export function buildExportModel(
       tone: changeRateTone(changePct),
     })
   }
-  if (efficiency.encryption) {
+  // totalGb can be 0 when Encrypted values exist but every capacity cell is blank.
+  if (efficiency.encryption && efficiency.encryption.totalGb > 0) {
     const { encryptedGb, totalGb } = efficiency.encryption
     effChips.push({
       label: t('dashboard:efficiency.encryptionChip'),
