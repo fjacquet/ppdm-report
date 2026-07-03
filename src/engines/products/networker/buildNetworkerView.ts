@@ -27,6 +27,23 @@ function distinctCount(wb: RawWorkbook, sheet: string, key: string): number {
   return set.size
 }
 
+/** Sum of `Volume Protected Last 60 Days (GB)` per `Workload Type` from the
+ * `Client Protected Vol. and FETB` sheet — presence-gated (blank volume cells skipped) and
+ * restricted to the workload types already present in `types`. A type with no matching rows
+ * is simply absent from the returned map (caller reads it back as `undefined`). */
+function protectedVolumeByType(wb: RawWorkbook, types: string[]): Map<string, number> {
+  const wanted = new Set(types)
+  const sums = new Map<string, number>()
+  for (const r of rowsOf(wb, 'Client Protected Vol. and FETB')) {
+    const type = cellStr(r, 'Workload Type')
+    if (!wanted.has(type)) continue
+    const volCell = cellStr(r, 'Volume Protected Last 60 Days (GB)')
+    if (volCell === '') continue
+    sums.set(type, (sums.get(type) ?? 0) + cellNum(r, 'Volume Protected Last 60 Days (GB)'))
+  }
+  return sums
+}
+
 /** NetWorker composition root: RawWorkbook → ReportView. Pure. MVP fidelity (see plan). */
 export function buildNetworkerView(wb: RawWorkbook): ReportView {
   // coverage — scheduled-backup flag; no per-type, no excluded.
@@ -76,17 +93,24 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     .filter((r) => cellNum(r, 'Front End Capacity (GB)') === 0)
     .map((r) => cellStr(r, 'Workload Type'))
 
-  // front-end volumetry — capacity-bearing workload rows map to protected FETB.
+  // front-end volumetry — capacity-bearing workload rows map to protected FETB; discovered size
+  // comes from the 60-day protected-volume sheet, when it has a matching workload type.
+  const protectedVolume = protectedVolumeByType(wb, inUse)
   const frontEnd = {
     byType: workloadRows
       .filter((r) => cellNum(r, 'Front End Capacity (GB)') > 0)
-      .map((r) => ({
-        type: cellStr(r, 'Workload Type'),
-        protectedFetbGb: cellNum(r, 'Front End Capacity (GB)'),
-        protectedDiscoveredGb: undefined,
-        unprotectedDiscoveredGb: undefined,
-        unprotectedFetbGb: undefined,
-      })),
+      .map((r) => {
+        const type = cellStr(r, 'Workload Type')
+        return {
+          type,
+          protectedFetbGb: cellNum(r, 'Front End Capacity (GB)'),
+          // Protected volume observed in the 60-day window — the closest NetWorker analogue of
+          // discovered size.
+          protectedDiscoveredGb: protectedVolume.get(type),
+          unprotectedDiscoveredGb: undefined,
+          unprotectedFetbGb: undefined,
+        }
+      }),
     excludedCount: 0,
   }
 
