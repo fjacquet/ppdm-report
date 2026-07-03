@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { emptyEfficiency } from '../../engines/aggregation/efficiency'
 import { emptyOpsInsights } from '../../engines/aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../../engines/aggregation/provenance'
 import { emptyReliability } from '../../engines/aggregation/reliability'
@@ -7,6 +8,7 @@ import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { CapacitySection } from './CapacitySection'
 import { CoverageSection } from './CoverageSection'
+import { EfficiencySection } from './EfficiencySection'
 import { ExecutiveKpis } from './ExecutiveKpis'
 import { GapsSection } from './GapsSection'
 import { IdleAgentsSection } from './IdleAgentsSection'
@@ -79,6 +81,7 @@ const fixture: ReportView = {
   frontEnd: { byType: [], excludedCount: 0 },
   opsInsights: emptyOpsInsights(),
   reliability: emptyReliability(),
+  efficiency: emptyEfficiency(),
   provenance: allAvailable(0),
 }
 
@@ -509,5 +512,67 @@ describe('ReliabilitySection', () => {
     const view = makeView({ reliability: emptyReliability() })
     const { container } = render(<ReliabilitySection view={view} />)
     expect(container).toBeEmptyDOMElement()
+  })
+})
+
+describe('EfficiencySection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('renders retention rows and low-dedupe clients', () => {
+    const view = makeView({
+      efficiency: {
+        dedupe: {
+          common: { num: 9200, den: 100 },
+          lowDedupe: {
+            items: [{ host: 'poor', commonPct: 20, processedGb: 5 }],
+            total: 1,
+            shown: 1,
+          },
+        },
+        retention: {
+          totalGbByBucket: { r30: 100, r60: 0, r180: 0, r1y: 0, r7y: 0, r7yPlus: 0 },
+          perPolicyType: [
+            { type: 'SQL', gbByBucket: { r30: 100, r60: 0, r180: 0, r1y: 0, r7y: 0, r7yPlus: 0 } },
+          ],
+        },
+      },
+    })
+    render(<EfficiencySection view={view} />)
+    expect(screen.getByText('SQL')).toBeTruthy()
+    expect(screen.getByText('poor')).toBeTruthy()
+  })
+
+  it('renders nothing when efficiency is empty', () => {
+    const { container } = render(
+      <EfficiencySection view={makeView({ efficiency: emptyEfficiency() })} />,
+    )
+    expect(container).toBeEmptyDOMElement()
+  })
+})
+
+describe('JobsComplianceSection — replication health', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('shows the replication health block when replicationHealth is present', () => {
+    const view = makeView({
+      ...jobsComplianceFixture,
+      efficiency: {
+        replicationHealth: {
+          counts: { success: 40, exceptions: 2, partial: 3, cancelled: 1, failed: 4 },
+          total: 50,
+        },
+      },
+    })
+    render(<JobsComplianceSection view={view} dark={false} />)
+    expect(screen.getByText('Replication health')).toBeInTheDocument()
+    expect(
+      screen.getByText('7 of 50 replication activities failed or were partial'),
+    ).toBeInTheDocument()
   })
 })

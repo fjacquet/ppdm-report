@@ -49,6 +49,31 @@
       "gt8h": "> 8 h"
     }
   },
+  "efficiency": {
+    "title": "Storage efficiency",
+    "takeaway": "{{dedupe}} average dedupe commonality",
+    "takeawayNoDedupe": "Retention and efficiency profile",
+    "dedupeChip": "Dedupe commonality",
+    "globalChip": "Data reduction",
+    "changeChip": "Daily change rate",
+    "encryptionChip": "Encrypted capacity",
+    "lowDedupe": {
+      "caption": "Clients under 50% commonality — top {{shown}} of {{total}}",
+      "col": { "client": "Client", "common": "Commonality", "processed": "Processed" }
+    },
+    "retention": {
+      "title": "Capacity by retention",
+      "col": { "type": "Policy type", "total": "Total" },
+      "bucket": {
+        "r30": "< 30 d",
+        "r60": "< 60 d",
+        "r180": "< 180 d",
+        "r1y": "< 1 y",
+        "r7y": "< 7 y",
+        "r7yPlus": "≥ 7 y"
+      }
+    }
+  },
   "resilience": {
     "title": "Cyber-resilience",
     "appConsistent": "App-consistent backups",
@@ -57,7 +82,17 @@
     "takeaway": "Ransomware resilience: {{pct}} of copies are immutable",
     "backupLevel": "Backup level mix",
     "level": "Backup level",
-    "count": "Copies"
+    "count": "Copies",
+    "replicationHealth": "Replication health",
+    "replicationIssues": "Failed or partial replications",
+    "replicationTakeaway": "{{issues}} of {{total}} replication activities failed or were partial",
+    "outcome": {
+      "success": "Successful",
+      "exceptions": "With exceptions",
+      "partial": "Partial",
+      "cancelled": "Cancelled",
+      "failed": "Failed"
+    }
   },
   "capacity": {
     "title": "Capacity",

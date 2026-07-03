@@ -4,6 +4,7 @@ import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { networkerProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr, countBy } from '../../aggregation/rows'
+import { networkerEfficiency } from './efficiency'
 import { networkerReliability } from './reliability'
 
 const rowsOf = (wb: RawWorkbook, sheet: string) => wb.sheets[sheet]?.rows ?? []
@@ -105,6 +106,8 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
   const windowSize = backupRows.length
   const deviceTotal = deviceRows.length
 
+  const efficiency = networkerEfficiency(wb)
+
   return {
     meta: wb.meta,
     inUse,
@@ -143,6 +146,11 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     frontEnd,
     opsInsights: emptyOpsInsights(),
     reliability: networkerReliability(wb),
-    provenance: networkerProvenance(windowSize, jobRows.length > 0),
+    efficiency,
+    provenance: networkerProvenance(
+      windowSize,
+      jobRows.length > 0,
+      Object.values(efficiency).some((v) => v !== undefined),
+    ),
   }
 }

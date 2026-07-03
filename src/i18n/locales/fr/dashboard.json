@@ -49,6 +49,31 @@
       "gt8h": "> 8 h"
     }
   },
+  "efficiency": {
+    "title": "Efficacité du stockage",
+    "takeaway": "{{dedupe}} de communalité de déduplication en moyenne",
+    "takeawayNoDedupe": "Profil de rétention et d'efficacité",
+    "dedupeChip": "Communalité dédup",
+    "globalChip": "Réduction de données",
+    "changeChip": "Taux de changement quotidien",
+    "encryptionChip": "Capacité chiffrée",
+    "lowDedupe": {
+      "caption": "Clients sous 50 % de communalité — top {{shown}} sur {{total}}",
+      "col": { "client": "Client", "common": "Communalité", "processed": "Traité" }
+    },
+    "retention": {
+      "title": "Capacité par rétention",
+      "col": { "type": "Type de politique", "total": "Total" },
+      "bucket": {
+        "r30": "< 30 j",
+        "r60": "< 60 j",
+        "r180": "< 180 j",
+        "r1y": "< 1 an",
+        "r7y": "< 7 ans",
+        "r7yPlus": "≥ 7 ans"
+      }
+    }
+  },
   "resilience": {
     "title": "Cyber-résilience",
     "appConsistent": "Sauvegardes cohérentes applicativement",
@@ -57,7 +82,17 @@
     "takeaway": "Résilience face aux rançongiciels : {{pct}} des copies sont immuables",
     "backupLevel": "Répartition des niveaux de sauvegarde",
     "level": "Niveau de sauvegarde",
-    "count": "Copies"
+    "count": "Copies",
+    "replicationHealth": "Santé de la réplication",
+    "replicationIssues": "Réplications échouées ou partielles",
+    "replicationTakeaway": "{{issues}} des {{total}} activités de réplication ont échoué ou sont partielles",
+    "outcome": {
+      "success": "Réussies",
+      "exceptions": "Avec exceptions",
+      "partial": "Partielles",
+      "cancelled": "Annulées",
+      "failed": "Échouées"
+    }
   },
   "capacity": {
     "title": "Capacité",

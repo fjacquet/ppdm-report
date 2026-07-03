@@ -3,12 +3,15 @@ import {
   appConsistentTone,
   atRiskTone,
   backupDurationTone,
+  changeRateTone,
   coverageTone,
+  dedupeCommonTone,
   immutableTone,
   jobSuccessTone,
   queueDelayTone,
   repeatFailureTone,
   replicatedTone,
+  replicationIssueTone,
   utilizationTone,
 } from './thresholds'
 
@@ -69,5 +72,21 @@ describe('reliability tones', () => {
   it('queue-delay share: ≤10% ok, >10% warn', () => {
     expect(queueDelayTone(0.1)).toBe('ok')
     expect(queueDelayTone(0.11)).toBe('warn')
+  })
+})
+
+describe('efficiency tones', () => {
+  it('dedupe commonality (0..100): <50 warn, else ok', () => {
+    expect(dedupeCommonTone(50)).toBe('ok')
+    expect(dedupeCommonTone(49.9)).toBe('warn')
+  })
+  it('daily change rate (0..1): >0.10 warn, else ok', () => {
+    expect(changeRateTone(0.1)).toBe('ok')
+    expect(changeRateTone(0.11)).toBe('warn')
+  })
+  it('replication issues share (0..1): 0 ok, >0 warn, ≥0.05 bad', () => {
+    expect(replicationIssueTone(0)).toBe('ok')
+    expect(replicationIssueTone(0.01)).toBe('warn')
+    expect(replicationIssueTone(0.05)).toBe('bad')
   })
 })

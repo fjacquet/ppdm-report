@@ -1,3 +1,4 @@
+import type { Efficiency } from '../engines/aggregation/efficiency'
 import type { Reliability } from '../engines/aggregation/reliability'
 import type { CaptureMeta, ProductId } from './ppdm'
 
@@ -8,6 +9,7 @@ export type MetricKey =
   | 'storageTargets'
   | 'frontEnd'
   | 'reliability'
+  | 'efficiency'
 
 /** Availability of a detail-only metric across the servers in scope. */
 export interface MetricProvenance {
@@ -171,6 +173,7 @@ export interface ReportView {
   frontEnd: FrontEnd
   opsInsights: OpsInsights
   reliability: Reliability
+  efficiency: Efficiency
   provenance: Record<MetricKey, MetricProvenance>
 }
 

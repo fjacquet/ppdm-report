@@ -1,7 +1,12 @@
 import type { EChartsOption } from 'echarts/types/dist/shared'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import {
+  REPLICATION_OUTCOME_IDS,
+  type ReplicationOutcomeId,
+} from '../../engines/aggregation/efficiency'
 import { immutableTone } from '../../engines/export/thresholds'
+import type { ExportTone } from '../../engines/export/types'
 import { DARK, LIGHT } from '../../theme/palette'
 import type { ReportView } from '../../types/reportView'
 import { fmtInt, fmtPercent } from '../../utils/format'
@@ -16,11 +21,21 @@ interface JobsComplianceSectionProps {
   dark: boolean
 }
 
+/** Outcome → tone: success is always ok, cancelled is neutral, failed/partial/exceptions
+ * flag warn or bad only once they carry a positive count. */
+function replicationOutcomeTone(id: ReplicationOutcomeId, count: number): ExportTone {
+  if (id === 'success') return 'ok'
+  if (id === 'cancelled') return 'muted'
+  return count > 0 ? (id === 'failed' ? 'bad' : 'warn') : 'ok'
+}
+
 export function JobsComplianceSection({ view, dark }: JobsComplianceSectionProps) {
   const { t, i18n } = useTranslation(['dashboard', 'common'])
   const locale = i18n.language
   const palette = dark ? DARK : LIGHT
-  const { jobs, compliance } = view
+  const { jobs, compliance, efficiency } = view
+  const repHealth = efficiency.replicationHealth
+  const repIssues = repHealth ? repHealth.counts.failed + repHealth.counts.partial : 0
 
   const jobBars: BarDatum[] = useMemo(() => {
     const jobColor: Record<string, string> = {
@@ -146,6 +161,31 @@ export function JobsComplianceSection({ view, dark }: JobsComplianceSectionProps
           {t('common:capped', { n: fmtInt(compliance.windowSize, locale) })}
         </p>
       )}
+
+      {repHealth && repHealth.total > 0 && (
+        <>
+          <h3 className="mb-3 mt-4 text-base font-semibold text-gray-900 dark:text-gray-100">
+            {t('dashboard:resilience.replicationHealth')}
+          </h3>
+          <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
+            {REPLICATION_OUTCOME_IDS.map((id) => (
+              <KpiCard
+                key={id}
+                value={fmtInt(repHealth.counts[id], locale)}
+                label={t(`dashboard:resilience.outcome.${id}`)}
+                tone={replicationOutcomeTone(id, repHealth.counts[id])}
+              />
+            ))}
+          </div>
+          <p className="mb-4 text-sm text-gray-700 dark:text-gray-300">
+            {t('dashboard:resilience.replicationTakeaway', {
+              issues: fmtInt(repIssues, locale),
+              total: fmtInt(repHealth.total, locale),
+            })}
+          </p>
+        </>
+      )}
+
       <ProvenanceNote p={view.provenance.compliance} dark={dark} />
     </section>
   )

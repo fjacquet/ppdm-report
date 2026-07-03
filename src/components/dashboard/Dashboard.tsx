@@ -6,6 +6,7 @@ import { AgentVersionsSection } from './AgentVersionsSection'
 import { AtRiskSection } from './AtRiskSection'
 import { CapacitySection } from './CapacitySection'
 import { CoverageSection } from './CoverageSection'
+import { EfficiencySection } from './EfficiencySection'
 import { ExecutiveKpis } from './ExecutiveKpis'
 import { GapsSection } from './GapsSection'
 import { IdleAgentsSection } from './IdleAgentsSection'
@@ -55,6 +56,8 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return <AgentVersionsSection key={id} view={view} />
       case 'longestBackups':
         return <LongestBackupsSection key={id} view={view} />
+      case 'efficiency':
+        return <EfficiencySection key={id} view={view} />
     }
   }
 

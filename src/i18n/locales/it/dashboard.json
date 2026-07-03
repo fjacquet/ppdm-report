@@ -49,6 +49,38 @@
       "gt8h": "> 8 h"
     }
   },
+  "efficiency": {
+    "title": "Efficienza dello storage",
+    "takeaway": "{{dedupe}} di comunanza media di deduplica",
+    "takeawayNoDedupe": "Profilo di conservazione ed efficienza",
+    "dedupeChip": "Comunanza dedup",
+    "globalChip": "Riduzione dei dati",
+    "changeChip": "Tasso di variazione giornaliero",
+    "encryptionChip": "Capacità cifrata",
+    "lowDedupe": {
+      "caption": "Client sotto il 50% di comunanza — primi {{shown}} di {{total}}",
+      "col": {
+        "client": "Client",
+        "common": "Comunanza",
+        "processed": "Elaborato"
+      }
+    },
+    "retention": {
+      "title": "Capacità per conservazione",
+      "col": {
+        "type": "Tipo di policy",
+        "total": "Totale"
+      },
+      "bucket": {
+        "r30": "< 30 g",
+        "r60": "< 60 g",
+        "r180": "< 180 g",
+        "r1y": "< 1 anno",
+        "r7y": "< 7 anni",
+        "r7yPlus": "≥ 7 anni"
+      }
+    }
+  },
   "resilience": {
     "title": "Cyber-resilienza",
     "appConsistent": "Backup coerenti con l'applicazione",
@@ -57,7 +89,17 @@
     "takeaway": "Resilienza ai ransomware: {{pct}} delle copie è immutabile",
     "backupLevel": "Distribuzione dei livelli di backup",
     "level": "Livello di backup",
-    "count": "Copie"
+    "count": "Copie",
+    "replicationHealth": "Stato della replica",
+    "replicationIssues": "Repliche non riuscite o parziali",
+    "replicationTakeaway": "{{issues}} su {{total}} attività di replica non riuscite o parziali",
+    "outcome": {
+      "success": "Riuscite",
+      "exceptions": "Con eccezioni",
+      "partial": "Parziali",
+      "cancelled": "Annullate",
+      "failed": "Non riuscite"
+    }
   },
   "capacity": {
     "title": "Capacità",
@@ -123,14 +165,24 @@
   },
   "agentVersions": {
     "title": "Distribuzione versioni agent",
-    "col": { "version": "Versione agent", "count": "Client" },
+    "col": {
+      "version": "Versione agent",
+      "count": "Client"
+    },
     "takeaway": "{{count}} versioni agent distinte in uso",
     "caption": "Versioni agent dei client nel parco."
   },
   "atRisk": {
     "title": "Client a rischio",
-    "col": { "client": "Client", "type": "Tipo", "risk": "Rischio" },
-    "risk": { "overtime": "Finestra di backup superata", "stale": "Nessun backup da 7 giorni" },
+    "col": {
+      "client": "Client",
+      "type": "Tipo",
+      "risk": "Rischio"
+    },
+    "risk": {
+      "overtime": "Finestra di backup superata",
+      "stale": "Nessun backup da 7 giorni"
+    },
     "overtimeChip": "Oltre finestra",
     "staleChip": "Mancati 7 giorni",
     "takeaway": "{{overtime}} oltre finestra · {{stale}} mancati in 7 giorni",
