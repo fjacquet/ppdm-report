@@ -76,7 +76,11 @@ export function PerServerSection({ servers, dark }: PerServerSectionProps) {
                 <td className="py-1.5 pr-4">{fmtInt(s.view.gaps.count, locale)}</td>
                 {anySizes && (
                   <td className="py-1.5 pr-4">
-                    {formatGbOrUnknown(s.view.gaps.totalCapacityGb, locale, t('common:sizeUnknown'))}
+                    {formatGbOrUnknown(
+                      s.view.gaps.totalCapacityGb,
+                      locale,
+                      t('common:sizeUnknown'),
+                    )}
                   </td>
                 )}
                 <td className="py-1.5 pr-4">{fmtPercent(s.view.jobs.successPct, locale)}</td>
