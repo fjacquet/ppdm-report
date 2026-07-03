@@ -50,6 +50,16 @@ describe('computeCapacityTrend', () => {
     expect(b?.series[b.series.length - 1]?.[0]).toBe(b?.windowEnd)
   })
 
+  it.each([
+    240, 600,
+  ])('downsample bound: n=%i series stays ≤ 120, spans full window, no duplicate final entry', (n) => {
+    const t = computeCapacityTrend(daily('g/0', n, (i) => i / 100)).targets[0]
+    expect(t?.series.length).toBeLessThanOrEqual(120)
+    expect(t?.series[0]?.[0]).toBe(t?.windowStart)
+    expect(t?.series[t.series.length - 1]?.[0]).toBe(t?.windowEnd)
+    expect(t?.series[t.series.length - 1]?.[0]).not.toBe(t?.series[t.series.length - 2]?.[0])
+  })
+
   it('unsorted input is sorted by day; empty input → empty targets', () => {
     const t = computeCapacityTrend([
       { target: 'g/0', day: '2026-01-03', pct: 3 },

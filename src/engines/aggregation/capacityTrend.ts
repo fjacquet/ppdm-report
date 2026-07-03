@@ -52,15 +52,16 @@ function slopeOf(points: [string, number][]): number {
 }
 
 function downsample(points: [string, number][]): [string, number][] {
-  if (points.length <= MAX_SERIES_POINTS) return points
-  const step = Math.ceil(points.length / MAX_SERIES_POINTS)
+  const n = points.length
+  if (n <= MAX_SERIES_POINTS) return [...points]
+  // Evenly spaced indices from 0 to n-1 inclusive — exactly MAX_SERIES_POINTS picks,
+  // always including the first and last point, never exceeding the cap.
   const out: [string, number][] = []
-  for (let i = 0; i < points.length; i += step) {
-    const p = points[i]
-    if (p) out.push(p)
+  for (let i = 0; i < MAX_SERIES_POINTS; i++) {
+    const idx = Math.round((i * (n - 1)) / (MAX_SERIES_POINTS - 1))
+    const p = points[idx]
+    if (p && out[out.length - 1] !== p) out.push(p)
   }
-  const last = points[points.length - 1]
-  if (last && out[out.length - 1] !== last) out.push(last)
   return out
 }
 
