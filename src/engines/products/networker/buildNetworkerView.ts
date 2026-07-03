@@ -2,11 +2,11 @@ import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../ty
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
 import { emptyCapacityTrend } from '../../aggregation/capacityTrend'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
-import { emptyHygiene } from '../../aggregation/hygiene'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { networkerProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr, countBy } from '../../aggregation/rows'
 import { networkerEfficiency } from './efficiency'
+import { networkerHygiene } from './hygiene'
 import { networkerReliability } from './reliability'
 
 const rowsOf = (wb: RawWorkbook, sheet: string) => wb.sheets[sheet]?.rows ?? []
@@ -109,6 +109,7 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
   const deviceTotal = deviceRows.length
 
   const efficiency = networkerEfficiency(wb)
+  const hygiene = networkerHygiene(wb)
 
   return {
     meta: wb.meta,
@@ -151,14 +152,14 @@ export function buildNetworkerView(wb: RawWorkbook): ReportView {
     efficiency,
     capacityTrend: emptyCapacityTrend(),
     // NetWorker has no utilization time series — snapshot only.
-    hygiene: emptyHygiene(),
-    // hygiene wiring lands in the next tasks
+    hygiene,
     provenance: networkerProvenance(
       windowSize,
       jobRows.length > 0,
       Object.values(efficiency).some((v) => v !== undefined),
       false,
-      false,
+      // zero findings reads as unavailable — nothing to show is suppressed, not zeroed
+      hygiene.items.length > 0,
     ),
   }
 }
