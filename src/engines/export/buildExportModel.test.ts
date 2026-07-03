@@ -734,6 +734,38 @@ describe('buildExportModel', () => {
       expect(chip?.tone).toBe('bad')
     })
 
+    it('renders a declining target with a signed-minus slope, no growth chip, and no leading plus', () => {
+      const v = baseView({
+        capacityTrend: {
+          targets: [
+            {
+              target: 'dd1',
+              currentPct: 40,
+              minPct: 40,
+              maxPct: 55,
+              windowStart: '2026-05-01',
+              windowEnd: '2026-06-30',
+              sampleCount: 60,
+              slopePer30d: -3,
+              series: [],
+            },
+          ],
+        },
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'capacityTrend')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows.length).toBe(1)
+      expect(section?.deck?.bars?.length).toBe(1)
+      const chip = section?.deck?.kpiChips?.find(
+        (k) => k.label === t('dashboard:capacityTrend.chip'),
+      )
+      expect(chip).toBeUndefined()
+      const barValue = section?.deck?.bars?.[0]?.value ?? ''
+      expect(barValue).not.toContain('+-')
+      expect(barValue).toContain('-3')
+    })
+
     it('is suppressed when capacityTrend is empty', () => {
       const model = buildExportModel(
         baseView({ capacityTrend: emptyCapacityTrend() }),

@@ -611,6 +611,8 @@ export function buildExportModel(
     },
     undefined,
   )
+  // Only prepend '+' for genuine growth; fmtNum already carries the locale minus sign for declines.
+  const signedSlope = (s: number) => (s > 0 ? `+${fmtNum(s, locale, 1)}` : fmtNum(s, locale, 1))
   const capacityTrendSection: ExportSection = {
     id: 'capacityTrend',
     title: t('dashboard:capacityTrend.title'),
@@ -649,11 +651,11 @@ export function buildExportModel(
                   })
                 : t('dashboard:capacityTrend.takeawayFlat'),
             kpiChips:
-              fastestTrend?.slopePer30d !== undefined
+              fastestTrend?.slopePer30d !== undefined && fastestTrend.slopePer30d > 0
                 ? [
                     {
                       label: t('dashboard:capacityTrend.chip'),
-                      value: `+${fmtNum(fastestTrend.slopePer30d, locale, 1)}`,
+                      value: signedSlope(fastestTrend.slopePer30d),
                       tone: capacityTrendTone(fastestTrend.slopePer30d, fastestTrend.currentPct),
                     },
                   ]
@@ -664,9 +666,7 @@ export function buildExportModel(
                 magnitude: tg.currentPct / 100,
                 value:
                   fmtPercentValue(tg.currentPct, locale) +
-                  (tg.slopePer30d === undefined
-                    ? ''
-                    : ` · +${fmtNum(tg.slopePer30d, locale, 1)}/30d`),
+                  (tg.slopePer30d === undefined ? '' : ` · ${signedSlope(tg.slopePer30d)}/30d`),
                 tone: utilizationTone(tg.currentPct),
               })),
               pal,
