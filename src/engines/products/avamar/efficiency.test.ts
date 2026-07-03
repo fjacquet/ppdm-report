@@ -25,6 +25,21 @@ describe('avamarEfficiency', () => {
     expect(e.changeRate).toEqual({ sentBytes: 1.5 * GIB, processedBytes: 10 * GIB })
   })
 
+  it('pair-gates change-rate sums: a row with processed but blank sent is excluded from both sums, but still weights dedupe common', () => {
+    const e = avamarEfficiency(
+      wb({
+        'Avamar DPN Summary': [
+          ['Host', 'Operation', '% Common', 'Bytes Processed', 'Bytes Mod And Sent'],
+          ['h1', 'Scheduled Backup', 100, 10 * GIB, 1 * GIB],
+          ['h2', 'Scheduled Backup', 50, 10 * GIB, ''],
+        ],
+      }),
+    )
+    expect(e.changeRate).toEqual({ sentBytes: 1 * GIB, processedBytes: 10 * GIB })
+    // dedupe weighting still uses processed-bytes presence alone, independent of the pair gate.
+    expect(e.dedupe?.common && e.dedupe.common.num / e.dedupe.common.den).toBeCloseTo(75, 6)
+  })
+
   it('maps Policy Capacity-Retention columns (numeric headers arrive as string keys)', () => {
     const e = avamarEfficiency(
       wb({
@@ -54,18 +69,19 @@ describe('avamarEfficiency', () => {
     expect(e.encryption).toBeUndefined()
   })
 
-  it('computes encryption coverage when values are present', () => {
+  it('computes encryption coverage when values are present, presence-gating capacity separately from job counts', () => {
     const e = avamarEfficiency(
       wb({
         'Job List Detailed': [
           ['Host', 'Job Type', 'Capacity (GiB)', 'Encrypted'],
           ['h1', 'Backup', 10, 'true'],
           ['h2', 'Backup', 30, 'false'],
-          ['h3', 'GC', 99, 'true'], // non-backup — excluded
+          ['h3', 'Backup', '', 'true'], // encrypted, blank capacity — counted, not summed
+          ['h4', 'GC', 99, 'true'], // non-backup — excluded
         ],
       }),
     )
-    expect(e.encryption).toEqual({ encryptedJobs: 1, totalJobs: 2, encryptedGb: 10, totalGb: 40 })
+    expect(e.encryption).toEqual({ encryptedJobs: 2, totalJobs: 3, encryptedGb: 10, totalGb: 40 })
   })
 
   it('replication health from the completion-status sheet', () => {

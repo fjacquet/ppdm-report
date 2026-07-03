@@ -36,14 +36,10 @@ export function avamarEfficiency(wb: RawWorkbook): Efficiency {
   const samples: DedupeSample[] = []
   let sentBytes = 0
   let processedBytes = 0
-  let sawProcessed = false
   for (const r of dpn) {
-    const processed =
-      cellStr(r, 'Bytes Processed') !== '' ? cellNum(r, 'Bytes Processed') : undefined
-    if (processed === undefined) continue
-    sawProcessed = true
-    processedBytes += processed
-    if (cellStr(r, 'Bytes Mod And Sent') !== '') sentBytes += cellNum(r, 'Bytes Mod And Sent')
+    const processedStr = cellStr(r, 'Bytes Processed')
+    if (processedStr === '') continue
+    const processed = cellNum(r, 'Bytes Processed')
     if (cellStr(r, '% Common') !== '') {
       samples.push({
         host: cellStr(r, 'Host'),
@@ -51,12 +47,19 @@ export function avamarEfficiency(wb: RawWorkbook): Efficiency {
         weightBytes: processed,
       })
     }
+    // change-rate sums are pair-gated: both bytes cells must be present, or the
+    // sent/processed ratio is deflated by a missing-coerced-to-0 numerator.
+    const sentStr = cellStr(r, 'Bytes Mod And Sent')
+    if (sentStr !== '') {
+      sentBytes += cellNum(r, 'Bytes Mod And Sent')
+      processedBytes += processed
+    }
   }
   if (samples.length > 0) {
     const { common, lowDedupe } = computeDedupeCommon(samples)
     out.dedupe = { common, lowDedupe }
   }
-  if (sawProcessed && processedBytes > 0) out.changeRate = { sentBytes, processedBytes }
+  if (processedBytes > 0) out.changeRate = { sentBytes, processedBytes }
 
   // retention profile — GiB values straight off the sheet (base-2 formatting downstream).
   const retRows = wb.sheets['Policy Capacity-Retention']?.rows ?? []
@@ -85,11 +88,12 @@ export function avamarEfficiency(wb: RawWorkbook): Efficiency {
     let encryptedGb = 0
     let totalGb = 0
     for (const r of jl) {
-      const gb = cellNum(r, 'Capacity (GiB)')
-      totalGb += gb
-      if (ENCRYPTED_TRUE.test(cellStr(r, 'Encrypted'))) {
-        encryptedJobs++
-        encryptedGb += gb
+      const encrypted = ENCRYPTED_TRUE.test(cellStr(r, 'Encrypted'))
+      if (encrypted) encryptedJobs++
+      if (cellStr(r, 'Capacity (GiB)') !== '') {
+        const gb = cellNum(r, 'Capacity (GiB)')
+        totalGb += gb
+        if (encrypted) encryptedGb += gb
       }
     }
     out.encryption = { encryptedJobs, totalJobs: jl.length, encryptedGb, totalGb }

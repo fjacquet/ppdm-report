@@ -44,7 +44,7 @@ export function networkerEfficiency(wb: RawWorkbook): Efficiency {
     jobRatio.den += cap
   }
 
-  if (sawDd || jobRatio) {
+  if ((sawDd && usedGb > 0) || jobRatio) {
     out.dedupe = {
       lowDedupe: { items: [], total: 0, shown: 0 },
       global: sawDd && usedGb > 0 ? { logicalGb, usedGb } : undefined,
