@@ -814,6 +814,22 @@ describe('buildExportModel', () => {
       expect(licenseChip?.tone).toBe('bad')
     })
 
+    it('gives the license bar a warn tone when a license is expiring but none are expired', () => {
+      const v = baseView({
+        hygiene: computeHygiene([
+          { kind: 'datasetUnused', name: 'ds1' },
+          { kind: 'license', name: 'lic1', licenseStatus: 'expiring' },
+        ]),
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'hygiene')
+      const licenseBar = section?.deck?.bars?.find(
+        (b) => b.label === t('dashboard:hygiene.kind.license'),
+      )
+      expect(licenseBar).toBeDefined()
+      expect(licenseBar?.color).toBe('#d97706')
+    })
+
     it('is suppressed when hygiene is empty', () => {
       const model = buildExportModel(
         baseView({ hygiene: emptyHygiene() }),

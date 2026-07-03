@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { ExportTone } from '../../engines/export/types'
+import { TOP_N_DEFAULT } from '../../types/ppdm'
 import type { ReportView } from '../../types/reportView'
 import { fmtInt } from '../../utils/format'
 
@@ -35,7 +36,7 @@ export function HygieneSection({ view }: { view: ReportView }) {
             </tr>
           </thead>
           <tbody>
-            {hygiene.items.map((item, i) => {
+            {hygiene.items.slice(0, TOP_N_DEFAULT).map((item, i) => {
               // Multi-grid merges can repeat names across kinds; the index keeps
               // React keys unique. The indirect const avoids biome's noArrayIndexKey.
               const rowKey = `${item.kind}-${item.name}-${i}`
@@ -63,6 +64,12 @@ export function HygieneSection({ view }: { view: ReportView }) {
             })}
           </tbody>
         </table>
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          {t('hygiene.caption', {
+            shown: Math.min(hygiene.items.length, TOP_N_DEFAULT),
+            total: hygiene.items.length,
+          })}
+        </p>
       </div>
     </section>
   )

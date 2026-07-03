@@ -102,6 +102,11 @@ function toBars(
   }))
 }
 
+/** Bars use 'muted' as the neutral/no-issue color; licenseTone's 'ok' maps to it. */
+function mapLicenseBarTone(tone: ExportTone): ExportTone {
+  return tone === 'ok' ? 'muted' : tone
+}
+
 const JOB_TONE: Record<string, ExportTone> = {
   SUCCESS: 'ok',
   RETRIED: 'warn',
@@ -819,8 +824,8 @@ export function buildExportModel(
           value: fmtInt(hygiene.countByKind[kind], locale),
           tone: (kind === 'clientInactive'
             ? 'warn'
-            : kind === 'license' && hygiene.expiredLicenses > 0
-              ? 'bad'
+            : kind === 'license'
+              ? mapLicenseBarTone(licenseTone(hygiene.expiredLicenses, hygiene.expiringLicenses))
               : 'muted') as ExportTone,
         })),
         pal,

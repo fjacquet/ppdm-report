@@ -78,6 +78,48 @@ describe('mergeViews', () => {
     expect(m.coverage.overall.pct).toBeCloseTo(0.5)
   })
 
+  it('merges hygiene items across servers and recomputes rollup counts', () => {
+    const a = detail({
+      hygiene: {
+        items: [{ kind: 'datasetUnused', name: 'stale-dataset' }],
+        countByKind: {
+          datasetUnused: 1,
+          retentionUnused: 0,
+          scheduleUnused: 0,
+          clientInactive: 0,
+          clientOvertime: 0,
+          license: 0,
+        },
+        cleanupTotal: 1,
+        expiredLicenses: 0,
+        expiringLicenses: 0,
+      },
+    })
+    const b = detail({
+      hygiene: {
+        items: [
+          { kind: 'license', name: 'lic1', licenseStatus: 'expired' },
+          { kind: 'clientInactive', name: 'client1' },
+        ],
+        countByKind: {
+          datasetUnused: 0,
+          retentionUnused: 0,
+          scheduleUnused: 0,
+          clientInactive: 1,
+          clientOvertime: 0,
+          license: 1,
+        },
+        cleanupTotal: 1,
+        expiredLicenses: 1,
+        expiringLicenses: 0,
+      },
+    })
+    const m = mergeViews([a, b])
+    expect(m.hygiene.items.length).toBe(3)
+    expect(m.hygiene.cleanupTotal).toBe(2)
+    expect(m.hygiene.expiredLicenses).toBe(1)
+  })
+
   it('combines compliance by raw counts, not rounded pct', () => {
     const a = detail({
       compliance: {

@@ -558,6 +558,33 @@ describe('HygieneSection', () => {
     const { container } = render(<HygieneSection view={view} />)
     expect(container).toBeEmptyDOMElement()
   })
+
+  it('caps the table at 25 rows and shows a 25/30 caption for a 30-item estate', () => {
+    const items = Array.from({ length: 30 }, (_, i) => ({
+      kind: 'datasetUnused' as const,
+      name: `stale-dataset-${i}`,
+      detail: 'no clients',
+    }))
+    const view = makeView({
+      hygiene: {
+        items,
+        countByKind: {
+          datasetUnused: 30,
+          retentionUnused: 0,
+          scheduleUnused: 0,
+          clientInactive: 0,
+          clientOvertime: 0,
+          license: 0,
+        },
+        cleanupTotal: 30,
+        expiredLicenses: 0,
+        expiringLicenses: 0,
+      },
+    })
+    render(<HygieneSection view={view} />)
+    expect(screen.getAllByText('no clients')).toHaveLength(25)
+    expect(screen.getByText('Top 25 of 30.')).toBeTruthy()
+  })
 })
 
 describe('EfficiencySection', () => {
