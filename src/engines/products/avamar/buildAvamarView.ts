@@ -1,5 +1,6 @@
 import { FLAG_THRESHOLD_PCT, type RawWorkbook, TOP_N_DEFAULT } from '../../../types/ppdm'
 import type { ReportView, StorageTarget, UnprotectedAsset } from '../../../types/reportView'
+import { emptyCapacityTrend } from '../../aggregation/capacityTrend'
 import { emptyBand, finalizeBand } from '../../aggregation/coverage'
 import { computeAvamarFrontEnd } from '../../aggregation/frontEnd'
 import { avamarProvenance } from '../../aggregation/provenance'
@@ -119,9 +120,12 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     opsInsights: computeAvamarOpsInsights(wb),
     reliability: avamarReliability(wb),
     efficiency,
+    capacityTrend: emptyCapacityTrend(),
+    // capacity-trend wiring lands in the next task
     provenance: avamarProvenance(
       hasReliabilitySource(wb),
       Object.values(efficiency).some((v) => v !== undefined),
+      false,
     ),
   }
 }

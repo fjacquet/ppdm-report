@@ -4,6 +4,7 @@ import type { ReportView } from '../../types/reportView'
 import { normalizeWorkbook } from '../parser/normalizeWorkbook'
 import { buildAvamarView } from '../products/avamar/buildAvamarView'
 import { buildNetworkerView } from '../products/networker/buildNetworkerView'
+import { emptyCapacityTrend } from './capacityTrend'
 import { emptyEfficiency } from './efficiency'
 import { mergeViews } from './mergeViews'
 import { emptyOpsInsights } from './opsInsights'
@@ -45,6 +46,7 @@ function detail(over: Partial<ReportView>): ReportView {
     opsInsights: emptyOpsInsights(),
     reliability: emptyReliability(),
     efficiency: emptyEfficiency(),
+    capacityTrend: emptyCapacityTrend(),
     provenance: allAvailable(0),
     ...over,
   }

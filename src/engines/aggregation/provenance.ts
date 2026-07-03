@@ -18,6 +18,8 @@ export function allAvailable(assetsTotal: number): Record<MetricKey, MetricProve
     reliability: { available: false, serversCovered: 0, serversTotal: 1 },
     // PPDM efficiency wiring is a follow-up — unavailable for now.
     efficiency: { available: false, serversCovered: 0, serversTotal: 1 },
+    // PPDM capacity-trend wiring is a follow-up — unavailable for now.
+    capacityTrend: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -38,6 +40,8 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
     reliability: { available: false, serversCovered: 0, serversTotal: 1 },
     // PPDM efficiency wiring is a follow-up — unavailable for now.
     efficiency: { available: false, serversCovered: 0, serversTotal: 1 },
+    // PPDM capacity-trend wiring is a follow-up — unavailable for now.
+    capacityTrend: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -48,6 +52,7 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
 export function avamarProvenance(
   reliabilityAvailable: boolean,
   efficiencyAvailable: boolean,
+  capacityTrendAvailable: boolean,
 ): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
@@ -71,6 +76,11 @@ export function avamarProvenance(
       serversCovered: efficiencyAvailable ? 1 : 0,
       serversTotal: 1,
     },
+    capacityTrend: {
+      available: capacityTrendAvailable,
+      serversCovered: capacityTrendAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
   }
 }
 
@@ -81,6 +91,7 @@ export function networkerProvenance(
   assetsTotal: number,
   reliabilityAvailable: boolean,
   efficiencyAvailable: boolean,
+  capacityTrendAvailable: boolean,
 ): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
@@ -102,6 +113,11 @@ export function networkerProvenance(
     efficiency: {
       available: efficiencyAvailable,
       serversCovered: efficiencyAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
+    capacityTrend: {
+      available: capacityTrendAvailable,
+      serversCovered: capacityTrendAvailable ? 1 : 0,
       serversTotal: 1,
     },
   }

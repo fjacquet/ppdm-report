@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { emptyCapacityTrend } from '../../engines/aggregation/capacityTrend'
 import { emptyEfficiency } from '../../engines/aggregation/efficiency'
 import { emptyOpsInsights } from '../../engines/aggregation/opsInsights'
 import { allAvailable } from '../../engines/aggregation/provenance'
@@ -77,6 +78,7 @@ const fixture: ReportView = {
   opsInsights: emptyOpsInsights(),
   reliability: emptyReliability(),
   efficiency: emptyEfficiency(),
+  capacityTrend: emptyCapacityTrend(),
   provenance: allAvailable(0),
 }
 

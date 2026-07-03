@@ -1,5 +1,6 @@
 import { AGENT_SHEETS, type RawWorkbook, type SheetData } from '../../types/ppdm'
 import type { FrontEndTypeRow, ReportView } from '../../types/reportView'
+import { emptyCapacityTrend } from './capacityTrend'
 import { emptyBand, finalizeBand } from './coverage'
 import { emptyEfficiency } from './efficiency'
 import { emptyOpsInsights } from './opsInsights'
@@ -155,6 +156,7 @@ export function summaryView(wb: RawWorkbook): ReportView {
     opsInsights: emptyOpsInsights(),
     reliability: emptyReliability(),
     efficiency: emptyEfficiency(),
+    capacityTrend: emptyCapacityTrend(),
     provenance: {
       ...allUnavailable(totalAssets),
       frontEnd: {
