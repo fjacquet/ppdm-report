@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { TrendTarget } from '../../engines/aggregation/capacityTrend'
 import { emptyCapacityTrend } from '../../engines/aggregation/capacityTrend'
 import { emptyEfficiency } from '../../engines/aggregation/efficiency'
+import { emptyHygiene } from '../../engines/aggregation/hygiene'
 import { emptyOpsInsights } from '../../engines/aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../../engines/aggregation/provenance'
 import { emptyReliability } from '../../engines/aggregation/reliability'
@@ -14,6 +15,7 @@ import { CoverageSection } from './CoverageSection'
 import { EfficiencySection } from './EfficiencySection'
 import { ExecutiveKpis } from './ExecutiveKpis'
 import { GapsSection } from './GapsSection'
+import { HygieneSection } from './HygieneSection'
 import { IdleAgentsSection } from './IdleAgentsSection'
 import { JobsComplianceSection } from './JobsComplianceSection'
 import { PoliciesSection } from './PoliciesSection'
@@ -86,6 +88,7 @@ const fixture: ReportView = {
   reliability: emptyReliability(),
   efficiency: emptyEfficiency(),
   capacityTrend: emptyCapacityTrend(),
+  hygiene: emptyHygiene(),
   provenance: allAvailable(0),
 }
 
@@ -516,6 +519,71 @@ describe('ReliabilitySection', () => {
     const view = makeView({ reliability: emptyReliability() })
     const { container } = render(<ReliabilitySection view={view} />)
     expect(container).toBeEmptyDOMElement()
+  })
+})
+
+describe('HygieneSection', () => {
+  beforeEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+  afterEach(() => cleanup())
+
+  it('renders an unused-dataset item and an expired license status', () => {
+    const view = makeView({
+      hygiene: {
+        items: [
+          { kind: 'datasetUnused', name: 'stale-dataset', detail: 'no clients' },
+          { kind: 'license', name: 'PPDM-License', licenseStatus: 'expired' },
+        ],
+        countByKind: {
+          datasetUnused: 1,
+          retentionUnused: 0,
+          scheduleUnused: 0,
+          clientInactive: 0,
+          clientOvertime: 0,
+          license: 1,
+        },
+        cleanupTotal: 1,
+        expiredLicenses: 1,
+        expiringLicenses: 0,
+      },
+    })
+    render(<HygieneSection view={view} />)
+    expect(screen.getByText('stale-dataset')).toBeTruthy()
+    expect(screen.getByText('Expired')).toBeTruthy()
+  })
+
+  it('renders nothing when hygiene is empty', () => {
+    const view = makeView({ hygiene: emptyHygiene() })
+    const { container } = render(<HygieneSection view={view} />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('caps the table at 25 rows and shows a 25/30 caption for a 30-item estate', () => {
+    const items = Array.from({ length: 30 }, (_, i) => ({
+      kind: 'datasetUnused' as const,
+      name: `stale-dataset-${i}`,
+      detail: 'no clients',
+    }))
+    const view = makeView({
+      hygiene: {
+        items,
+        countByKind: {
+          datasetUnused: 30,
+          retentionUnused: 0,
+          scheduleUnused: 0,
+          clientInactive: 0,
+          clientOvertime: 0,
+          license: 0,
+        },
+        cleanupTotal: 30,
+        expiredLicenses: 0,
+        expiringLicenses: 0,
+      },
+    })
+    render(<HygieneSection view={view} />)
+    expect(screen.getAllByText('no clients')).toHaveLength(25)
+    expect(screen.getByText('Top 25 of 30.')).toBeTruthy()
   })
 })
 

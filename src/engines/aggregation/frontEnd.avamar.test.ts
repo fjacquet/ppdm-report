@@ -19,12 +19,21 @@ describe('computeAvamarFrontEnd', () => {
       }),
     )
     expect(fe.excludedCount).toBe(0)
-    expect(fe.byType).toContainEqual({ type: 'Linux VMware Image', protectedDiscoveredGb: 125 })
-    expect(fe.byType).toContainEqual({ type: 'Windows File System', protectedDiscoveredGb: 50 })
-    // other three size fields are undefined ("–")
+    expect(fe.byType).toContainEqual({
+      type: 'Linux VMware Image',
+      protectedDiscoveredGb: 125,
+      protectedFetbGb: 125,
+    })
+    expect(fe.byType).toContainEqual({
+      type: 'Windows File System',
+      protectedDiscoveredGb: 50,
+      protectedFetbGb: 50,
+    })
+    // the two unprotected size fields stay undefined ("–")
     const row = fe.byType.find((r) => r.type === 'Windows File System')
-    expect(row?.protectedFetbGb).toBeUndefined()
+    expect(row?.protectedFetbGb).toBe(50)
     expect(row?.unprotectedDiscoveredGb).toBeUndefined()
+    expect(row?.unprotectedFetbGb).toBeUndefined()
   })
 
   it('empty when Client Capacity is absent', () => {

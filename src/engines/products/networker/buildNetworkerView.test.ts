@@ -92,8 +92,17 @@ describe('buildNetworkerView', () => {
     expect(v.frontEnd.byType.map((r) => r.type)).toEqual(['Filesystem', 'Oracle RMAN'])
     const fs = v.frontEnd.byType.find((r) => r.type === 'Filesystem')
     expect(fs?.protectedFetbGb).toBe(410)
-    expect(fs?.protectedDiscoveredGb).toBeUndefined()
     expect(fs?.unprotectedFetbGb).toBeUndefined()
     expect(v.provenance.frontEnd.available).toBe(true)
+  })
+
+  it('fills protectedDiscoveredGb from the 60-day protected-volume sheet, grouped by workload type', () => {
+    const v = view()
+    // Filesystem has two Vol rows (300 + 50) → summed
+    const fs = v.frontEnd.byType.find((r) => r.type === 'Filesystem')
+    expect(fs?.protectedDiscoveredGb).toBe(350)
+    // Oracle RMAN's only Vol row has a blank volume cell → presence-gated, skipped → undefined
+    const oracle = v.frontEnd.byType.find((r) => r.type === 'Oracle RMAN')
+    expect(oracle?.protectedDiscoveredGb).toBeUndefined()
   })
 })

@@ -10,6 +10,7 @@ import { CoverageSection } from './CoverageSection'
 import { EfficiencySection } from './EfficiencySection'
 import { ExecutiveKpis } from './ExecutiveKpis'
 import { GapsSection } from './GapsSection'
+import { HygieneSection } from './HygieneSection'
 import { IdleAgentsSection } from './IdleAgentsSection'
 import { JobsComplianceSection } from './JobsComplianceSection'
 import { LongestBackupsSection } from './LongestBackupsSection'
@@ -61,6 +62,8 @@ export function Dashboard({ view, perServer = [] }: DashboardProps) {
         return <LongestBackupsSection key={id} view={view} />
       case 'efficiency':
         return <EfficiencySection key={id} view={view} />
+      case 'hygiene':
+        return <HygieneSection key={id} view={view} />
     }
   }
 

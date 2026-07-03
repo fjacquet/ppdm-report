@@ -6,6 +6,7 @@ import { buildAvamarView } from '../products/avamar/buildAvamarView'
 import { buildNetworkerView } from '../products/networker/buildNetworkerView'
 import { emptyCapacityTrend } from './capacityTrend'
 import { emptyEfficiency } from './efficiency'
+import { emptyHygiene } from './hygiene'
 import { mergeViews } from './mergeViews'
 import { emptyOpsInsights } from './opsInsights'
 import { allAvailable, allUnavailable } from './provenance'
@@ -47,6 +48,7 @@ function detail(over: Partial<ReportView>): ReportView {
     reliability: emptyReliability(),
     efficiency: emptyEfficiency(),
     capacityTrend: emptyCapacityTrend(),
+    hygiene: emptyHygiene(),
     provenance: allAvailable(0),
     ...over,
   }
@@ -74,6 +76,48 @@ describe('mergeViews', () => {
     const m = mergeViews([a, b])
     expect(m.coverage.overall.protected).toBe(10)
     expect(m.coverage.overall.pct).toBeCloseTo(0.5)
+  })
+
+  it('merges hygiene items across servers and recomputes rollup counts', () => {
+    const a = detail({
+      hygiene: {
+        items: [{ kind: 'datasetUnused', name: 'stale-dataset' }],
+        countByKind: {
+          datasetUnused: 1,
+          retentionUnused: 0,
+          scheduleUnused: 0,
+          clientInactive: 0,
+          clientOvertime: 0,
+          license: 0,
+        },
+        cleanupTotal: 1,
+        expiredLicenses: 0,
+        expiringLicenses: 0,
+      },
+    })
+    const b = detail({
+      hygiene: {
+        items: [
+          { kind: 'license', name: 'lic1', licenseStatus: 'expired' },
+          { kind: 'clientInactive', name: 'client1' },
+        ],
+        countByKind: {
+          datasetUnused: 0,
+          retentionUnused: 0,
+          scheduleUnused: 0,
+          clientInactive: 1,
+          clientOvertime: 0,
+          license: 1,
+        },
+        cleanupTotal: 1,
+        expiredLicenses: 1,
+        expiringLicenses: 0,
+      },
+    })
+    const m = mergeViews([a, b])
+    expect(m.hygiene.items.length).toBe(3)
+    expect(m.hygiene.cleanupTotal).toBe(2)
+    expect(m.hygiene.expiredLicenses).toBe(1)
   })
 
   it('combines compliance by raw counts, not rounded pct', () => {

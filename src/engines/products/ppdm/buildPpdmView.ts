@@ -7,6 +7,7 @@ import { computeCoverage } from '../../aggregation/coverage'
 import { emptyEfficiency } from '../../aggregation/efficiency'
 import { computeFrontEnd } from '../../aggregation/frontEnd'
 import { findGaps } from '../../aggregation/gaps'
+import { emptyHygiene } from '../../aggregation/hygiene'
 import { computeJobs } from '../../aggregation/jobs'
 import { emptyOpsInsights } from '../../aggregation/opsInsights'
 import { summarizePolicies } from '../../aggregation/policies'
@@ -39,6 +40,7 @@ export function buildPpdmView(wb: RawWorkbook): ReportView {
     reliability: emptyReliability(),
     efficiency: emptyEfficiency(),
     capacityTrend: emptyCapacityTrend(),
+    hygiene: emptyHygiene(),
     provenance: allAvailable(totalAssets),
   }
 }

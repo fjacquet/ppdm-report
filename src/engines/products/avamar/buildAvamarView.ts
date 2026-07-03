@@ -6,6 +6,7 @@ import { avamarProvenance } from '../../aggregation/provenance'
 import { cellNum, cellStr } from '../../aggregation/rows'
 import { avamarCapacityTrend, utilizationScaleFactor } from './capacityTrend'
 import { avamarEfficiency } from './efficiency'
+import { avamarHygiene } from './hygiene'
 import { avamarJobs } from './jobs'
 import { computeAvamarOpsInsights } from './opsInsights'
 import { avamarPolicies } from './policies'
@@ -103,6 +104,7 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
 
   const efficiency = avamarEfficiency(wb)
   const trend = avamarCapacityTrend(wb)
+  const hygiene = avamarHygiene(wb)
 
   return {
     meta: wb.meta,
@@ -124,10 +126,13 @@ export function buildAvamarView(wb: RawWorkbook): ReportView {
     reliability: avamarReliability(wb),
     efficiency,
     capacityTrend: trend,
+    hygiene,
     provenance: avamarProvenance(
       hasReliabilitySource(wb),
       Object.values(efficiency).some((v) => v !== undefined),
       trend.targets.length > 0,
+      // zero findings reads as unavailable — nothing to show is suppressed, not zeroed
+      hygiene.items.length > 0,
     ),
   }
 }

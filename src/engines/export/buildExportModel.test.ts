@@ -3,6 +3,7 @@ import i18n from '../../i18n'
 import type { ReportView } from '../../types/reportView'
 import { emptyCapacityTrend } from '../aggregation/capacityTrend'
 import { emptyEfficiency } from '../aggregation/efficiency'
+import { computeHygiene, emptyHygiene } from '../aggregation/hygiene'
 import { emptyOpsInsights } from '../aggregation/opsInsights'
 import { allAvailable, allUnavailable } from '../aggregation/provenance'
 import { emptyReliability } from '../aggregation/reliability'
@@ -77,6 +78,7 @@ const view: ReportView = {
   reliability: emptyReliability(),
   efficiency: emptyEfficiency(),
   capacityTrend: emptyCapacityTrend(),
+  hygiene: emptyHygiene(),
   provenance: allAvailable(0),
 }
 
@@ -394,6 +396,8 @@ describe('buildExportModel', () => {
           },
         ],
       },
+      // non-empty hygiene so the hygiene section renders and adds no suppression warning
+      hygiene: computeHygiene([{ kind: 'datasetUnused', name: 'ds1' }]),
     }
     const model = buildExportModel(dup, 'assessment', 'light', t, 'en')
     expect(model.warnings).toEqual(['cap note', 'merge note'])
@@ -775,6 +779,66 @@ describe('buildExportModel', () => {
         'en',
       )
       expect(model.sections.find((s) => s.id === 'capacityTrend')).toBeUndefined()
+    })
+  })
+
+  describe('hygiene section', () => {
+    it('renders table rows, a warn cleanup chip, and a bad license chip when a license is expired', () => {
+      const v = baseView({
+        hygiene: computeHygiene([
+          { kind: 'datasetUnused', name: 'ds1', detail: 'Never used' },
+          { kind: 'clientInactive', name: 'client1' },
+          { kind: 'license', name: 'lic1', licenseStatus: 'expired' },
+          { kind: 'license', name: 'lic2', licenseStatus: 'expiring' },
+        ]),
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'hygiene')
+      expect(section).toBeDefined()
+      expect(section?.table?.rows.length).toBe(4)
+      expect(section?.table?.rows[0]).toEqual([
+        t('dashboard:hygiene.kind.datasetUnused'),
+        'ds1',
+        'Never used',
+        '',
+      ])
+      const cleanupChip = section?.deck?.kpiChips?.find(
+        (k) => k.label === t('dashboard:hygiene.cleanupChip'),
+      )
+      expect(cleanupChip?.value).toBe('2')
+      expect(cleanupChip?.tone).toBe('warn')
+      const licenseChip = section?.deck?.kpiChips?.find(
+        (k) => k.label === t('dashboard:hygiene.licenseChip'),
+      )
+      expect(licenseChip?.value).toBe('2')
+      expect(licenseChip?.tone).toBe('bad')
+    })
+
+    it('gives the license bar a warn tone when a license is expiring but none are expired', () => {
+      const v = baseView({
+        hygiene: computeHygiene([
+          { kind: 'datasetUnused', name: 'ds1' },
+          { kind: 'license', name: 'lic1', licenseStatus: 'expiring' },
+        ]),
+      })
+      const model = buildExportModel(v, 'assessment', 'light', t, 'en')
+      const section = model.sections.find((s) => s.id === 'hygiene')
+      const licenseBar = section?.deck?.bars?.find(
+        (b) => b.label === t('dashboard:hygiene.kind.license'),
+      )
+      expect(licenseBar).toBeDefined()
+      expect(licenseBar?.color).toBe('#d97706')
+    })
+
+    it('is suppressed when hygiene is empty', () => {
+      const model = buildExportModel(
+        baseView({ hygiene: emptyHygiene() }),
+        'assessment',
+        'light',
+        t,
+        'en',
+      )
+      expect(model.sections.find((s) => s.id === 'hygiene')).toBeUndefined()
     })
   })
 })

@@ -93,10 +93,18 @@ describe('buildAvamarView', () => {
     })
   })
 
-  it('front-end volumetry per Application (base-2 GiB)', () => {
+  it('front-end volumetry per Application (base-2 GiB); FETB mirrors discovered', () => {
     const fe = view().frontEnd
-    expect(fe.byType).toContainEqual({ type: 'Linux VMware Image', protectedDiscoveredGb: 125 })
-    expect(fe.byType).toContainEqual({ type: 'Windows File System', protectedDiscoveredGb: 50 })
+    expect(fe.byType).toContainEqual({
+      type: 'Linux VMware Image',
+      protectedDiscoveredGb: 125,
+      protectedFetbGb: 125,
+    })
+    expect(fe.byType).toContainEqual({
+      type: 'Windows File System',
+      protectedDiscoveredGb: 50,
+      protectedFetbGb: 50,
+    })
   })
 
   it('replication resilience populated; provenance marks compliance + frontEnd available', () => {

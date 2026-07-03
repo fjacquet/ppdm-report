@@ -97,6 +97,33 @@
     "noSlope": "k. A.",
     "observedNote": "Beobachteter Trend im Erfassungszeitraum — keine Projektion."
   },
+  "hygiene": {
+    "title": "Konfigurationshygiene",
+    "takeaway": "{{count}} Aufräum-Möglichkeiten",
+    "takeawayClean": "Keine ungenutzte Konfiguration gefunden",
+    "cleanupChip": "Aufräum-Möglichkeiten",
+    "licenseChip": "Lizenzprobleme",
+    "col": {
+      "kind": "Typ",
+      "name": "Name",
+      "detail": "Detail",
+      "status": "Status"
+    },
+    "kind": {
+      "datasetUnused": "Ungenutztes Dataset",
+      "retentionUnused": "Ungenutzte Aufbewahrung",
+      "scheduleUnused": "Ungenutzter Zeitplan",
+      "clientInactive": "Inaktiver Client",
+      "clientOvertime": "Client mit Überschreitung",
+      "license": "Lizenz"
+    },
+    "licenseStatus": {
+      "ok": "OK",
+      "expiring": "Läuft ≤ 90 T ab",
+      "expired": "Abgelaufen"
+    },
+    "caption": "Top {{shown}} von {{total}}."
+  },
   "resilience": {
     "title": "Cyber-Resilienz",
     "appConsistent": "Anwendungskonsistente Sicherungen",

@@ -67,8 +67,9 @@ function resolveSize(b: Bucket): number | undefined {
 }
 
 /** Front-end volume per workload type from Avamar's `Client Capacity` sheet.
- * Clients in that sheet have backups, so values populate `protectedDiscoveredGb`
- * (peak GiB, base-2); the other three fields stay undefined ("–"). Pure. */
+ * Clients in that sheet have backups, so values populate `protectedDiscoveredGb` and
+ * `protectedFetbGb` (peak GiB, base-2, same figure for both); the two unprotected
+ * fields stay undefined ("–"). Pure. */
 export function computeAvamarFrontEnd(wb: RawWorkbook): FrontEnd {
   const rows = wb.sheets['Client Capacity']?.rows ?? []
   const byApp = new Map<string, number>()
@@ -80,6 +81,9 @@ export function computeAvamarFrontEnd(wb: RawWorkbook): FrontEnd {
   const byType: FrontEndTypeRow[] = [...byApp.entries()].map(([type, gb]) => ({
     type,
     protectedDiscoveredGb: gb,
+    // Avamar's front-end TB definition IS the client peak capacity, so the peak sum serves as
+    // both discovered size and FETB.
+    protectedFetbGb: gb,
   }))
   return { byType, excludedCount: 0 }
 }

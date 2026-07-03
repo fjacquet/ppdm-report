@@ -20,6 +20,8 @@ export function allAvailable(assetsTotal: number): Record<MetricKey, MetricProve
     efficiency: { available: false, serversCovered: 0, serversTotal: 1 },
     // PPDM capacity-trend wiring is a follow-up — unavailable for now.
     capacityTrend: { available: false, serversCovered: 0, serversTotal: 1 },
+    // PPDM hygiene wiring is a follow-up — unavailable for now.
+    hygiene: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -42,6 +44,8 @@ export function allUnavailable(assetsTotal: number): Record<MetricKey, MetricPro
     efficiency: { available: false, serversCovered: 0, serversTotal: 1 },
     // PPDM capacity-trend wiring is a follow-up — unavailable for now.
     capacityTrend: { available: false, serversCovered: 0, serversTotal: 1 },
+    // PPDM hygiene wiring is a follow-up — unavailable for now.
+    hygiene: { available: false, serversCovered: 0, serversTotal: 1 },
   }
 }
 
@@ -53,6 +57,7 @@ export function avamarProvenance(
   reliabilityAvailable: boolean,
   efficiencyAvailable: boolean,
   capacityTrendAvailable: boolean,
+  hygieneAvailable: boolean,
 ): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
@@ -81,6 +86,11 @@ export function avamarProvenance(
       serversCovered: capacityTrendAvailable ? 1 : 0,
       serversTotal: 1,
     },
+    hygiene: {
+      available: hygieneAvailable,
+      serversCovered: hygieneAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
   }
 }
 
@@ -92,6 +102,7 @@ export function networkerProvenance(
   reliabilityAvailable: boolean,
   efficiencyAvailable: boolean,
   capacityTrendAvailable: boolean,
+  hygieneAvailable: boolean,
 ): Record<MetricKey, MetricProvenance> {
   return {
     coverageByType: { available: false, serversCovered: 0, serversTotal: 1 },
@@ -118,6 +129,11 @@ export function networkerProvenance(
     capacityTrend: {
       available: capacityTrendAvailable,
       serversCovered: capacityTrendAvailable ? 1 : 0,
+      serversTotal: 1,
+    },
+    hygiene: {
+      available: hygieneAvailable,
+      serversCovered: hygieneAvailable ? 1 : 0,
       serversTotal: 1,
     },
   }

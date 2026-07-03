@@ -3,6 +3,7 @@ import type { FrontEndTypeRow, ReportView } from '../../types/reportView'
 import { emptyCapacityTrend } from './capacityTrend'
 import { emptyBand, finalizeBand } from './coverage'
 import { emptyEfficiency } from './efficiency'
+import { emptyHygiene } from './hygiene'
 import { emptyOpsInsights } from './opsInsights'
 import { allUnavailable } from './provenance'
 import { emptyReliability } from './reliability'
@@ -157,6 +158,7 @@ export function summaryView(wb: RawWorkbook): ReportView {
     reliability: emptyReliability(),
     efficiency: emptyEfficiency(),
     capacityTrend: emptyCapacityTrend(),
+    hygiene: emptyHygiene(),
     provenance: {
       ...allUnavailable(totalAssets),
       frontEnd: {

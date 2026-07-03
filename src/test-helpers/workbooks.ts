@@ -160,6 +160,12 @@ export function networkerWorkbookBuffer(): ArrayBuffer {
       ['SQL', 0],
       ['VMware', 0],
     ],
+    'Client Protected Vol. and FETB': [
+      ['Workload Type', 'Volume Protected Last 60 Days (GB)'],
+      ['Filesystem', 300],
+      ['Filesystem', 50],
+      ['Oracle RMAN', ''],
+    ],
     Policies: [['Policy Name'], ['Bronze'], ['Bronze'], ['Silver']],
     'Devices Detailed': [
       ['Dev Name', 'DD Retention Lock Mode'],

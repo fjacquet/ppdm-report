@@ -97,6 +97,33 @@
     "noSlope": "n/d",
     "observedNote": "Tendance observée sur la période de collecte — pas une projection."
   },
+  "hygiene": {
+    "title": "Hygiène de configuration",
+    "takeaway": "{{count}} opportunités de nettoyage",
+    "takeawayClean": "Aucune configuration inutilisée détectée",
+    "cleanupChip": "Opportunités de nettoyage",
+    "licenseChip": "Problèmes de licence",
+    "col": {
+      "kind": "Type",
+      "name": "Nom",
+      "detail": "Détail",
+      "status": "Statut"
+    },
+    "kind": {
+      "datasetUnused": "Dataset inutilisé",
+      "retentionUnused": "Rétention inutilisée",
+      "scheduleUnused": "Planification inutilisée",
+      "clientInactive": "Client inactif",
+      "clientOvertime": "Client en dépassement",
+      "license": "Licence"
+    },
+    "licenseStatus": {
+      "ok": "OK",
+      "expiring": "Expire ≤ 90 j",
+      "expired": "Expirée"
+    },
+    "caption": "Top {{shown}} sur {{total}}."
+  },
   "resilience": {
     "title": "Cyber-résilience",
     "appConsistent": "Sauvegardes cohérentes applicativement",

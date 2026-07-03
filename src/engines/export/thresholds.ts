@@ -89,3 +89,15 @@ export function capacityTrendTone(slopePer30d: number, currentPct: number): Expo
   if (slopePer30d >= 1) return 'warn'
   return 'ok'
 }
+
+/** Total configuration-hygiene cleanup opportunities — any nonzero count is a warning. */
+export function hygieneTone(cleanupTotal: number): ExportTone {
+  return cleanupTotal === 0 ? 'ok' : 'warn'
+}
+
+/** License issues: any expired license is bad; expiring-only is a warning. */
+export function licenseTone(expired: number, expiring: number): ExportTone {
+  if (expired > 0) return 'bad'
+  if (expiring > 0) return 'warn'
+  return 'ok'
+}
