@@ -219,6 +219,44 @@ describe('GapsSection', () => {
     expect(screen.getAllByText('HR_PAYROLL_PROD').length).toBeGreaterThan(0)
     expect(screen.getByText('Top 1 of 281')).toBeInTheDocument()
   })
+
+  it('renders the size column and keeps no "sizes unavailable" note when the estate carries sizes', () => {
+    render(<GapsSection view={gapsFixture} dark={false} />)
+    expect(screen.getByText('Size')).toBeInTheDocument()
+    expect(
+      screen.queryByText('Live Optics does not size clients that have never been backed up.'),
+    ).not.toBeInTheDocument()
+  })
+
+  const gapsFixtureNoSizes: ReportView = {
+    ...fixture,
+    gaps: {
+      count: 281,
+      totalCapacityGb: undefined,
+      top: {
+        items: [{ name: 'client01.corp', type: 'Client', sizeGb: undefined }],
+        total: 281,
+        shown: 1,
+      },
+    },
+  }
+
+  it('omits the unprotected-TB KPI and size column when the estate carries no gap sizes (Avamar/NetWorker)', () => {
+    render(<GapsSection view={gapsFixtureNoSizes} dark={false} />)
+    expect(screen.queryByText('Unprotected data (TB)')).not.toBeInTheDocument()
+    expect(screen.queryByText('Size')).not.toBeInTheDocument()
+    expect(screen.getByText('Unprotected assets')).toBeInTheDocument()
+    expect(screen.getAllByText('281').length).toBeGreaterThan(0)
+    expect(
+      screen.getByText('Live Optics does not size clients that have never been backed up.'),
+    ).toBeInTheDocument()
+  })
+
+  it('never renders "Size unknown" per row when the estate carries no gap sizes', () => {
+    render(<GapsSection view={gapsFixtureNoSizes} dark={false} />)
+    expect(screen.queryByText('Size unknown')).not.toBeInTheDocument()
+    expect(screen.getAllByText('client01.corp').length).toBeGreaterThan(0)
+  })
 })
 
 describe('IdleAgentsSection', () => {

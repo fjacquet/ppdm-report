@@ -20,6 +20,11 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
   const palette = dark ? DARK : LIGHT
 
   const { top, count } = view.gaps
+  // Avamar/NetWorker never size never-backed-up clients — showing "unknown" on
+  // every row plus a TB KPI is noise, not information. Single derived flag,
+  // shared with buildExportModel's identical gate.
+  const hasGapSizes =
+    view.gaps.totalCapacityGb !== undefined || top.items.some((a) => a.sizeGb !== undefined)
 
   const barData: BarDatum[] = useMemo(
     () =>
@@ -48,14 +53,16 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
 
       {/* KPI row */}
       <div className="mb-4 flex gap-8">
-        <div>
-          <p className="text-3xl font-bold text-red-500">
-            {formatGbOrUnknown(view.gaps.totalCapacityGb, locale, t('common:sizeUnknown'))}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t('dashboard:exposure.unprotectedTb')}
-          </p>
-        </div>
+        {hasGapSizes && (
+          <div>
+            <p className="text-3xl font-bold text-red-500">
+              {formatGbOrUnknown(view.gaps.totalCapacityGb, locale, t('common:sizeUnknown'))}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('dashboard:exposure.unprotectedTb')}
+            </p>
+          </div>
+        )}
         <div>
           <p className="text-3xl font-bold text-red-500">{fmtInt(count, locale)}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -80,7 +87,9 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
                 <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
                   <th className="pb-2 pr-4 font-medium">{t('common:col.name')}</th>
                   <th className="pb-2 pr-4 font-medium">{t('common:col.type')}</th>
-                  <th className="pb-2 font-medium text-right">{t('common:col.size')}</th>
+                  {hasGapSizes && (
+                    <th className="pb-2 font-medium text-right">{t('common:col.size')}</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -97,9 +106,11 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
                     >
                       <td className="py-1.5 pr-4">{item?.name}</td>
                       <td className="py-1.5 pr-4 text-gray-500 dark:text-gray-400">{item?.type}</td>
-                      <td className="py-1.5 text-right">
-                        {formatGbOrUnknown(item?.sizeGb, locale, t('common:sizeUnknown'))}
-                      </td>
+                      {hasGapSizes && (
+                        <td className="py-1.5 text-right">
+                          {formatGbOrUnknown(item?.sizeGb, locale, t('common:sizeUnknown'))}
+                        </td>
+                      )}
                     </tr>
                   )
                 })}
@@ -108,6 +119,11 @@ export function GapsSection({ view, dark }: GapsSectionProps) {
             <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
               {t('common:topOf', { shown: top.shown, total: top.total })}
             </p>
+            {!hasGapSizes && (
+              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                {t('dashboard:exposure.noSizesNote')}
+              </p>
+            )}
           </div>
         </Details>
       )}

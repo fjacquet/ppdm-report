@@ -148,6 +148,12 @@ export function buildExportModel(
     hygiene,
   } = view
 
+  // Avamar/NetWorker never size never-backed-up clients — showing "unknown" on
+  // every row plus a TB KPI is noise, not information. Gate both renderers on
+  // this single derived flag rather than faking a size.
+  const hasGapSizes =
+    gaps.totalCapacityGb !== undefined || gaps.top.items.some((a) => a.sizeGb !== undefined)
+
   const execKpis = [
     {
       label: t('dashboard:kpi.coverage'),
@@ -155,12 +161,19 @@ export function buildExportModel(
       detail: t('dashboard:coverage.inclExcluded'),
       tone: coverageTone(coverage.overall.pct),
     },
-    {
-      label: t('dashboard:kpi.unprotected'),
-      value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
-      detail: t('dashboard:kpi.unprotectedDetail'),
-      tone: 'warn' as const,
-    },
+    hasGapSizes
+      ? {
+          label: t('dashboard:kpi.unprotected'),
+          value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
+          detail: t('dashboard:kpi.unprotectedDetail'),
+          tone: 'warn' as const,
+        }
+      : {
+          label: t('dashboard:exposure.assets'),
+          value: fmtInt(gaps.count, locale),
+          detail: t('dashboard:kpi.unprotectedDetail'),
+          tone: 'warn' as const,
+        },
     {
       label: t('dashboard:kpi.jobSuccess'),
       value: fmtPercent(jobs.successPct, locale),
@@ -244,31 +257,39 @@ export function buildExportModel(
     },
   }
 
-  const gapsKpis: ExportKpi[] = [
-    {
-      label: t('dashboard:exposure.unprotectedTb'),
-      value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
-      tone: 'bad',
-    },
-    { label: t('dashboard:exposure.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
-  ]
+  const gapsKpis: ExportKpi[] = hasGapSizes
+    ? [
+        {
+          label: t('dashboard:exposure.unprotectedTb'),
+          value: formatGbOrUnknown(gaps.totalCapacityGb, locale, t('common:sizeUnknown')),
+          tone: 'bad',
+        },
+        { label: t('dashboard:exposure.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' },
+      ]
+    : [{ label: t('dashboard:exposure.assets'), value: fmtInt(gaps.count, locale), tone: 'warn' }]
+  const gapsBaseCaveat = `${t('common:topOf', { shown: Math.min(10, gaps.top.items.length), total: gaps.top.total })} · ${t('common:fullListInExcel')}`
   const gapsSection: ExportSection = {
     id: 'exposure',
     title: t('dashboard:exposure.title'),
     kpis: gapsKpis,
     table: {
-      columns: [t('common:col.name'), t('common:col.type'), t('common:col.size')],
-      rows: gaps.top.items.map((a) => [
-        a.name,
-        a.type,
-        formatGbOrUnknown(a.sizeGb, locale, t('common:sizeUnknown')),
-      ]),
+      columns: hasGapSizes
+        ? [t('common:col.name'), t('common:col.type'), t('common:col.size')]
+        : [t('common:col.name'), t('common:col.type')],
+      rows: gaps.top.items.map((a) =>
+        hasGapSizes
+          ? [a.name, a.type, formatGbOrUnknown(a.sizeGb, locale, t('common:sizeUnknown'))]
+          : [a.name, a.type],
+      ),
       caption: t('common:topOf', { shown: gaps.top.shown, total: gaps.top.total }),
     },
+    notes: hasGapSizes ? undefined : [t('dashboard:exposure.noSizesNote')],
     deck: {
       subtitle: t('dashboard:exposure.takeaway', { count: fmtInt(gaps.count, locale) }),
       kpiChips: gapsKpis,
-      caveat: `${t('common:topOf', { shown: Math.min(10, gaps.top.items.length), total: gaps.top.total })} · ${t('common:fullListInExcel')}`,
+      caveat: hasGapSizes
+        ? gapsBaseCaveat
+        : `${gapsBaseCaveat} · ${t('dashboard:exposure.noSizesNote')}`,
       bars: toBars(
         gaps.top.items
           .filter((a) => a.sizeGb !== undefined)
