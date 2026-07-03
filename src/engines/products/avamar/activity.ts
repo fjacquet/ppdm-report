@@ -17,6 +17,9 @@ function optNum(row: Record<string, Cell>, key: string): number | undefined {
  * The estate-wide change rate already ships in `efficiency`.
  */
 export function avamarActivity(wb: RawWorkbook): Activity {
+  // Unlike workloadTypes (which drops GC / No Plug-in as non-workloads), activity
+  // keeps every Backup-type row: it reports bytes actually transferred per policy
+  // type, so "No Plug-in" traffic is real activity, not a classification artifact.
   const rows = (wb.sheets['Job List Detailed']?.rows ?? []).filter(
     (r) => cellStr(r, 'Job Type') === 'Backup',
   )
