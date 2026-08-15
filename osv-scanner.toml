@@ -14,7 +14,7 @@
 
 [[IgnoredVulns]]
 id = "GHSA-4r6h-8v6p-xvw6"
-ignoreUntil = 2026-08-14
+ignoreUntil = 2026-11-13
 reason = """
 SheetJS prototype pollution. GHSA-summary affected range is < 0.19.3; we
 ship xlsx 0.20.3 via the CDN tarball, so we are past the fix. OSV.dev range
@@ -24,7 +24,7 @@ vulnerable. Not actually vulnerable on 0.20.3.
 
 [[IgnoredVulns]]
 id = "GHSA-5pgg-2g8v-p4x9"
-ignoreUntil = 2026-08-14
+ignoreUntil = 2026-11-13
 reason = """
 SheetJS ReDoS. GHSA-summary affected range is < 0.20.2; we ship xlsx 0.20.3
 via the CDN tarball. Same OSV structured-range gap (introduced=0, no fixed
