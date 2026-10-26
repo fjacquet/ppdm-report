@@ -19,7 +19,7 @@ Drop a Dell Live Optics PPDM `.xlsx` extract and get a professional, multilingua
 
 Key capabilities:
 
-- **Two report flavors** — *Assessment* (pre-sales: leads with coverage and gaps) and *Ops* (health/posture: leads with job health and compliance/SLA) — driven by a single shared metric engine; only the slide order and KPI emphasis change.
+- **Two report flavors** — _Assessment_ (pre-sales: leads with coverage and gaps) and _Ops_ (health/posture: leads with job health and compliance/SLA) — driven by a single shared metric engine; only the slide order and KPI emphasis change.
 - **Protection coverage** — headline `PROTECTED / (PROTECTED + UNPROTECTED)` plus a secondary figure including EXCLUDED assets; neither number is hidden.
 - **Unprotected-gap analysis** — count, total capacity, and top-N assets ranked by size.
 - **Job health** — result distribution (SUCCESS / RETRIED / SKIPPED / CANCELED) and success rate over the most recent up-to-10,000-row window, with an explicit in-place caveat when capped.
@@ -37,20 +37,20 @@ Key capabilities:
 
 ## Stack
 
-| Layer | Library | Version |
-|---|---|---|
-| UI framework | React | ^19.2.6 |
-| Language | TypeScript (strict) | ^5.6.0 |
-| Build | Vite | ^6.0.0 |
-| Styling | Tailwind CSS v4 (class-based dark mode) | ^4.0.0 |
-| State | Zustand | ^5.0.13 |
-| Validation | Zod | ^4.4.3 |
-| i18n | react-i18next / i18next | ^17.0.8 / ^26.3.1 |
-| Charts | ECharts (SVG renderer, tree-shaken) | ^5.6.0 |
-| Spreadsheet | SheetJS xlsx — **CDN tarball pin** (see note) | 0.20.3 |
-| Slides | pptxgenjs | ^4.0.1 |
-| Formatter / linter | Biome | ^2.0.0 |
-| Test runner | Vitest | ^2.1.0 |
+| Layer              | Library                                       | Version           |
+| ------------------ | --------------------------------------------- | ----------------- |
+| UI framework       | React                                         | ^19.2.6           |
+| Language           | TypeScript (strict)                           | ^5.6.0            |
+| Build              | Vite                                          | ^6.0.0            |
+| Styling            | Tailwind CSS v4 (class-based dark mode)       | ^4.0.0            |
+| State              | Zustand                                       | ^5.0.13           |
+| Validation         | Zod                                           | ^4.4.3            |
+| i18n               | react-i18next / i18next                       | ^17.0.8 / ^26.3.1 |
+| Charts             | ECharts (SVG renderer, tree-shaken)           | ^5.6.0            |
+| Spreadsheet        | SheetJS xlsx — **CDN tarball pin** (see note) | 0.20.3            |
+| Slides             | pptxgenjs                                     | ^4.0.1            |
+| Formatter / linter | Biome                                         | ^2.0.0            |
+| Test runner        | Vitest                                        | ^2.1.0            |
 
 **SheetJS note:** `xlsx` is pinned to the CDN tarball (`https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`) for supply-chain safety. Do **not** run `npm install xlsx` or replace this with the npm registry package.
 
@@ -87,13 +87,13 @@ ppdm-report-pptx <file.xlsx> [options]
 
 ### Options
 
-| Flag | Values | Default | Description |
-|---|---|---|---|
-| `--out <path>` | any file path | `<basename>_ppdm-report.pptx` beside the input | Output PPTX path |
-| `--lang <code>` | `en` `fr` `de` `it` | `en` | Report language |
-| `--theme <name>` | `light` `dark` | `light` | Slide colour theme |
-| `--flavor <name>` | `assessment` `ops` | `assessment` | Report flavor |
-| `--quiet` | — | off | Suppress progress output |
+| Flag              | Values              | Default                                        | Description              |
+| ----------------- | ------------------- | ---------------------------------------------- | ------------------------ |
+| `--out <path>`    | any file path       | `<basename>_ppdm-report.pptx` beside the input | Output PPTX path         |
+| `--lang <code>`   | `en` `fr` `de` `it` | `en`                                           | Report language          |
+| `--theme <name>`  | `light` `dark`      | `light`                                        | Slide colour theme       |
+| `--flavor <name>` | `assessment` `ops`  | `assessment`                                   | Report flavor            |
+| `--quiet`         | —                   | off                                            | Suppress progress output |
 
 ### How it works
 
@@ -151,24 +151,23 @@ Architecture mirrors the sibling project [vatlas](https://github.com/fjacquet/va
 
 ## Documentation
 
-| Document | Location |
-|---|---|
-| Design spec (authoritative) | [`docs/superpowers/specs/2026-06-18-ppdm-report-design.md`](docs/superpowers/specs/2026-06-18-ppdm-report-design.md) |
-| PRD | [`docs/PRD.md`](docs/PRD.md) |
-| Architecture | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
-| User guide | [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md) |
-| Architecture decision records | [`docs/adr/`](docs/adr/README.md) |
+| Document                      | Location                                                                                                             |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Design spec (authoritative)   | [`docs/superpowers/specs/2026-06-18-ppdm-report-design.md`](docs/superpowers/specs/2026-06-18-ppdm-report-design.md) |
+| PRD                           | [`docs/PRD.md`](docs/PRD.md)                                                                                         |
+| Architecture                  | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)                                                                       |
+| User guide                    | [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md)                                                                           |
+| Architecture decision records | [`docs/adr/`](docs/adr/README.md)                                                                                    |
 
 ---
 
 ## Status
 
-| Phase | Status |
-|---|---|
-| Plan 1 — Parser (xlsx → typed rows) | Complete |
-| Plan 2 — Metric engines (aggregation) | Complete |
+| Phase                                      | Status   |
+| ------------------------------------------ | -------- |
+| Plan 1 — Parser (xlsx → typed rows)        | Complete |
+| Plan 2 — Metric engines (aggregation)      | Complete |
 | Plan 3 — Dashboard + exports (PPTX / HTML) | Complete |
-
 - **139 tests**, 0 failures, 0 skipped.
 - Coverage gate: engines / utils / privacy must reach **≥ 75%** (enforced by the `test:coverage` threshold).
 - Quality gates (run locally; ready to wire into CI): typecheck → lint → test → build → supply-chain check (xlsx CDN-pin verification + telemetry denylist).
